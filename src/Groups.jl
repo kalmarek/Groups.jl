@@ -174,5 +174,6 @@ end
 (^){T<:GSymbol}(x::T, n::Integer) = GWord(x)^n
 
 include("free_groups.jl")
+include("automorphism_groups.jl")
 
 end # of module Groups
