@@ -55,15 +55,16 @@ function flip_AutSymbol(j; pow::Int=1)
 end
 
 function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
-    # if perm == collect(1:length(perm))
-    #     return one(AutSymbol)
-    # end
     perm = Permutation(perm)
     ord = order(perm)
     pow = pow % ord
     perm = perm^pow
-    gen = string('σ', [Char(8320 + i) for i in array(perm)]...)
-    return AutSymbol(gen, 1, :(σ($(array(perm)))))
+    if array(perm) == collect(1:length(perm))
+        return one(AutSymbol)
+    else
+        gen = string('σ', [Char(8320 + i) for i in array(perm)]...)
+        return AutSymbol(gen, 1, :(σ($(array(perm)))))
+    end
 end
 
 function getperm(s::AutSymbol)
