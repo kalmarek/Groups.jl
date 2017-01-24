@@ -80,6 +80,7 @@ end
         @test (t*s*t^-1)^10 == t*s^10*t^-1
         @test (t*s*t^-1)^-10 == t*s^-10*t^-1
     end
+end
 @testset "Automorphisms" begin
     @testset "AutSymbol" begin
         @test_throws MethodError AutSymbol("a")
@@ -140,9 +141,9 @@ end
         @test isa(S₁, Vector{AutWord})
         p = prod(S₁)
         @test length(p) == 75
-        @test Group.simplify_perms!(p) == false
+        @test Groups.simplify_perms!(p) == false
         @test length(p) == 53
-        @test Group.join_free_symbols!(p) == true
+        @test Groups.join_free_symbols!(p) == true
 
 
     end
