@@ -35,7 +35,7 @@ t = FGSymbol("t")
     end
 end
 
-@testset "GWords" begin
+@testset "FGWords" begin
     @testset "defines" begin
         @test isa(Groups.GWord(s), Groups.GWord)
         @test isa(Groups.GWord(s), FGWord)

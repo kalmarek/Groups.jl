@@ -28,7 +28,6 @@ one(s::GSymbol) = one(typeof(s))
 
 change_pow(s::GSymbol, n::Int) = throw(ArgumentError("Define change_pow function for $(typeof(s))!"))
 
-
 abstract Word
 
 type GWord{T<:GSymbol} <: Word
