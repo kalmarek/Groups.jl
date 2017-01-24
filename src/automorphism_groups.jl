@@ -1,5 +1,6 @@
 using Permutations
 
+import Base: convert
 export AutSymbol, AutWord, rmul_AutSymbol, lmul_AutSymbol, flip_AutSymbol, symmetric_AutSymbol
 
 immutable AutSymbol <: GSymbol
@@ -37,7 +38,6 @@ function change_pow(s::AutSymbol, n::Int)
 end
 
 inv(f::AutSymbol) = change_pow(f, -1*f.pow)
-(^)(s::AutSymbol, n::Integer) = change_pow(s, s.pow*n)
 
 function rmul_AutSymbol(i,j; pow::Int=1)
     gen = string('ϱ',Char(8320+i), Char(8320+j)...)
@@ -75,6 +75,8 @@ function getperm(s::AutSymbol)
 end
 
 typealias AutWord GWord{AutSymbol}
+
+convert(::Type{AutWord}, s::AutSymbol) = GWord(s)
 
 function simplify_perms!(W::AutWord)
     reduced = true
