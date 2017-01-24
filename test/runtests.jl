@@ -120,4 +120,30 @@ end
         @test a*b == b*a
         @test a^3 * b^3 == one(a)
     end
+    @testset "specific Aut(𝔽₄) tests" begin
+        N = 4
+        import Combinatorics.nthperm
+        SymmetricGroup(n) = [nthperm(collect(1:n), k) for k in 1:factorial(n)]
+        indexing = [[i,j] for i in 1:N for j in 1:N if i≠j]
+
+        σs = [symmetric_AutSymbol(perm) for perm in SymmetricGroup(N)[2:end]];
+        ϱs = [rmul_AutSymbol(i,j) for (i,j) in indexing]
+        λs = [lmul_AutSymbol(i,j) for (i,j) in indexing]
+        ɛs = [flip_AutSymbol(i) for i in 1:N];
+
+        S = vcat(ϱs, λs, σs, ɛs)
+        S = vcat(S, [inv(s) for s in S])
+        @test isa(S, Vector{AutSymbol})
+        @test length(S) == 102
+        @test length(unique(S)) == 75
+        S₁ = [GWord(s) for s in unique(S)]
+        @test isa(S₁, Vector{AutWord})
+        p = prod(S₁)
+        @test length(p) == 75
+        @test Group.simplify_perms!(p) == false
+        @test length(p) == 53
+        @test Group.join_free_symbols!(p) == true
+
+
+    end
 end
