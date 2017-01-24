@@ -80,5 +80,44 @@ end
         @test (t*s*t^-1)^10 == t*s^10*t^-1
         @test (t*s*t^-1)^-10 == t*s^-10*t^-1
     end
+@testset "Automorphisms" begin
+    @testset "AutSymbol" begin
+        @test_throws MethodError AutSymbol("a")
+        @test_throws MethodError AutSymbol("a", 1)
+        f = AutSymbol("a", 1, :(a(0)))
+        @test isa(f, GSymbol)
+        @test isa(f, AutSymbol)
+        @test isa(symmetric_AutSymbol([1,2,3,4]), AutSymbol)
+        @test isa(rmul_AutSymbol(1,2), AutSymbol)
+        @test isa(lmul_AutSymbol(3,4), AutSymbol)
+        @test isa(flip_AutSymbol(3), AutSymbol)
+    end
 
+    @testset "AutWords" begin
+        f = AutSymbol("a", 1, :(a(0)))
+        @test isa(GWord(f), GWord)
+        @test isa(GWord(f), AutWord)
+        @test isa(AutWord(f), AutWord)
+        @test isa(f*f, AutWord)
+        @test isa(f^2, AutWord)
+        @test isa(f^-1, AutWord)
+    end
+    @testset "eltary functions" begin
+        f = symmetric_AutSymbol([2,1,4,3])
+        @test isa(inv(f), AutSymbol)
+        @test isa(f^-1, AutWord)
+        @test f^-1 == GWord(inv(f))
+        @test inv(f) == f
+    end
+    @testset "reductions/arithmetic" begin
+        f = symmetric_AutSymbol([2,1,4,3])
+        f² = Groups.r_multiply(AutWord(f), [f], reduced=false)
+        @test Groups.simplify_perms!(f²) == false
+        @test f² == one(typeof(f*f))
+
+        a = rmul_AutSymbol(1,2)*flip_AutSymbol(2)
+        b = flip_AutSymbol(2)*inv(rmul_AutSymbol(1,2))
+        @test a*b == b*a
+        @test a^3 * b^3 == one(a)
+    end
 end
