@@ -100,5 +100,6 @@ function simplify_perms!(W::AutWord)
             end
         end
     end
+    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     return reduced
 end
