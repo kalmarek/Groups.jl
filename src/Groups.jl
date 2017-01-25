@@ -98,7 +98,7 @@ freegroup_reduce(W::GWord) = freegroup_reduce!(deepcopy(W))
 
 function hash{T}(W::GWord{T}, h::UInt)
     W.modified && freegroup_reduce!(W)
-    return W.savedhash) + h
+    return W.savedhash + h
 end
 
 function (==){T}(W::GWord{T}, Z::GWord{T})
