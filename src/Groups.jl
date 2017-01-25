@@ -173,6 +173,9 @@ end
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
 (^){T<:GSymbol}(x::T, n::Integer) = GWord(x)^n
 
+is_subsymbol(s::GSymbol, t::GSymbol) =
+    s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
+
 include("free_groups.jl")
 include("automorphism_groups.jl")
 
