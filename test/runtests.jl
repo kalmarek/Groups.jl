@@ -47,6 +47,8 @@ end
         @test isa(s*s, FGWord)
         @test s*s == s^2
         @test t*s ≠ s*t
+        @test Vector{GWord}([s,t]) == [s^2*s^-1, t]
+        @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
     end
     @testset "eltary functions" begin
         @test length(FGWord(s)) == 1
@@ -60,6 +62,7 @@ end
         @test isa(one(w), FGWord)
         @test inv(s*t) == t^-1*s^-1
         @test inv(w) == s*t^-1*s^-1
+
     end
 
     @testset "reductions" begin
