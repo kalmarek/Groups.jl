@@ -1,6 +1,6 @@
 module Groups
 
-import Base: length, ==, hash, show
+import Base: length, ==, hash, show, convert
 import Base: one, inv, reduce, *, ^
 
 export GSymbol, GWord
@@ -42,6 +42,7 @@ type GWord{T<:GSymbol} <: Word
 end
 
 GWord{T<:GSymbol}(s::T) = GWord{T}([s])
+convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 
 IDWord{T<:GSymbol}(::Type{T}) = GWord(one(T))
 IDWord{T<:GSymbol}(W::GWord{T}) = IDWord(T)
