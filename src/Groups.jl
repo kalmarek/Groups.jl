@@ -199,6 +199,36 @@ function Base.findnext(W::GWord, Z::GWord, i::Integer)
 end
 
 Base.findfirst(W::GWord, Z::GWord) = findnext(W, Z, 1)
+
+function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts=true)
+    n = length(toreplace.symbols)
+    if asserts
+        @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+        @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
+        @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
+    end
+
+    first = W.symbols[index]*inv(toreplace.symbols[1])
+    last = W.symbols[index+n-1]*inv(toreplace.symbols[end])
+    replacement = first*replacement*last
+    splice!(W.symbols, index:index+n-1, replacement.symbols)
+    Groups.freegroup_reduce!(W)
+    return W
+end
+
+function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+    reduced = true
+    for toreplace in reverse!(sort!(collect(keys(subst_dict))))
+        replacement = subst_dict[toreplace]
+        i = findfirst(W, toreplace)
+        while i ≠ 0
+            replace!(W,i,toreplace, replacement)
+            i = findnext(W, toreplace, i-1)
+        end
+    end
+    return W
+end
+
 include("free_groups.jl")
 include("automorphism_groups.jl")
 
