@@ -96,7 +96,10 @@ end
 
 freegroup_reduce(W::GWord) = freegroup_reduce!(deepcopy(W))
 
-hash{T}(W::GWord{T}) = (W.modified && freegroup_reduce!(W); W.savedhash)
+function hash{T}(W::GWord{T}, h::UInt)
+    W.modified && freegroup_reduce!(W)
+    return W.savedhash) + h
+end
 
 function (==){T}(W::GWord{T}, Z::GWord{T})
      W.modified && freegroup_reduce!(W) # reduce clears the flag and recalculate the hash
