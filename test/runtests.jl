@@ -40,6 +40,10 @@ end
         @test isa(Groups.GWord(s), Groups.GWord)
         @test isa(Groups.GWord(s), FGWord)
         @test isa(FGWord(s), Groups.GWord)
+        @test isa(convert(FGWord, s), GWord)
+        @test isa(convert(FGWord, s), FGWord)
+        @test isa(Vector{FGWord}([s,t]), Vector{FGWord})
+        @test Vector{GWord{FGSymbol}}([s,t]) == Vector{FGWord}([s,t])
         @test isa(s*s, FGWord)
         @test s*s == s^2
         @test t*s ≠ s*t
