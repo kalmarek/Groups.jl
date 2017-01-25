@@ -176,6 +176,29 @@ end
 is_subsymbol(s::GSymbol, t::GSymbol) =
     s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
+function Base.findnext(W::GWord, Z::GWord, i::Integer)
+
+    n = length(Z.symbols)
+
+    @assert n > 1
+    for (idx,a) in enumerate(W.symbols[i:end])
+
+        if idx + n - 1 > length(W.symbols)
+            break
+        end
+        first = is_subsymbol(Z.symbols[1],a)
+        if first
+            middle = W.symbols[i+idx:i-1+idx+n-2] == Z.symbols[2:end-1]
+            last = is_subsymbol(Z.symbols[end], W.symbols[i-1+idx+n-1])
+            if middle && last
+                return i-1 + idx
+            end
+        end
+    end
+    return 0
+end
+
+Base.findfirst(W::GWord, Z::GWord) = findnext(W, Z, 1)
 include("free_groups.jl")
 include("automorphism_groups.jl")
 
