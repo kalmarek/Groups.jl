@@ -223,8 +223,7 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts
 end
 
 function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
-    reduced = true
-    for toreplace in reverse!(sort!(collect(keys(subst_dict))))
+    for toreplace in reverse!(sort!(collect(keys(subst_dict)),by=length))
         replacement = subst_dict[toreplace]
         i = findfirst(W, toreplace)
         while i ≠ 0
