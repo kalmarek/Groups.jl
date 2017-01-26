@@ -222,6 +222,10 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts
     return W
 end
 
+function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
+    replace!(deepcopy(W), index, toreplace, replacement)
+end
+
 function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
     for toreplace in reverse!(sort!(collect(keys(subst_dict)),by=length))
         replacement = subst_dict[toreplace]
@@ -233,6 +237,8 @@ function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
     end
     return W
 end
+
+replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W), subst_dict)
 
 include("free_groups.jl")
 include("automorphism_groups.jl")
