@@ -2,6 +2,7 @@ module Groups
 
 import Base: length, ==, hash, show, convert
 import Base: one, inv, reduce, *, ^
+import Base: findfirst, findnext
 
 export GSymbol, GWord
 
@@ -176,6 +177,72 @@ end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
 (^){T<:GSymbol}(x::T, n::Integer) = GWord(x)^n
+
+is_subsymbol(s::GSymbol, t::GSymbol) =
+    s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
+
+function findfirst(W::GWord, Z::GWord)
+    n = length(Z.symbols)
+
+    @assert n > 1
+    for (idx,a) in enumerate(W.symbols)
+        if idx + n - 1 > length(W.symbols)
+            break
+        end
+        first = is_subsymbol(Z.symbols[1],a)
+        if first
+            middle = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
+            last = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
+            if middle && last
+                return idx
+            end
+        end
+    end
+    return 0
+end
+
+function findnext(W::GWord, Z::GWord, i::Integer)
+    t = findfirst(GWord{eltype(W.symbols)}(W.symbols[i:end]), Z)
+    if t > 0
+        return t+i-1
+    else
+        return 0
+    end
+end
+
+function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts=true)
+    n = length(toreplace.symbols)
+    if asserts
+        @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+        @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
+        @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
+    end
+
+    first = W.symbols[index]*inv(toreplace.symbols[1])
+    last = W.symbols[index+n-1]*inv(toreplace.symbols[end])
+    replacement = first*replacement*last
+    splice!(W.symbols, index:index+n-1, replacement.symbols)
+    Groups.freegroup_reduce!(W)
+    return W
+end
+
+function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
+    replace!(deepcopy(W), index, toreplace, replacement)
+end
+
+function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+    for toreplace in reverse!(sort!(collect(keys(subst_dict)),by=length))
+        replacement = subst_dict[toreplace]
+        i = findfirst(W, toreplace)
+        while i ≠ 0
+            replace!(W,i,toreplace, replacement)
+            i = findnext(W, toreplace, i)
+        end
+    end
+    return W
+end
+
+replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W), subst_dict)
 
 include("free_groups.jl")
 include("automorphism_groups.jl")

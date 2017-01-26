@@ -87,7 +87,28 @@ end
         @test (t*s*t^-1)^10 == t*s^10*t^-1
         @test (t*s*t^-1)^-10 == t*s^-10*t^-1
     end
+
+    @testset "replacements" begin
+        @test Groups.is_subsymbol(s, Groups.change_pow(s,2)) == true
+        @test Groups.is_subsymbol(s, Groups.change_pow(s,-2)) == false
+        @test Groups.is_subsymbol(t, Groups.change_pow(s,-2)) == false
+        @test Groups.is_subsymbol(inv(t), Groups.change_pow(t,-2)) == true
+        c = s*t*s^-1*t^-1
+        @test findfirst(c, s^-1*t^-1) == 3
+        @test findnext(c*s^-1, s^-1*t^-1,3) == 3
+        @test findnext(c*s^-1*t^-1, s^-1*t^-1,4) == 5
+        @test findfirst(c*t, c) == 0
+        w = s*t*s^-1
+        subst = Dict{FGWord, FGWord}(w => s^1, s*t^-1 => t^4)
+        @test Groups.replace(c, 1, s*t, one(FGWord)) == s^-1*t^-1
+
+        @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
+        @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
+        @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
+        @test Groups.replace_all!(s*c*s*c*s, subst) == s*t^4*s*t^4*s
+    end
 end
+
 @testset "Automorphisms" begin
     @testset "AutSymbol" begin
         @test_throws MethodError AutSymbol("a")
