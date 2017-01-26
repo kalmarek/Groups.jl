@@ -232,7 +232,7 @@ function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
         i = findfirst(W, toreplace)
         while i ≠ 0
             replace!(W,i,toreplace, replacement)
-            i = findnext(W, toreplace, i-1)
+            i = findnext(W, toreplace, i)
         end
     end
     return W
