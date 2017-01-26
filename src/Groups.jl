@@ -2,6 +2,7 @@ module Groups
 
 import Base: length, ==, hash, show
 import Base: one, inv, reduce, *, ^
+import Base: findfirst, findnext
 
 export GSymbol, GWord
 
@@ -176,29 +177,34 @@ end
 is_subsymbol(s::GSymbol, t::GSymbol) =
     s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
-function Base.findnext(W::GWord, Z::GWord, i::Integer)
-
+function findfirst(W::GWord, Z::GWord)
     n = length(Z.symbols)
 
     @assert n > 1
-    for (idx,a) in enumerate(W.symbols[i:end])
-
+    for (idx,a) in enumerate(W.symbols)
         if idx + n - 1 > length(W.symbols)
             break
         end
         first = is_subsymbol(Z.symbols[1],a)
         if first
-            middle = W.symbols[i+idx:i-1+idx+n-2] == Z.symbols[2:end-1]
-            last = is_subsymbol(Z.symbols[end], W.symbols[i-1+idx+n-1])
+            middle = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
+            last = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
             if middle && last
-                return i-1 + idx
+                return idx
             end
         end
     end
     return 0
 end
 
-Base.findfirst(W::GWord, Z::GWord) = findnext(W, Z, 1)
+function findnext(W::GWord, Z::GWord, i::Integer)
+    t = findfirst(GWord{eltype(W.symbols)}(W.symbols[i:end]), Z)
+    if t > 0
+        return t+i-1
+    else
+        return 0
+    end
+end
 
 function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts=true)
     n = length(toreplace.symbols)
