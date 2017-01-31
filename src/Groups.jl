@@ -158,21 +158,22 @@ function power_by_squaring{T}(x::GWord{T}, p::Integer)
     elseif p == 2
         return x*x
     end
+    x = deepcopy(x)
     t = trailing_zeros(p) + 1
     p >>= t
     while (t -= 1) > 0
-        x *= x
+        r_multiply!(x, x.symbols)
     end
-    y = x
+    y = deepcopy(x)
     while p > 0
         t = trailing_zeros(p) + 1
         p >>= t
         while (t -= 1) >= 0
-            x *= x
+            r_multiply!(x, x.symbols)
         end
-        y *= x
+        r_multiply!(y, x.symbols)
     end
-    return freegroup_reduce!(y)
+    return Groups.freegroup_reduce!(y)
 end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
