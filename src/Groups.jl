@@ -173,7 +173,7 @@ function power_by_squaring{T}(x::GWord{T}, p::Integer)
         end
         r_multiply!(y, x.symbols)
     end
-    return Groups.freegroup_reduce!(y)
+    return y
 end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
