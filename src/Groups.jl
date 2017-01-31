@@ -154,7 +154,7 @@ function power_by_squaring{T}(x::GWord{T}, p::Integer)
     elseif p == 0
         return one(x)
     elseif p == 1
-        return deepcopy(x)
+        return x
     elseif p == 2
         return x*x
     end
