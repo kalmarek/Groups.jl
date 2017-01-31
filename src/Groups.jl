@@ -29,7 +29,6 @@ one(s::GSymbol) = one(typeof(s))
 
 change_pow(s::GSymbol, n::Int) = throw(ArgumentError("Define change_pow function for $(typeof(s))!"))
 
-
 abstract Word
 
 type GWord{T<:GSymbol} <: Word
@@ -79,7 +78,7 @@ function join_free_symbols!(W::GWord)
     return reduced
 end
 
-function freegroup_reduce!{T}(W::GWord{T})
+function reduce!{T}(W::GWord{T})
     if length(W) < 2
         deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     else
@@ -95,16 +94,16 @@ function freegroup_reduce!{T}(W::GWord{T})
     return W
 end
 
-freegroup_reduce(W::GWord) = freegroup_reduce!(deepcopy(W))
+reduce(W::GWord) = reduce!(deepcopy(W))
 
 function hash{T}(W::GWord{T}, h::UInt)
-    W.modified && freegroup_reduce!(W)
+    W.modified && reduce!(W)
     return W.savedhash + h
 end
 
 function (==){T}(W::GWord{T}, Z::GWord{T})
-     W.modified && freegroup_reduce!(W) # reduce clears the flag and recalculate the hash
-     Z.modified && freegroup_reduce!(Z)
+     W.modified && reduce!(W) # reduce clears the flag and recalculate the hash
+     Z.modified && reduce!(Z)
      return W.savedhash == Z.savedhash && W.symbols == Z.symbols
 end
 
@@ -124,7 +123,7 @@ function r_multiply!(W::GWord, x; reduced::Bool=true)
         push!(W.symbols, x...)
     end
     if reduced
-        freegroup_reduce!(W)
+        reduce!(W)
     end
     return W
 end
@@ -134,7 +133,7 @@ function l_multiply!(W::GWord, x; reduced::Bool=true)
         unshift!(W.symbols, reverse(x)...)
     end
     if reduced
-        freegroup_reduce!(W)
+        reduce!(W)
     end
     return W
 end
@@ -223,8 +222,7 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts
     last = W.symbols[index+n-1]*inv(toreplace.symbols[end])
     replacement = first*replacement*last
     splice!(W.symbols, index:index+n-1, replacement.symbols)
-    Groups.freegroup_reduce!(W)
-    return W
+    return reduce!(W)
 end
 
 function replace(W::GWord, index, toreplace::GWord, replacement::GWord)

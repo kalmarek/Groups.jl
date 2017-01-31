@@ -152,3 +152,20 @@ function simplify_perms!(W::AutWord)
     deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     return reduced
 end
+
+function reduce!(W::AutWord)
+    if length(W) < 2
+        deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+    else
+        reduced = false
+        while !reduced
+            reduced = join_free_symbols!(W)
+            reduced = simplify_perms!(W)
+            deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+        end
+    end
+
+    W.modified = false
+    W.savedhash = hash(W.symbols,hash(typeof(W)))
+    return W
+end

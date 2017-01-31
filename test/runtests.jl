@@ -35,7 +35,7 @@ t = FGSymbol("t")
     end
 end
 
-@testset "GWords" begin
+@testset "FGWords" begin
     @testset "defines" begin
         @test isa(Groups.GWord(s), Groups.GWord)
         @test isa(Groups.GWord(s), FGWord)
@@ -69,14 +69,14 @@ end
         @test one(FGWord) == one(s)*one(s)
         w = GWord{FGSymbol}([s])
         push!(w.symbols, (s^-1).symbols[1])
-        @test Groups.freegroup_reduce!(w) == one(FGWord)
+        @test Groups.reduce!(w) == one(FGWord)
         o = (t*s)^3
         @test o == t*s*t*s*t*s
         p = (t*s)^-3
         @test p == s^-1*t^-1*s^-1*t^-1*s^-1*t^-1
         @test o*p == one(FGWord)
         w = FGWord([o.symbols..., p.symbols...])
-        @test Groups.freegroup_reduce!(w).symbols ==Vector{FGSymbol}([])
+        @test Groups.reduce!(w).symbols ==Vector{FGSymbol}([])
     end
     @testset "arithmetic" begin
         @test Groups.r_multiply!(FGWord(t),[s,t]; reduced=true) == t*s*t
