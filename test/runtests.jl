@@ -168,11 +168,7 @@ end
         S₁ = [GWord(s) for s in unique(S)]
         @test isa(S₁, Vector{AutWord})
         p = prod(S₁)
-        @test length(p) == 75
-        @test Groups.simplify_perms!(p) == false
         @test length(p) == 53
-        @test Groups.join_free_symbols!(p) == true
-
 
     end
 end
