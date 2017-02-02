@@ -159,8 +159,8 @@ function reduce!(W::AutWord)
     else
         reduced = false
         while !reduced
-            reduced = join_free_symbols!(W)
             reduced = simplify_perms!(W)
+            reduced = join_free_symbols!(W)
             deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
         end
     end
