@@ -7,26 +7,23 @@ immutable AutSymbol <: GSymbol
     gen::String
     pow::Int
     ex::Expr
-    fmap::Function
-    imap::Function
+    func::Function
 end
 
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
-    if f.pow > 0
-        map = f.fmap
+    if f.pow == 0
+        return v
     else
-        map = f.imap
+        return f.func(v)
+    # else
+    #     throw(ArgumentError("Check that Symbol $f is properly defined!\n $(dump(f))"))
     end
-    for i in 1:abs(f.pow)
-         v::Vector{GWord{T}} = map(v)
-    end
-    return v
 end
 
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
 hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
 
-IdSymbol(::Type{AutSymbol}) = AutSymbol("(id)", 0, :(Id(N)), v -> Vector{GWord}(v), v -> Vector{GWord}(v))
+IdSymbol(::Type{AutSymbol}) = AutSymbol("(id)", 0, :(id()), id)
 
 function change_pow(s::AutSymbol, n::Int)
     if n == 0
@@ -41,58 +38,56 @@ function change_pow(s::AutSymbol, n::Int)
         return rmul_AutSymbol(s.ex.args[2], s.ex.args[3], pow=n)
     elseif symbol == :λ
         return lmul_AutSymbol(s.ex.args[2], s.ex.args[3], pow=n)
-    elseif symbol == :Id
+    elseif symbol == :id
         return s
     else
         warn("Changing an unknown type of symbol! $s")
-        return AutSymbol(s.gen, n, s.ex, s.fmap, s.imap)
+        return AutSymbol(s.gen, n, s.ex, s.func)
     end
 end
 
 inv(f::AutSymbol) = change_pow(f, -f.pow)
 
-function ϱ(i,j)
-    # @assert i ≠ j
-    return v -> [(k!=i ? GWord(v[k]) : v[i]*v[j]) for k in eachindex(v)]
+function id()
+    return v -> v
 end
 
-function ϱ_inv(i,j)
+function ϱ(i,j, pow=1)
     # @assert i ≠ j
-    return v -> [(k!=i ? GWord(v[k]) : v[i]*v[j]^-1) for k in eachindex(v)]
+    return v -> [(k==i ? v[i]*v[j]^pow : v[k]) for k in eachindex(v)]
 end
 
-
-function λ(i,j)
+function λ(i,j, pow=1)
     # @assert i ≠ j
-    return v -> ([(k!=i ? GWord(v[k]) : v[j]*v[i]) for k in eachindex(v)])
+    return v -> [(k==i ? v[j]^pow*v[i] : v[k]) for k in eachindex(v)]
 end
 
-function λ_inv(i,j)
-    # @assert i ≠ j
-    return v -> ([(k!=i ? GWord(v[k]) : v[j]^-1*v[i]) for k in eachindex(v)])
-end
-
-
-ɛ(i) = v -> [(k!=i ? GWord(v[k]) : v[k]^-1) for k in eachindex(v)]
-
-function σ(perm)
+function σ(perm, pow=1)
     # @assert sort(perm) == collect(1:length(perm))
-    return v -> [GWord(v[perm[k]]) for k in eachindex(v)]
+    if pow == 1
+        return v -> [v[perm[k]] for k in eachindex(v)]
+    else
+        p = Permutations.Permutation(perm)
+        perm = array(p^pow)
+        return v -> [v[perm[k]] for k in eachindex(v)]
+    end
 end
+
+ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(pow % 2)) : v[k]) for k in eachindex(v)]
 
 function rmul_AutSymbol(i,j; pow::Int=1)
     gen = string('ϱ',Char(8320+i), Char(8320+j)...)
-    return AutSymbol(gen, pow, :(ϱ($i,$j)), ϱ(i,j), ϱ_inv(i,j))
+    return AutSymbol(gen, pow, :(ϱ($i,$j, $pow)), ϱ(i,j, pow))
 end
 
 function lmul_AutSymbol(i,j; pow::Int=1)
     gen = string('λ',Char(8320+i), Char(8320+j)...)
-    return AutSymbol(gen, pow, :(λ($i,$j)), λ(i,j), λ_inv(i,j))
+    return AutSymbol(gen, pow, :(λ($i,$j, $pow)), λ(i,j, pow))
 end
 
 function flip_AutSymbol(j; pow::Int=1)
     gen = string('ɛ', Char(8320 + j))
-    return AutSymbol(gen, (2+ pow%2)%2, :(ɛ($j)), ɛ(j), ɛ(j))
+    return AutSymbol(gen, (2+pow%2)%2, :(ɛ($j, $pow)), ɛ(j,pow))
 end
 
 function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
@@ -105,7 +100,7 @@ function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
         return one(AutSymbol)
     else
         gen = string('σ', [Char(8320 + i) for i in p]...)
-        return AutSymbol(gen, 1, :(σ($p)), σ(p), σ(array(inv(perm))))
+        return AutSymbol(gen, 1, :(σ($p, 1)), σ(p, 1))
     end
 end
 
