@@ -122,6 +122,78 @@ end
         @test isa(flip_AutSymbol(3), AutSymbol)
     end
 
+    @testset "flip_AutSymbol correctness" begin
+        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
+        domain = [a,b,c,d]
+        @test flip_AutSymbol(1)(domain) == [a^-1, b,c,d]
+        @test flip_AutSymbol(2)(domain) == [a, b^-1,c,d]
+        @test flip_AutSymbol(3)(domain) == [a, b,c^-1,d]
+        @test flip_AutSymbol(4)(domain) == [a, b,c,d^-1]
+        @test inv(flip_AutSymbol(1))(domain) == [a^-1, b,c,d]
+        @test inv(flip_AutSymbol(2))(domain) == [a, b^-1,c,d]
+        @test inv(flip_AutSymbol(3))(domain) == [a, b,c^-1,d]
+        @test inv(flip_AutSymbol(4))(domain) == [a, b,c,d^-1]
+    end
+
+    @testset "symmetric_AutSymbol correctness" begin
+        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
+        domain = [a,b,c,d]
+        σ = symmetric_AutSymbol([1,2,3,4])
+        @test σ(domain) == domain
+        @test inv(σ)(domain) == domain
+
+        σ = symmetric_AutSymbol([2,3,4,1])
+        @test σ(domain) == [b, c, d, a]
+        @test inv(σ)(domain) == [d, a, b, c]
+
+        σ = symmetric_AutSymbol([2,1,4,3])
+        @test σ(domain) == [b, a, d, c]
+        @test inv(σ)(domain) == [b, a, d, c]
+
+        σ = symmetric_AutSymbol([2,3,1,4])
+        @test σ(domain) == [b,c,a,d]
+        @test inv(σ)(domain) == [c,a,b,d]
+    end
+
+    @testset "mul_AutSymbol correctness" begin
+        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
+        domain = [a,b,c,d]
+        i,j = 1,2
+        r = rmul_AutSymbol(i,j)
+        l = lmul_AutSymbol(i,j)
+        @test r(domain) == [a*b,b,c,d]
+        @test inv(r)(domain) == [a*b^-1,b,c,d]
+        @test l(domain) == [b*a,b,c,d]
+        @test inv(l)(domain) == [b^-1*a,b,c,d]
+
+        i,j = 3,1
+        r = rmul_AutSymbol(i,j)
+        l = lmul_AutSymbol(i,j)
+        @test r(domain) == [a,b,c*a,d]
+        @test inv(r)(domain) == [a,b,c*a^-1,d]
+        @test l(domain) == [a,b,a*c,d]
+        @test inv(l)(domain) == [a,b,a^-1*c,d]
+
+
+        i,j = 4,3
+        r = rmul_AutSymbol(i,j)
+        l = lmul_AutSymbol(i,j)
+        @test r(domain) == [a,b,c,d*c]
+        @test inv(r)(domain) == [a,b,c,d*c^-1]
+        @test l(domain) == [a,b,c,c*d]
+        @test inv(l)(domain) == [a,b,c,c^-1*d]
+
+
+        i,j = 2,4
+        r = rmul_AutSymbol(i,j)
+        l = lmul_AutSymbol(i,j)
+        @test r(domain) == [a,b*d,c,d]
+        @test inv(r)(domain) == [a,b*d^-1,c,d]
+        @test l(domain) == [a,d*b,c,d]
+        @test inv(l)(domain) == [a,d^-1*b,c,d]
+    end
+
+
     @testset "AutWords" begin
         f = AutSymbol("a", 1, :(a()), v -> v)
         @test isa(GWord(f), GWord)
@@ -169,6 +241,5 @@ end
         @test isa(S₁, Vector{AutWord})
         p = prod(S₁)
         @test length(p) == 53
-
     end
 end
