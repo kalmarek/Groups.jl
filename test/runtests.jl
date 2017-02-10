@@ -113,7 +113,7 @@ end
     @testset "AutSymbol" begin
         @test_throws MethodError AutSymbol("a")
         @test_throws MethodError AutSymbol("a", 1)
-        f = AutSymbol("a", 1, :(a(0)), v -> v, v -> v)
+        f = AutSymbol("a", 1, :(a()), v -> v)
         @test isa(f, GSymbol)
         @test isa(f, AutSymbol)
         @test isa(symmetric_AutSymbol([1,2,3,4]), AutSymbol)
@@ -123,7 +123,7 @@ end
     end
 
     @testset "AutWords" begin
-        f = AutSymbol("a", 1, :(a(0)), v -> v, v -> v)
+        f = AutSymbol("a", 1, :(a()), v -> v)
         @test isa(GWord(f), GWord)
         @test isa(GWord(f), AutWord)
         @test isa(AutWord(f), AutWord)
