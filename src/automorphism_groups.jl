@@ -73,7 +73,7 @@ function σ(perm, pow=1)
     end
 end
 
-ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(pow % 2)) : v[k]) for k in eachindex(v)]
+ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(2+pow%2)%2) : v[k]) for k in eachindex(v)]
 
 function rmul_AutSymbol(i,j; pow::Int=1)
     gen = string('ϱ',Char(8320+i), Char(8320+j)...)
