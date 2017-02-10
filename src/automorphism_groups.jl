@@ -13,11 +13,8 @@ end
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
     if f.pow == 0
         return v
-    else
-        return f.func(v)
-    # else
-    #     throw(ArgumentError("Check that Symbol $f is properly defined!\n $(dump(f))"))
     end
+    return f.func(v)
 end
 
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
