@@ -32,9 +32,10 @@ function change_pow(s::AutSymbol, n::Int)
     elseif symbol == :σ
         return symmetric_AutSymbol(s.ex.args[2], pow=n)
     elseif symbol == :ϱ
-        return rmul_AutSymbol(s.ex.args[2], s.ex.args[3], pow=n)
+        s.ex.args[2:end-1]
+        return rmul_AutSymbol(s.ex.args[2:end-1]..., pow=n)
     elseif symbol == :λ
-        return lmul_AutSymbol(s.ex.args[2], s.ex.args[3], pow=n)
+        return lmul_AutSymbol(s.ex.args[2:end-1]..., pow=n)
     elseif symbol == :id
         return s
     else
