@@ -72,18 +72,25 @@ end
 
 ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(2+pow%2)%2) : v[k]) for k in eachindex(v)]
 
+# taken from ValidatedNumerics
+function subscriptify(n::Int)
+    dig = reverse(digits(n))
+    subscript_0 = Int('₀')    # 0x2080
+    join([Char(subscript_0 + i) for i in dig])
+end
+
 function rmul_AutSymbol(i,j; pow::Int=1)
-    gen = string('ϱ',Char(8320+i), Char(8320+j)...)
+    gen = "ϱ"*subscriptify(i)*subscriptify(j)
     return AutSymbol(gen, pow, :(ϱ($i,$j, $pow)), ϱ(i,j, pow))
 end
 
 function lmul_AutSymbol(i,j; pow::Int=1)
-    gen = string('λ',Char(8320+i), Char(8320+j)...)
+    gen = "λ"*subscriptify(i)*subscriptify(j)
     return AutSymbol(gen, pow, :(λ($i,$j, $pow)), λ(i,j, pow))
 end
 
 function flip_AutSymbol(j; pow::Int=1)
-    gen = string('ɛ', Char(8320 + j))
+    gen = "ɛ"*subscriptify(j)
     return AutSymbol(gen, (2+pow%2)%2, :(ɛ($j, $pow)), ɛ(j,pow))
 end
 
@@ -96,7 +103,7 @@ function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
     if p == collect(1:length(p))
         return one(AutSymbol)
     else
-        gen = string('σ', [Char(8320 + i) for i in p]...)
+        gen = "σ"*join([subscriptify(i) for i in p])
         return AutSymbol(gen, 1, :(σ($p, 1)), σ(p, 1))
     end
 end
