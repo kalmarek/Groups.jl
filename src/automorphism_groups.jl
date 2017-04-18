@@ -95,9 +95,7 @@ function flip_AutSymbol(j; pow::Int=1)
 end
 
 function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
-    perm = Permutation(perm)
-    ord = order(perm)
-    pow = pow % ord
+    perm = Permutations.Permutation(perm)
     perm = perm^pow
     p = array(perm)
     if p == collect(1:length(p))
