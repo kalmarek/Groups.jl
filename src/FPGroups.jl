@@ -1,4 +1,8 @@
-
+###############################################################################
+#
+#   FPSymbol/FPGroupElem/FPGroup definition
+#
+###############################################################################
 
 immutable FPSymbol <: GSymbol
    str::String
@@ -23,14 +27,30 @@ end
 
 export FPSymbol, FPGroupElem, FPGroup, generators
 
+###############################################################################
+#
+#   Type and parent object methods
+#
+###############################################################################
 parent_type(::Type{FPGroupElem}) = FPGroup
 
 elem_type(::FPGroup) = FPGroupElem
 
+###############################################################################
+#
+#   FPSymbol constructors
+#
+###############################################################################
 
 FPSymbol(s::String) = FPSymbol(s,1)
 
 FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a], FPGroupElem[])
+
+###############################################################################
+#
+#   Parent object call overloads
+#
+###############################################################################
 
 function (G::FPGroup)()
    id = FPGroupElem(FPSymbol("", 0))
@@ -53,6 +73,11 @@ end
 
 (G::FPGroup)(s::FPSymbol) = G(FPGroupElem(s))
 
+###############################################################################
+#
+#   Basic manipulation
+#
+###############################################################################
 
 hash(s::FPSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FPSymbol, h)))
 
@@ -63,6 +88,12 @@ change_pow(s::FPSymbol, n::Int) = FPSymbol(s.str, n)
 length(s::FPSymbol) = abs(s.pow)
 
 generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
+
+###############################################################################
+#
+#   String I/O
+#
+###############################################################################
 
 function show(io::IO, G::FPGroup)
     print(io, "Finitely presented group on $(length(G.gens)) gens and $(length(G.rels)) relations:\n")
@@ -80,6 +111,12 @@ function show(io::IO, s::FPSymbol)
    end
 end
 
+###############################################################################
+#
+#   Comparison
+#
+###############################################################################
+
 function (==)(s::FPSymbol, t::FPSymbol)
    isone(s) && isone(t) && return true
    s.str == t.str || return false
@@ -87,9 +124,19 @@ function (==)(s::FPSymbol, t::FPSymbol)
    return true
 end
 
+###############################################################################
+#
+#   Inversion
+#
+###############################################################################
 
 inv(s::FPSymbol) = change_pow(s, -s.pow)
 
+###############################################################################
+#
+#   Misc
+#
+###############################################################################
 
 FreeGroup(n::Int, f::String=f) = FPGroup(["$f$i" for i in 1:n])
 
