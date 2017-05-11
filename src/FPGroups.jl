@@ -70,11 +70,6 @@ function show(io::IO, G::FPGroup)
     print(io, "rels:\t", join([rel for rel in G.rels], ","),"\n")
 end
 
-function add_gen!{T<:GSymbol}(G::FPGroup, g::T)
-    if !(g in G.gens)
-        push!(G.gens, g)
-    end
-    return G
 end
 
 function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
