@@ -109,14 +109,7 @@ doc"""
 """
 reduce(W::GWord) = reduce!(deepcopy(W))
 
-function (==){T}(W::GWord{T}, Z::GWord{T})
-     W.modified && reduce!(W) # reduce clears the flag and recalculate the hash
-     Z.modified && reduce!(Z)
-     return W.savedhash == Z.savedhash && W.symbols == Z.symbols
-end
 
-(==){T}(W::GWord{T}, s::T) = W == GWord(s)
-(==){T}(s::T, W::GWord{T}) = W == GWord(s)
 
 function show(io::IO, W::GWord)
     if length(W) == 0
@@ -124,6 +117,13 @@ function show(io::IO, W::GWord)
     else
         join(io, [string(s) for s in W.symbols], "*")
     end
+end
+
+function (==)(W::GWord, Z::GWord)
+    parent(W) == parent(Z) || return false
+    W.modified && reduce!(W) # reduce clears the flag and calculates savedhash
+    Z.modified && reduce!(Z)
+    return W.savedhash == Z.savedhash && W.symbols == Z.symbols
 end
 
 function r_multiply!(W::GWord, x; reduced::Bool=true)
