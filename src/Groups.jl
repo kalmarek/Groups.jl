@@ -151,36 +151,36 @@ r_multiply(W::GWord, x; reduced::Bool=true) =
 l_multiply(W::GWord, x; reduced::Bool=true) =
     l_multiply!(deepcopy(W),x, reduced=reduced)
 
-(*){T}(W::GWord{T}, Z::GWord{T}) = r_multiply(W, Z.symbols)
-(*)(W::GWord, s::GSymbol) = W*GWord(s)
-(*)(s::GSymbol, W::GWord) = GWord(s)*W
+(*)(W::GWord, Z::GWord) = r_multiply(W, Z.symbols)
+(*)(W::GWord, s::GSymbol) = r_multiply(W, [s])
+(*)(s::GSymbol, W::GWord) = l_multiply(W, [s])
 
-function power_by_squaring{T}(x::GWord{T}, p::Integer)
+function power_by_squaring(W::GWord, p::Integer)
     if p < 0
-        return power_by_squaring(inv(x), -p)
+        return power_by_squaring(inv(W), -p)
     elseif p == 0
         return parent(W)()
     elseif p == 1
-        return x
+        return W
     elseif p == 2
-        return x*x
+        return W*W
     end
-    x = deepcopy(x)
+    W = deepcopy(W)
     t = trailing_zeros(p) + 1
     p >>= t
     while (t -= 1) > 0
-        r_multiply!(x, x.symbols)
+        r_multiply!(W, W.symbols)
     end
-    y = deepcopy(x)
+    Z = deepcopy(W)
     while p > 0
         t = trailing_zeros(p) + 1
         p >>= t
         while (t -= 1) >= 0
-            r_multiply!(x, x.symbols)
+            r_multiply!(W, W.symbols)
         end
-        r_multiply!(y, x.symbols)
+        r_multiply!(Z, W.symbols)
     end
-    return y
+    return Z
 end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
