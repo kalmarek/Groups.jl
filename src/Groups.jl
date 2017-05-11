@@ -21,11 +21,27 @@ doc"""
 """
 abstract GSymbol
 
+doc"""
+    W::GWord{T<:GSymbol} <:GroupElem
+> Basic representation of element of a finitely presented group. `W.symbols`
+> fieldname contains particular group symbols which multiplied constitute a
+> group element, i.e. a word in generators.
+> As reduction (inside group) of such word may be time consuming we provide
+> `savedhash` and `modified` fields as well:
+> hash (used e.g. in the `unique` function) is calculated by reducing the word,
+> setting `modified` flag to `false` and computing the hash which is stored in
+> `savedhash` field.
+> whenever word `W` is changed `W.modified` is set to `false`;
+> Future comparisons don't perform reduction (and use `savedhash`) as long as
+> `modified` flag remains `false`.
 
+"""
 
+type GWord{T<:GSymbol} <: GroupElem
     symbols::Vector{T}
     savedhash::UInt
     modified::Bool
+    parent::Group
 
     function GWord(symbols::Vector{T})
         return new(symbols, hash(symbols), true)
