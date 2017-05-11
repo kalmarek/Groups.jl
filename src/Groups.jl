@@ -229,9 +229,9 @@ function findnext(W::GWord, Z::GWord, i::Integer)
     end
 end
 
-function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts=true)
+function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=true)
     n = length(toreplace.symbols)
-    if asserts
+    if check
         @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
         @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
         @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
