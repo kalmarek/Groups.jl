@@ -83,7 +83,7 @@ function free_reduce!(W::GWord)
     return reduced
 end
 
-function reduce!{T}(W::GWord{T})
+function reduce!(W::GWord)
     if length(W) < 2
         deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     else
@@ -94,12 +94,20 @@ function reduce!{T}(W::GWord{T})
     end
 
     W.modified = false
-    W.savedhash = hash(W.symbols,hash(typeof(W)))
+    W.savedhash = hash(W.symbols, hash(typeof(W)))
     return W
 end
 
-reduce(W::GWord) = reduce!(deepcopy(W))
+doc"""
+    reduce(W::GWord)
+> performs reduction/simplification of a group element (word in generators).
+> The default reduction is the free group reduction, i.e. consists of
+> multiplying adjacent symbols with the same `str` identifier and deleting the
+> identity elements from `W.symbols`.
+> More specific procedures should be dispatched on `GWord`s type parameter.
 
+"""
+reduce(W::GWord) = reduce!(deepcopy(W))
 
 function (==){T}(W::GWord{T}, Z::GWord{T})
      W.modified && reduce!(W) # reduce clears the flag and recalculate the hash
