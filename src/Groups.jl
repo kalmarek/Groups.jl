@@ -8,6 +8,11 @@ import Base: inv, reduce, *, ^
 import Base: findfirst, findnext
 import Base: deepcopy_internal
 
+###############################################################################
+#
+#   ParentType / ObjectType definition
+#
+###############################################################################
 
 doc"""
     ::GSymbol
@@ -48,12 +53,28 @@ end
 
 export GSymbol, GWord
 
+###############################################################################
+#
+#   Type and parent object methods
+#
+###############################################################################
 
 parent{T<:GSymbol}(w::GWord{T}) = w.parent
+
+###############################################################################
+#
+#   ParentType / ObjectType constructors
+#
+###############################################################################
 
 GWord{T<:GSymbol}(s::T) = GWord{T}(T[s])
 convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 
+###############################################################################
+#
+#   Basic manipulation
+#
+###############################################################################
 
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
@@ -108,8 +129,17 @@ doc"""
 """
 reduce(W::GWord) = reduce!(deepcopy(W))
 
+###############################################################################
+#
+#   String I/O
+#
+###############################################################################
 
+doc"""
+    show(io::IO, W::GWord)
+> The actual string produced by show depends on the eltype of W.symbols.
 
+"""
 function show(io::IO, W::GWord)
     if length(W) == 0
         print(io, "(id)")
@@ -118,12 +148,24 @@ function show(io::IO, W::GWord)
     end
 end
 
+###############################################################################
+#
+#   Comparison
+#
+###############################################################################
+
 function (==)(W::GWord, Z::GWord)
     parent(W) == parent(Z) || return false
     W.modified && reduce!(W) # reduce clears the flag and calculates savedhash
     Z.modified && reduce!(Z)
     return W.savedhash == Z.savedhash && W.symbols == Z.symbols
 end
+
+###############################################################################
+#
+#   Binary operators
+#
+###############################################################################
 
 function r_multiply!(W::GWord, x; reduced::Bool=true)
     if length(x) > 0
@@ -185,6 +227,10 @@ end
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
 
 ###############################################################################
+#
+#   Inversion
+#
+###############################################################################
 
 function inv{T}(W::GWord{T})
     if length(W) == 0
@@ -196,6 +242,12 @@ function inv{T}(W::GWord{T})
         return G(w)
     end
 end
+
+###############################################################################
+#
+#   Replacement of symbols / sub-words
+#
+###############################################################################
 
 is_subsymbol(s::GSymbol, t::GSymbol) =
     s.str == t.str && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
@@ -266,7 +318,12 @@ end
 
 replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W), subst_dict)
 
-include("free_groups.jl")
+###############################################################################
+#
+#   Includes
+#
+###############################################################################
+
 include("automorphism_groups.jl")
 
 end # of module Groups
