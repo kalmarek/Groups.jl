@@ -7,22 +7,24 @@ end
 
 typealias FPGroupElem GWord{FPSymbol}
 
+type FPGroup <: Group
+   gens::Vector{FPSymbol}
+   rels::Vector{FPGroupElem}
+   #     order::Vector{T}
+   #     fastmult_table::Array{Int,2}
+   function FPGroup{T<:GSymbol}(gens::Vector{T}, rels::Vector{GWord{T}})
+      G = new(gens, rels)
+      G.gens = gens
+      rels = [G(r) for r in rels]
+      G.rels = rels
+      return G
+   end
 end
 
 # FPSymbol(x::String, G::Group) = FPSymbol(x,1,G)
 # FPSymbol(s::GSymbol, G::Group) = FPSymbol(s.gen, s.pow, G)
 
 
-immutable FPGroup <: Group
-    gens::Vector{FPSymbol}
-    rels::Vector{FPGroupElem}
-#     order::Vector{T}
-#     fast_multable::Array{Int,2}
-    function FPGroup{T<:GSymbol}(gens::Vector{T}, rels::GWord{T})
-        G = new()
-        gens = [FPSymbol{G}(g.gen, G) for g in gens]
-        rels = []
-    end
 end
 
 FPGroup() = FPGroup(Vector{FPSymbol}(), Vector{GWord{FPSymbol}}())
