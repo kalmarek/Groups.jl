@@ -62,6 +62,8 @@ change_pow(s::FPSymbol, n::Int) = FPSymbol(s.str, n)
 
 length(s::FPSymbol) = abs(s.pow)
 
+generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
+
 function show(io::IO, G::FPGroup)
     print(io, "Finitely presented group on $(length(G.gens)) gens and $(length(G.rels)) relations:\n")
     print(io, "gens:\t", join([g.gen for g in G.gens], ","),"\n")
