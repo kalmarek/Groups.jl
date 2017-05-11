@@ -1,8 +1,5 @@
-module FinitelyPresentedGroups
 
-using Groups
 
-abstract Group
 
 immutable FPSymbol{T<:Group} <: GSymbol
     gen::String
