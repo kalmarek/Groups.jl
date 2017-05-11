@@ -1,16 +1,17 @@
 
 
+immutable FPSymbol <: GSymbol
+   str::String
+   pow::Int
+end
 
-immutable FPSymbol{T<:Group} <: GSymbol
-    gen::String
-    pow::Integer
-    parent::T
+typealias FPGroupElem GWord{FPSymbol}
+
 end
 
 # FPSymbol(x::String, G::Group) = FPSymbol(x,1,G)
 # FPSymbol(s::GSymbol, G::Group) = FPSymbol(s.gen, s.pow, G)
 
-typealias FPGroupElem GWord{FPSymbol}
 
 immutable FPGroup <: Group
     gens::Vector{FPSymbol}
