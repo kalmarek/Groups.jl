@@ -52,6 +52,7 @@ function free_reduce!(W::GWord)
             W.symbols[i] = one(W.symbols[i])
         end
     end
+    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     return reduced
 end
 
@@ -62,7 +63,6 @@ function reduce!{T}(W::GWord{T})
         reduced = false
         while !reduced
             reduced = free_reduce!(W)
-            deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
         end
     end
 
