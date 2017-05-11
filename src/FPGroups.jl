@@ -90,8 +90,10 @@ end
 
 
 
+FreeGroup(n::Int, f::String=f) = FPGroup(["$f$i" for i in 1:n])
 inv(s::FPSymbol) = change_pow(s, -s.pow)
 
+FreeGroup(a::Vector{String}) = FPGroup(a)
 function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
     if !(w in G.rels)
         push!(G.rels, w)
