@@ -4,7 +4,7 @@ using Nemo
 import Nemo: Group, parent
 
 import Base: length, ==, hash, show, convert
-import Base: one, inv, reduce, *, ^
+import Base: inv, reduce, *, ^
 import Base: findfirst, findnext
 import Base: deepcopy_internal
 
@@ -49,7 +49,7 @@ function free_reduce!(W::GWord)
             p1 = W.symbols[i].pow
             p2 = W.symbols[i+1].pow
             W.symbols[i+1] = change_pow(W.symbols[i], p1 + p2)
-            W.symbols[i] = one(W.symbols[i])
+            W.symbols[i] = change_pow(W.symbols[i], 0)
         end
     end
     deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
@@ -128,7 +128,7 @@ function power_by_squaring{T}(x::GWord{T}, p::Integer)
     if p < 0
         return power_by_squaring(inv(x), -p)
     elseif p == 0
-        return one(x)
+        return parent(W)()
     elseif p == 1
         return x
     elseif p == 2
