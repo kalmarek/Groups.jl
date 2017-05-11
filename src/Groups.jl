@@ -48,10 +48,12 @@ type GWord{T<:GSymbol} <: GroupElem
     end
 end
 
-GWord{T<:GSymbol}(s::T) = GWord{T}([s])
-convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 
 
+parent{T<:GSymbol}(w::GWord{T}) = w.parent
+
+GWord{T<:GSymbol}(s::T) = GWord{T}(T[s])
+convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 
 
 function hash(W::GWord, h::UInt)
