@@ -9,8 +9,6 @@ import Base: findfirst, findnext
 import Base: deepcopy_internal
 
 
-export GSymbol, GWord
-
 doc"""
     ::GSymbol
 > Abstract type which all group symbols of FPGroups should subtype. Each
@@ -48,6 +46,7 @@ type GWord{T<:GSymbol} <: GroupElem
     end
 end
 
+export GSymbol, GWord
 
 
 parent{T<:GSymbol}(w::GWord{T}) = w.parent
