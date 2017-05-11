@@ -23,6 +23,10 @@ end
 
 export FPSymbol, FPGroupElem, FPGroup, generators
 
+parent_type(::Type{FPGroupElem}) = FPGroup
+
+elem_type(::FPGroup) = FPGroupElem
+
 
 FPSymbol(s::String) = FPSymbol(s,1)
 
