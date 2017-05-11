@@ -1,8 +1,13 @@
 module Groups
 
+using Nemo
+import Nemo: Group, parent
+
 import Base: length, ==, hash, show, convert
 import Base: one, inv, reduce, *, ^
 import Base: findfirst, findnext
+import Base: deepcopy_internal
+
 
 export GSymbol, GWord
 
