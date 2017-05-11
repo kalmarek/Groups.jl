@@ -21,9 +21,11 @@ type FPGroup <: Group
    end
 end
 
-# FPSymbol(x::String, G::Group) = FPSymbol(x,1,G)
-# FPSymbol(s::GSymbol, G::Group) = FPSymbol(s.gen, s.pow, G)
 
+
+FPSymbol(s::String) = FPSymbol(s,1)
+
+FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a], FPGroupElem[])
 
 end
 
