@@ -46,14 +46,6 @@ function length(W::GWord)
 end
 
 
-function inv{T}(W::GWord{T})
-    if length(W) == 0
-        return W
-    else
-        w = GWord{T}(reverse([inv(s) for s in W.symbols]))
-        w.modified = true
-        return w
-    end
 end
 
 function join_free_symbols!(W::GWord)
@@ -169,6 +161,17 @@ end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
 (^){T<:GSymbol}(x::T, n::Integer) = GWord(x)^n
+
+function inv{T}(W::GWord{T})
+    if length(W) == 0
+        return W
+    else
+        G = parent(W)
+        w = GWord{T}(reverse([inv(s) for s in W.symbols]))
+        w.modified = true
+        return G(w)
+    end
+end
 
 is_subsymbol(s::GSymbol, t::GSymbol) =
     s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
