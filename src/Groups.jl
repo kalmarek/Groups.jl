@@ -60,7 +60,12 @@ function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
     return W.savedhash $ h
 end
+
+function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)
+    G = parent(W)
+    return G(GWord{T}(deepcopy(W.symbols)))
 end
+
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
 function free_reduce!(W::GWord)
