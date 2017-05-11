@@ -32,6 +32,7 @@ export FPSymbol, FPGroupElem, FPGroup, generators
 #   Type and parent object methods
 #
 ###############################################################################
+
 parent_type(::Type{FPGroupElem}) = FPGroup
 
 elem_type(::FPGroup) = FPGroupElem
@@ -96,9 +97,9 @@ generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
 ###############################################################################
 
 function show(io::IO, G::FPGroup)
-    print(io, "Finitely presented group on $(length(G.gens)) gens and $(length(G.rels)) relations:\n")
-    print(io, "gens:\t", join([g.gen for g in G.gens], ","),"\n")
-    print(io, "rels:\t", join([rel for rel in G.rels], ","),"\n")
+   print(io, "Finitely presented group on $(length(G.gens)) generators and $(length(G.rels)) relations:\n")
+   print(io, "gens:\t", join([g.str for g in G.gens], ", "),"\n")
+   print(io, "rels:\t", join([rel for rel in G.rels], ", "))
 end
 
 function show(io::IO, s::FPSymbol)
