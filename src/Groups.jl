@@ -41,7 +41,7 @@ convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 end
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
-function join_free_symbols!(W::GWord)
+function free_reduce!(W::GWord)
     reduced = true
     for i in 1:length(W.symbols) - 1
         if W.symbols[i].gen == W.symbols[i+1].gen
@@ -61,7 +61,7 @@ function reduce!{T}(W::GWord{T})
     else
         reduced = false
         while !reduced
-            reduced = join_free_symbols!(W)
+            reduced = free_reduce!(W)
             deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
         end
     end
