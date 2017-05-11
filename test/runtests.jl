@@ -2,244 +2,278 @@ using Groups
 using Base.Test
 
 # write your own tests here
-s = FGSymbol("s")
-t = FGSymbol("t")
 
-@testset "FGSymbols" begin
-    @testset "defines" begin
-        @test isa(FGSymbol(string(Char(rand(50:2000)))), Groups.GSymbol)
-        @test FGSymbol("abc").pow == 1
-        @test isa(s, FGSymbol)
-        @test isa(t, FGSymbol)
-    end
-    @testset "eltary functions" begin
-        @test length(s) == 1
-        @test one(s) == s^0
-        @test one(s) == one(FGSymbol)
-        @test Groups.change_pow(s,0) == one(s)
-        @test length(one(s)) == 0
-        @test inv(s).pow == -1
-        @test FGSymbol("s", 3) == Groups.change_pow(s,3)
-        @test s^2 ≠ t^2
+@testset "Groups" begin
 
-    end
-    @testset "powers" begin
-        s⁴ = Groups.change_pow(s,4)
-        @test s⁴.pow == 4
-        @test (s^4).symbols[1] == Groups.change_pow(s,4)
-        @test s*s == s^2
-        @test inv(s*s) == inv(s^2)
-        @test inv(s)^2 == inv(s^2)
-        @test inv(s)*inv(s) == inv(s^2)
-        @test inv(s*s) == inv(s)*inv(s)
-    end
-end
+   @testset "FPSymbols" begin
+      s = FPSymbol("s")
+      t = FPSymbol("t")
+      @testset "defines" begin
+         @test isa(FPSymbol(string(Char(rand(50:2000)))), GSymbol)
+         @test FPSymbol("abc").pow == 1
+         @test isa(s, FPSymbol)
+         @test isa(t, FPSymbol)
+      end
+      @testset "eltary functions" begin
+         @test length(s) == 1
+         @test Groups.change_pow(s, 0) == Groups.change_pow(t, 0)
+         @test length(Groups.change_pow(s, 0)) == 0
+         @test inv(s).pow == -1
+         @test FPSymbol("s", 3) == Groups.change_pow(s, 3)
+         @test FPSymbol("s", 3) != FPSymbol("t", 3)
+         @test Groups.change_pow(inv(s), -3) == inv(Groups.change_pow(s, 3))
+      end
+      @testset "powers" begin
+         s⁴ = Groups.change_pow(s,4)
+         @test s⁴.pow == 4
+         @test Groups.change_pow(s, 4) == FPSymbol("s", 4)
+      end
+   end
 
-@testset "FGWords" begin
-    @testset "defines" begin
-        @test isa(Groups.GWord(s), Groups.GWord)
-        @test isa(Groups.GWord(s), FGWord)
-        @test isa(FGWord(s), Groups.GWord)
-        @test isa(convert(FGWord, s), GWord)
-        @test isa(convert(FGWord, s), FGWord)
-        @test isa(Vector{FGWord}([s,t]), Vector{FGWord})
-        @test Vector{GWord{FGSymbol}}([s,t]) == Vector{FGWord}([s,t])
-        @test isa(s*s, FGWord)
-        @test s*s == s^2
-        @test t*s ≠ s*t
-        @test Vector{GWord}([s,t]) == [s^2*s^-1, t]
-        @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
-    end
-    @testset "eltary functions" begin
-        @test length(FGWord(s)) == 1
-        @test length(s*s) == 2
-        @test length(s*s^-1) == 0
-        @test length(s*t^-1) == 2
-        @test isa(one(FGWord), FGWord)
-        @test one(FGWord).symbols == Vector{FGSymbol}([one(FGSymbol)])
-        @test isa(one(Groups.GWord{FGSymbol}), Groups.GWord{FGSymbol})
-        w = s*t*s^-1
-        @test isa(one(w), FGWord)
-        @test inv(s*t) == t^-1*s^-1
-        @test inv(w) == s*t^-1*s^-1
+   @testset "FPGroupElems" begin
+      s = FPSymbol("s")
+      t = FPSymbol("t", -2)
+      @testset "defines" begin
+         @test isa(Groups.GWord(s), Groups.GWord)
+         @test isa(Groups.GWord(s), FPGroupElem)
+         @test isa(FPGroupElem(s), Groups.GWord)
+         @test isa(convert(FPGroupElem, s), GWord)
+         @test isa(convert(FPGroupElem, s), FPGroupElem)
+         @test isa(Vector{FPGroupElem}([s,t]), Vector{FPGroupElem})
+         @test length(FPGroupElem(s)) == 1
+         @test length(FPGroupElem(t)) == 2
+      end
 
-    end
+      @testset "eltary functions" begin
+         @test_skip (s*s).symbols == (s^2).symbols
+         @test_skip Vector{GWord{FPSymbol}}([s,t]) == Vector{FPGroupElem}([s,t])
+         @test_skip Vector{GWord}([s,t]) == [GWord(s), GWord(t)]
+         @test_skip hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
+      end
+   end
 
-    @testset "reductions" begin
-        @test one(FGWord) == one(s)*one(s)
-        w = GWord{FGSymbol}([s])
-        push!(w.symbols, (s^-1).symbols[1])
-        @test Groups.reduce!(w) == one(FGWord)
-        o = (t*s)^3
-        @test o == t*s*t*s*t*s
-        p = (t*s)^-3
-        @test p == s^-1*t^-1*s^-1*t^-1*s^-1*t^-1
-        @test o*p == one(FGWord)
-        w = FGWord([o.symbols..., p.symbols...])
-        @test Groups.reduce!(w).symbols ==Vector{FGSymbol}([])
-    end
-    @testset "arithmetic" begin
-        @test Groups.r_multiply!(FGWord(t),[s,t]; reduced=true) == t*s*t
-        @test Groups.r_multiply!(FGWord(t),[s,t]; reduced=false) == t*s*t
+   @testset "FPGroup" begin
+      @test isa(FPGroup(["s", "t"]), Nemo.Group)
+      G = FPGroup(["s", "t"])
 
-        @test Groups.l_multiply!(FGWord(t),[s,t]; reduced=true) == t*s*t
-        @test Groups.l_multiply!(FGWord(t),[s,t]; reduced=false) == t*s*t
-        @test (t*s*t^-1)^10 == t*s^10*t^-1
-        @test (t*s*t^-1)^-10 == t*s^-10*t^-1
-    end
+      @testset "elements constructors" begin
+         @test isa(G(), FPGroupElem)
+         @test eltype(G.gens) == FPSymbol
+         @test length(G.gens) == 2
+         @test eltype(G.rels) == FPGroupElem
+         @test length(G.rels) == 0
+         @test eltype(generators(G)) == FPGroupElem
+         @test length(generators(G)) == 2
+      end
 
-    @testset "replacements" begin
-        @test Groups.is_subsymbol(s, Groups.change_pow(s,2)) == true
-        @test Groups.is_subsymbol(s, Groups.change_pow(s,-2)) == false
-        @test Groups.is_subsymbol(t, Groups.change_pow(s,-2)) == false
-        @test Groups.is_subsymbol(inv(t), Groups.change_pow(t,-2)) == true
-        c = s*t*s^-1*t^-1
-        @test findfirst(c, s^-1*t^-1) == 3
-        @test findnext(c*s^-1, s^-1*t^-1,3) == 3
-        @test findnext(c*s^-1*t^-1, s^-1*t^-1,4) == 5
-        @test findfirst(c*t, c) == 0
-        w = s*t*s^-1
-        subst = Dict{FGWord, FGWord}(w => s^1, s*t^-1 => t^4)
-        @test Groups.replace(c, 1, s*t, one(FGWord)) == s^-1*t^-1
+      s, t = generators(G)
 
-        @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
-        @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
-        @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
-        @test Groups.replace_all!(s*c*s*c*s, subst) == s*t^4*s*t^4*s
-    end
-end
+      @testset "internal arithmetic" begin
+         t_symb = FPSymbol("t")
+         tt = deepcopy(t)
+         @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
+            "(id)"
+         tt = deepcopy(t)
+         @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=false)) ==
+            "t*t^-1"
+         tt = deepcopy(t)
+         @test string(Groups.l_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
+            "(id)"
+         tt = deepcopy(t)
+         @test string(Groups.l_multiply!(tt,[inv(t_symb)]; reduced=false)) ==
+            "t^-1*t"
+      end
 
-@testset "Automorphisms" begin
-    @testset "AutSymbol" begin
-        @test_throws MethodError AutSymbol("a")
-        @test_throws MethodError AutSymbol("a", 1)
-        f = AutSymbol("a", 1, :(a()), v -> v)
-        @test isa(f, GSymbol)
-        @test isa(f, AutSymbol)
-        @test isa(symmetric_AutSymbol([1,2,3,4]), AutSymbol)
-        @test isa(rmul_AutSymbol(1,2), AutSymbol)
-        @test isa(lmul_AutSymbol(3,4), AutSymbol)
-        @test isa(flip_AutSymbol(3), AutSymbol)
-    end
+      @testset "reductions" begin
+         @test length(G().symbols) == 1
+         @test length((G()*G()).symbols) == 0
+         @test G() == G()*G()
+         w = deepcopy(s)
+         push!(w.symbols, (s^-1).symbols[1])
+         @test Groups.reduce!(w) == parent(w)()
+         o = (t*s)^3
+         @test o == t*s*t*s*t*s
+         p = (t*s)^-3
+         @test p == s^-1*t^-1*s^-1*t^-1*s^-1*t^-1
+         @test o*p == parent(o*p)()
+         w = FPGroupElem([o.symbols..., p.symbols...])
+         w.parent = G
+         @test Groups.reduce!(w).symbols ==Vector{FPSymbol}([])
+      end
 
-    @testset "flip_AutSymbol correctness" begin
-        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
-        domain = [a,b,c,d]
-        @test flip_AutSymbol(1)(domain) == [a^-1, b,c,d]
-        @test flip_AutSymbol(2)(domain) == [a, b^-1,c,d]
-        @test flip_AutSymbol(3)(domain) == [a, b,c^-1,d]
-        @test flip_AutSymbol(4)(domain) == [a, b,c,d^-1]
-        @test inv(flip_AutSymbol(1))(domain) == [a^-1, b,c,d]
-        @test inv(flip_AutSymbol(2))(domain) == [a, b^-1,c,d]
-        @test inv(flip_AutSymbol(3))(domain) == [a, b,c^-1,d]
-        @test inv(flip_AutSymbol(4))(domain) == [a, b,c,d^-1]
-    end
+      @testset "binary/inv operations" begin
+         @test parent(s) == G
+         @test parent(s) === parent(deepcopy(s))
+         @test isa(s*t, FPGroupElem)
+         @test parent(s*t) == parent(s^2)
+         @test s*s == s^2
+         @test inv(s*s) == inv(s^2)
+         @test inv(s)^2 == inv(s^2)
+         @test inv(s)*inv(s) == inv(s^2)
+         @test inv(s*t) == inv(t)*inv(s)
+         w = s*t*s^-1
+         @test inv(w) == s*t^-1*s^-1
+         @test (t*s*t^-1)^10 == t*s^10*t^-1
+         @test (t*s*t^-1)^-10 == t*s^-10*t^-1
+      end
 
-    @testset "symmetric_AutSymbol correctness" begin
-        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
-        domain = [a,b,c,d]
-        σ = symmetric_AutSymbol([1,2,3,4])
-        @test σ(domain) == domain
-        @test inv(σ)(domain) == domain
+      @testset "replacements" begin
+         a = FPSymbol("a")
+         b = FPSymbol("b")
+         @test Groups.is_subsymbol(a, Groups.change_pow(a,2)) == true
+         @test Groups.is_subsymbol(a, Groups.change_pow(a,-2)) == false
+         @test Groups.is_subsymbol(b, Groups.change_pow(a,-2)) == false
+         @test Groups.is_subsymbol(inv(b), Groups.change_pow(b,-2)) == true
+         c = s*t*s^-1*t^-1
+         @test findfirst(c, s^-1*t^-1) == 3
+         @test findnext(c*s^-1, s^-1*t^-1,3) == 3
+         @test findnext(c*s^-1*t^-1, s^-1*t^-1,4) == 5
+         @test findfirst(c*t, c) == 0
+         w = s*t*s^-1
+         subst = Dict{FPGroupElem, FPGroupElem}(w => s^1, s*t^-1 => t^4)
+         @test Groups.replace(c, 1, s*t, G()) == s^-1*t^-1
+         @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
+         @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
+         @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
+         @test Groups.replace_all!(s*c*s*c*s, subst) == s*t^4*s*t^4*s
+      end
+   end
 
-        σ = symmetric_AutSymbol([2,3,4,1])
-        @test σ(domain) == [b, c, d, a]
-        @test inv(σ)(domain) == [d, a, b, c]
+   @testset "Automorphisms" begin
+      @testset "AutSymbol" begin
+         @test_throws MethodError AutSymbol("a")
+         @test_throws MethodError AutSymbol("a", 1)
+         f = AutSymbol("a", 1, :(a()), v -> v)
+         @test isa(f, GSymbol)
+         @test isa(f, AutSymbol)
+         @test isa(symmetric_AutSymbol([1,2,3,4]), AutSymbol)
+         @test isa(rmul_AutSymbol(1,2), AutSymbol)
+         @test isa(lmul_AutSymbol(3,4), AutSymbol)
+         @test isa(flip_AutSymbol(3), AutSymbol)
+      end
 
-        σ = symmetric_AutSymbol([2,1,4,3])
-        @test σ(domain) == [b, a, d, c]
-        @test inv(σ)(domain) == [b, a, d, c]
+      @testset "flip_AutSymbol correctness" begin
+         a,b,c,d = [FPGroupElem(FPSymbol(i)) for i in ["a", "b", "c", "d"]]
+         domain = [a,b,c,d]
+         @test flip_AutSymbol(1)(domain) == [a^-1, b,c,d]
+         @test flip_AutSymbol(2)(domain) == [a, b^-1,c,d]
+         @test flip_AutSymbol(3)(domain) == [a, b,c^-1,d]
+         @test flip_AutSymbol(4)(domain) == [a, b,c,d^-1]
+         @test inv(flip_AutSymbol(1))(domain) == [a^-1, b,c,d]
+         @test inv(flip_AutSymbol(2))(domain) == [a, b^-1,c,d]
+         @test inv(flip_AutSymbol(3))(domain) == [a, b,c^-1,d]
+         @test inv(flip_AutSymbol(4))(domain) == [a, b,c,d^-1]
+      end
 
-        σ = symmetric_AutSymbol([2,3,1,4])
-        @test σ(domain) == [b,c,a,d]
-        @test inv(σ)(domain) == [c,a,b,d]
-    end
+      @testset "symmetric_AutSymbol correctness" begin
+         a,b,c,d = [FPGroupElem(FPSymbol(i)) for i in ["a", "b", "c", "d"]]
+         domain = [a,b,c,d]
+         σ = symmetric_AutSymbol([1,2,3,4])
+         @test σ(domain) == domain
+         @test inv(σ)(domain) == domain
 
-    @testset "mul_AutSymbol correctness" begin
-        a,b,c,d = [FGWord(FGSymbol(i)) for i in ["a", "b", "c", "d"]]
-        domain = [a,b,c,d]
-        i,j = 1,2
-        r = rmul_AutSymbol(i,j)
-        l = lmul_AutSymbol(i,j)
-        @test r(domain) == [a*b,b,c,d]
-        @test inv(r)(domain) == [a*b^-1,b,c,d]
-        @test l(domain) == [b*a,b,c,d]
-        @test inv(l)(domain) == [b^-1*a,b,c,d]
+         σ = symmetric_AutSymbol([2,3,4,1])
+         @test σ(domain) == [b, c, d, a]
+         @test inv(σ)(domain) == [d, a, b, c]
 
-        i,j = 3,1
-        r = rmul_AutSymbol(i,j)
-        l = lmul_AutSymbol(i,j)
-        @test r(domain) == [a,b,c*a,d]
-        @test inv(r)(domain) == [a,b,c*a^-1,d]
-        @test l(domain) == [a,b,a*c,d]
-        @test inv(l)(domain) == [a,b,a^-1*c,d]
+         σ = symmetric_AutSymbol([2,1,4,3])
+         @test σ(domain) == [b, a, d, c]
+         @test inv(σ)(domain) == [b, a, d, c]
 
+         σ = symmetric_AutSymbol([2,3,1,4])
+         @test σ(domain) == [b,c,a,d]
+         @test inv(σ)(domain) == [c,a,b,d]
+      end
 
-        i,j = 4,3
-        r = rmul_AutSymbol(i,j)
-        l = lmul_AutSymbol(i,j)
-        @test r(domain) == [a,b,c,d*c]
-        @test inv(r)(domain) == [a,b,c,d*c^-1]
-        @test l(domain) == [a,b,c,c*d]
-        @test inv(l)(domain) == [a,b,c,c^-1*d]
+      @testset "mul_AutSymbol correctness" begin
+         a,b,c,d = [FPGroupElem(FPSymbol(i)) for i in ["a", "b", "c", "d"]]
+         domain = [a,b,c,d]
+         i,j = 1,2
+         r = rmul_AutSymbol(i,j)
+         l = lmul_AutSymbol(i,j)
+         @test r(domain) == [a*b,b,c,d]
+         @test inv(r)(domain) == [a*b^-1,b,c,d]
+         @test l(domain) == [b*a,b,c,d]
+         @test inv(l)(domain) == [b^-1*a,b,c,d]
 
-
-        i,j = 2,4
-        r = rmul_AutSymbol(i,j)
-        l = lmul_AutSymbol(i,j)
-        @test r(domain) == [a,b*d,c,d]
-        @test inv(r)(domain) == [a,b*d^-1,c,d]
-        @test l(domain) == [a,d*b,c,d]
-        @test inv(l)(domain) == [a,d^-1*b,c,d]
-    end
+         i,j = 3,1
+         r = rmul_AutSymbol(i,j)
+         l = lmul_AutSymbol(i,j)
+         @test r(domain) == [a,b,c*a,d]
+         @test inv(r)(domain) == [a,b,c*a^-1,d]
+         @test l(domain) == [a,b,a*c,d]
+         @test inv(l)(domain) == [a,b,a^-1*c,d]
 
 
-    @testset "AutWords" begin
-        f = AutSymbol("a", 1, :(a()), v -> v)
-        @test isa(GWord(f), GWord)
-        @test isa(GWord(f), AutWord)
-        @test isa(AutWord(f), AutWord)
-        @test isa(f*f, AutWord)
-        @test isa(f^2, AutWord)
-        @test isa(f^-1, AutWord)
-    end
-    @testset "eltary functions" begin
-        f = symmetric_AutSymbol([2,1,4,3])
-        @test isa(inv(f), AutSymbol)
-        @test isa(f^-1, AutWord)
-        @test f^-1 == GWord(inv(f))
-        @test inv(f) == f
-    end
-    @testset "reductions/arithmetic" begin
-        f = symmetric_AutSymbol([2,1,4,3])
-        f² = Groups.r_multiply(AutWord(f), [f], reduced=false)
-        @test Groups.simplify_perms!(f²) == false
-        @test f² == one(typeof(f*f))
+         i,j = 4,3
+         r = rmul_AutSymbol(i,j)
+         l = lmul_AutSymbol(i,j)
+         @test r(domain) == [a,b,c,d*c]
+         @test inv(r)(domain) == [a,b,c,d*c^-1]
+         @test l(domain) == [a,b,c,c*d]
+         @test inv(l)(domain) == [a,b,c,c^-1*d]
 
-        a = rmul_AutSymbol(1,2)*flip_AutSymbol(2)
-        b = flip_AutSymbol(2)*inv(rmul_AutSymbol(1,2))
-        @test a*b == b*a
-        @test a^3 * b^3 == one(a)
-    end
-    @testset "specific Aut(𝔽₄) tests" begin
-        N = 4
-        import Combinatorics.nthperm
-        SymmetricGroup(n) = [nthperm(collect(1:n), k) for k in 1:factorial(n)]
-        indexing = [[i,j] for i in 1:N for j in 1:N if i≠j]
 
-        σs = [symmetric_AutSymbol(perm) for perm in SymmetricGroup(N)[2:end]];
-        ϱs = [rmul_AutSymbol(i,j) for (i,j) in indexing]
-        λs = [lmul_AutSymbol(i,j) for (i,j) in indexing]
-        ɛs = [flip_AutSymbol(i) for i in 1:N];
+         i,j = 2,4
+         r = rmul_AutSymbol(i,j)
+         l = lmul_AutSymbol(i,j)
+         @test r(domain) == [a,b*d,c,d]
+         @test inv(r)(domain) == [a,b*d^-1,c,d]
+         @test l(domain) == [a,d*b,c,d]
+         @test inv(l)(domain) == [a,d^-1*b,c,d]
+      end
 
-        S = vcat(ϱs, λs, σs, ɛs)
-        S = vcat(S, [inv(s) for s in S])
-        @test isa(S, Vector{AutSymbol})
-        @test length(S) == 102
-        @test length(unique(S)) == 75
-        S₁ = [GWord(s) for s in unique(S)]
-        @test isa(S₁, Vector{AutWord})
-        p = prod(S₁)
-        @test length(p) == 53
-    end
+      @testset "AutWords" begin
+         f = AutSymbol("a", 1, :(a()), v -> v)
+         @test isa(GWord(f), GWord)
+         @test isa(GWord(f), AutWord)
+         @test isa(AutWord(f), AutWord)
+         @test isa(f*f, AutWord)
+         @test isa(f^2, AutWord)
+         @test isa(f^-1, AutWord)
+      end
+
+      @testset "eltary functions" begin
+         f = symmetric_AutSymbol([2,1,4,3])
+         @test isa(inv(f), AutSymbol)
+         @test isa(f^-1, AutWord)
+         @test f^-1 == GWord(inv(f))
+         @test inv(f) == f
+      end
+
+      @testset "reductions/arithmetic" begin
+         f = symmetric_AutSymbol([2,1,4,3])
+         f² = Groups.r_multiply(AutWord(f), [f], reduced=false)
+         @test Groups.simplify_perms!(f²) == false
+         @test f² == one(typeof(f*f))
+
+         a = rmul_AutSymbol(1,2)*flip_AutSymbol(2)
+         b = flip_AutSymbol(2)*inv(rmul_AutSymbol(1,2))
+         @test a*b == b*a
+         @test a^3 * b^3 == one(a)
+      end
+
+      @testset "specific Aut(𝔽₄) tests" begin
+         N = 4
+         import Combinatorics.nthperm
+         SymmetricGroup(n) = [nthperm(collect(1:n), k) for k in 1:factorial(n)]
+         indexing = [[i,j] for i in 1:N for j in 1:N if i≠j]
+
+         σs = [symmetric_AutSymbol(perm) for perm in SymmetricGroup(N)[2:end]];
+         ϱs = [rmul_AutSymbol(i,j) for (i,j) in indexing]
+         λs = [lmul_AutSymbol(i,j) for (i,j) in indexing]
+         ɛs = [flip_AutSymbol(i) for i in 1:N];
+
+         S = vcat(ϱs, λs, σs, ɛs)
+         S = vcat(S, [inv(s) for s in S])
+         @test isa(S, Vector{AutSymbol})
+         @test length(S) == 102
+         @test length(unique(S)) == 75
+         S₁ = [GWord(s) for s in unique(S)]
+         @test isa(S₁, Vector{AutWord})
+         p = prod(S₁)
+         @test length(p) == 53
+      end
+   end
+
 end
