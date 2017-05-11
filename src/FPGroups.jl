@@ -21,6 +21,7 @@ type FPGroup <: Group
    end
 end
 
+export FPSymbol, FPGroupElem, FPGroup, generators
 
 
 FPSymbol(s::String) = FPSymbol(s,1)
