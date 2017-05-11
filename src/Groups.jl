@@ -36,12 +36,10 @@ GWord{T<:GSymbol}(s::T) = GWord{T}([s])
 convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 
 
-function length(W::GWord)
-    return sum([abs(s.pow) for s in W.symbols])
-end
 
 
 end
+length(W::GWord) = sum([length(s) for s in W.symbols])
 
 function join_free_symbols!(W::GWord)
     reduced = true
