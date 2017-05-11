@@ -54,6 +54,10 @@ convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 
 
 
+function hash(W::GWord, h::UInt)
+    W.modified && reduce!(W)
+    return W.savedhash $ h
+end
 end
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
@@ -89,10 +93,6 @@ end
 
 reduce(W::GWord) = reduce!(deepcopy(W))
 
-function hash{T}(W::GWord{T}, h::UInt)
-    W.modified && reduce!(W)
-    return W.savedhash + h
-end
 
 function (==){T}(W::GWord{T}, Z::GWord{T})
      W.modified && reduce!(W) # reduce clears the flag and recalculate the hash
