@@ -70,7 +70,7 @@ length(W::GWord) = sum([length(s) for s in W.symbols])
 function free_reduce!(W::GWord)
     reduced = true
     for i in 1:length(W.symbols) - 1
-        if W.symbols[i].gen == W.symbols[i+1].gen
+        if W.symbols[i].str == W.symbols[i+1].str
             reduced = false
             p1 = W.symbols[i].pow
             p2 = W.symbols[i+1].pow
@@ -198,7 +198,7 @@ function inv{T}(W::GWord{T})
 end
 
 is_subsymbol(s::GSymbol, t::GSymbol) =
-    s.gen == t.gen && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
+    s.str == t.str && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
 function findfirst(W::GWord, Z::GWord)
     n = length(Z.symbols)
