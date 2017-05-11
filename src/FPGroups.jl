@@ -80,6 +80,20 @@ function show(io::IO, s::FPSymbol)
    end
 end
 
+function (==)(s::FPSymbol, t::FPSymbol)
+   isone(s) && isone(t) && return true
+   s.str == t.str || return false
+   s.pow == t.pow || return false
+   return true
+end
+
+function (<)(s::FPSymbol, t::FPSymbol)
+   isone(s) && return true
+   return s.str == t.str && s.pow < t.pow
+end
+
+(<=)(s::FPSymbol, t::FPSymbol) = s == t || s < t
+
 function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
     if !(w in G.rels)
         push!(G.rels, w)
