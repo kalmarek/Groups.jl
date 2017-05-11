@@ -153,7 +153,8 @@ function power_by_squaring{T}(x::GWord{T}, p::Integer)
 end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)
-(^){T<:GSymbol}(x::T, n::Integer) = GWord(x)^n
+
+###############################################################################
 
 function inv{T}(W::GWord{T})
     if length(W) == 0
