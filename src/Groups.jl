@@ -24,8 +24,6 @@ abstract GSymbol
 
 length(s::GSymbol) = (s.pow == 0 ? 0 : 1)
 
-(*){T<:GSymbol}(s::T, t::T) = return GWord{T}([s])*t
-
 change_pow(s::GSymbol, n::Int) = throw(ArgumentError("Define change_pow function for $(typeof(s))!"))
 
     symbols::Vector{T}
