@@ -32,9 +32,27 @@ FPSymbol(s::String) = FPSymbol(s,1)
 
 FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a], FPGroupElem[])
 
+function (G::FPGroup)()
+   id = FPGroupElem(FPSymbol("", 0))
+   id.parent = G
+   return id
 end
 
-FPGroup() = FPGroup(Vector{FPSymbol}(), Vector{GWord{FPSymbol}}())
+function (G::FPGroup)(w::GWord)
+   eltype(w.symbols) == FPSymbol || throw("Can not coerce $w to FPGroup $G.")
+   if length(w) > 0
+      for s in w.symbols
+         i = findfirst(g -> g.str == s.str, G.gens)
+         i == 0 && throw("Symbol $s does not belong to $G.")
+         s.pow % G.gens[i].pow == 0 || throw("Symbol $s doesn't belong to $G.")
+      end
+   end
+   w.parent = G
+   return w
+end
+
+(G::FPGroup)(s::FPSymbol) = G(FPGroupElem(s))
+
 
 function show(io::IO, G::FPGroup)
     print(io, "Finitely presented group on $(length(G.gens)) gens and $(length(G.rels)) relations:\n")
