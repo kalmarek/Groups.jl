@@ -87,12 +87,7 @@ function (==)(s::FPSymbol, t::FPSymbol)
    return true
 end
 
-function (<)(s::FPSymbol, t::FPSymbol)
-   isone(s) && return true
-   return s.str == t.str && s.pow < t.pow
-end
 
-(<=)(s::FPSymbol, t::FPSymbol) = s == t || s < t
 
 
 inv(s::FPSymbol) = change_pow(s, -s.pow)
