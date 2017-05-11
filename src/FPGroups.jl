@@ -94,6 +94,9 @@ end
 
 (<=)(s::FPSymbol, t::FPSymbol) = s == t || s < t
 
+
+inv(s::FPSymbol) = change_pow(s, -s.pow)
+
 function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
     if !(w in G.rels)
         push!(G.rels, w)
