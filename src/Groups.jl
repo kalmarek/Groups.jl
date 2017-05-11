@@ -24,11 +24,6 @@ abstract GSymbol
 
 length(s::GSymbol) = (s.pow == 0 ? 0 : 1)
 
-IdSymbol(T::Type{GSymbol}) = throw(ArgumentError("Define IdSymbol(::Type{$T}) which is the identity element for Your type!"))
-
-one{T<:GSymbol}(::Type{T}) = IdSymbol(T)
-one(s::GSymbol) = one(typeof(s))
-
 (*){T<:GSymbol}(s::T, t::T) = return GWord{T}([s])*t
 
 change_pow(s::GSymbol, n::Int) = throw(ArgumentError("Define change_pow function for $(typeof(s))!"))
@@ -45,15 +40,11 @@ end
 GWord{T<:GSymbol}(s::T) = GWord{T}([s])
 convert{T<:GSymbol, W<:Word}(::Type{W}, s::T) = GWord{T}(s)
 
-IDWord{T<:GSymbol}(::Type{T}) = GWord(one(T))
-IDWord{T<:GSymbol}(W::GWord{T}) = IDWord(T)
 
 function length(W::GWord)
     return sum([abs(s.pow) for s in W.symbols])
 end
 
-one{T}(::Type{GWord{T}}) = IDWord(T)
-one{T}(w::GWord{T}) = one(GWord{T})
 
 function inv{T}(W::GWord{T})
     if length(W) == 0
