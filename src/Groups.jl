@@ -11,6 +11,14 @@ import Base: deepcopy_internal
 
 export GSymbol, GWord
 
+doc"""
+    ::GSymbol
+> Abstract type which all group symbols of FPGroups should subtype. Each
+> concrete subtype should implement fields:
+> * `str` which is the string representation/identification of a symbol
+> * `pow` which is the (multiplicative) exponent of a symbol.
+
+"""
 abstract GSymbol
 
 function show(io::IO, s::GSymbol)
