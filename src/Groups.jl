@@ -237,9 +237,13 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; asserts
         @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
     end
 
-    first = W.symbols[index]*inv(toreplace.symbols[1])
-    last = W.symbols[index+n-1]*inv(toreplace.symbols[end])
-    replacement = first*replacement*last
+    first = change_pow(W.symbols[index],
+      W.symbols[index].pow - toreplace.symbols[1].pow)
+
+    last = change_pow(W.symbols[index+n-1],
+      W.symbols[index+n-1].pow - toreplace.symbols[end].pow)
+
+    replacement = first * replacement * last
     splice!(W.symbols, index:index+n-1, replacement.symbols)
     return reduce!(W)
 end
