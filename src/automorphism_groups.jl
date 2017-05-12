@@ -37,11 +37,11 @@ end
 
 ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(2+pow%2)%2) : v[k]) for k in eachindex(v)]
 
-# taken from ValidatedNumerics
+# taken from ValidatedNumerics, under under the MIT "Expat" License:
+# https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
 function subscriptify(n::Int)
-    dig = reverse(digits(n))
-    subscript_0 = Int('₀')    # 0x2080
-    join([Char(subscript_0 + i) for i in dig])
+    subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
+    return join([Char(subscript_0 + i) for i in reverse(digits(n))])
 end
 
 function id_autsymbol()
