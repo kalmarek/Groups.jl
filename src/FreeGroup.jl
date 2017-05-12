@@ -1,28 +1,28 @@
 ###############################################################################
 #
-#   FPSymbol/FPGroupElem/FPGroup definition
+#   FreeSymbol/FreeGroupElem/FreeGroup definition
 #
 ###############################################################################
 
-immutable FPSymbol <: GSymbol
+immutable FreeSymbol <: GSymbol
    str::String
    pow::Int
 end
 
-typealias FPGroupElem GWord{FPSymbol}
+typealias FreeGroupElem GWord{FreeSymbol}
 
-type FPGroup <: Group
-   gens::Vector{FPSymbol}
+type FreeGroup <: FPGroup
+   gens::Vector{FreeSymbol}
    #     order::Vector{T}
    #     fastmult_table::Array{Int,2}
-   function FPGroup{T<:GSymbol}(gens::Vector{T})
+   function FreeGroup{T<:GSymbol}(gens::Vector{T})
       G = new(gens)
       G.gens = gens
       return G
    end
 end
 
-export FPSymbol, FPGroupElem, FPGroup, generators
+export FreeGroupElem, FreeGroup, generators
 
 ###############################################################################
 #
@@ -30,19 +30,19 @@ export FPSymbol, FPGroupElem, FPGroup, generators
 #
 ###############################################################################
 
-parent_type(::Type{FPGroupElem}) = FPGroup
+parent_type(::Type{FreeGroupElem}) = FreeGroup
 
-elem_type(::FPGroup) = FPGroupElem
+elem_type(::FreeGroup) = FreeGroupElem
 
 ###############################################################################
 #
-#   FPSymbol constructors
+#   FreeSymbol constructors
 #
 ###############################################################################
 
-FPSymbol(s::String) = FPSymbol(s,1)
+FreeSymbol(s::String) = FreeSymbol(s,1)
 
-FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
+FreeGroup(a::Vector{String}) = FreeGroup([FreeSymbol(i) for i in a])
 
 ###############################################################################
 #
@@ -50,14 +50,14 @@ FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
 #
 ###############################################################################
 
-function (G::FPGroup)()
-   id = FPGroupElem(FPSymbol("", 0))
+function (G::FreeGroup)()
+   id = FreeGroupElem(FreeSymbol("", 0))
    id.parent = G
    return id
 end
 
-function (G::FPGroup)(w::GWord)
-   eltype(w.symbols) == FPSymbol || throw("Can not coerce $w to FPGroup $G.")
+function (G::FreeGroup)(w::GWord)
+   eltype(w.symbols) == FreeSymbol || throw("Can not coerce $w to FreeGroup $G.")
    if length(w) > 0
       for s in w.symbols
          i = findfirst(g -> g.str == s.str, G.gens)
@@ -69,7 +69,7 @@ function (G::FPGroup)(w::GWord)
    return w
 end
 
-(G::FPGroup)(s::FPSymbol) = G(FPGroupElem(s))
+(G::FreeGroup)(s::FreeSymbol) = G(FreeGroupElem(s))
 
 ###############################################################################
 #
@@ -77,13 +77,13 @@ end
 #
 ###############################################################################
 
-hash(s::FPSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FPSymbol, h)))
+hash(s::FreeSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FreeSymbol, h)))
 
-change_pow(s::FPSymbol, n::Int) = FPSymbol(s.str, n)
+change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.str, n)
 
-length(s::FPSymbol) = abs(s.pow)
+length(s::FreeSymbol) = abs(s.pow)
 
-generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
+generators(G::FreeGroup) = [G(FreeGroupElem(g)) for g in G.gens]
 
 ###############################################################################
 #
@@ -91,7 +91,7 @@ generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
 #
 ###############################################################################
 
-function show(io::IO, G::FPGroup)
+function show(io::IO, G::FreeGroup)
    print(io, "Finitely presented group on $(length(G.gens)) generators:\n")
    print(io, "gens:\t", join([g.str for g in G.gens], ", "))
 end
@@ -102,7 +102,7 @@ end
 #
 ###############################################################################
 
-function (==)(s::FPSymbol, t::FPSymbol)
+function (==)(s::FreeSymbol, t::FreeSymbol)
    isone(s) && isone(t) && return true
    s.str == t.str || return false
    s.pow == t.pow || return false
@@ -115,7 +115,7 @@ end
 #
 ###############################################################################
 
-inv(s::FPSymbol) = change_pow(s, -s.pow)
+inv(s::FreeSymbol) = change_pow(s, -s.pow)
 
 ###############################################################################
 #
@@ -123,7 +123,7 @@ inv(s::FPSymbol) = change_pow(s, -s.pow)
 #
 ###############################################################################
 
-# function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
+# function add_rel!{T<:FreeSymbol}(G::FreeGroup, w::GWord{T})
 #    if !(w in G.rels)
 #       w = G(w)
 #       push!(G.rels, w)
@@ -131,7 +131,7 @@ inv(s::FPSymbol) = change_pow(s, -s.pow)
 #    return G
 # end
 #
-# function quotientgroup(G::FPGroup, rels::Vector{FPGroupElem})
+# function quotientgroup(G::FreeGroup, rels::Vector{FreeGroupElem})
 #    for r in rels
 #       parent(r) == G || throw("Can not form quotient group: $r is not an element of $G")
 #    end
