@@ -85,7 +85,7 @@ end
 
 function perm_autsymbol(p::perm; pow::Int=1)
     if p == parent(p)()
-        return one(AutSymbol)
+        return id_autsymbol()
     else
         gen = "σ"*join([subscriptify(i) for i in p])
         return AutSymbol(gen, 1, :(σ($(p.d), 1)), σ(p, 1))
@@ -154,7 +154,7 @@ hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
 
 function change_pow(s::AutSymbol, n::Int)
     if n == 0
-        return one(s)
+        return id_autsymbol()
     end
     symbol = s.ex.args[1]
     if symbol == :ɛ
@@ -226,7 +226,7 @@ function simplify_perms!(W::AutGroupElem)
                 end
                 p1 = Permutation(getperm(current))
                 p2 = Permutation(getperm(next_s))
-                W.symbols[i] = one(AutSymbol)
+                W.symbols[i] = id_autsymbol()
                 W.symbols[i+1] = symmetric_AutSymbol(array(p1*p2))
             end
         end
