@@ -19,7 +19,7 @@ typealias AutGroupElem GWord{AutSymbol}
 
 type AutGroup <: FPGroup
    objectGroup::Group
-   generators::Vector{AutSymbol}
+   gens::Vector{AutSymbol}
 end
 
 export AutSymbol, AutGroupElem, AutGroup
@@ -107,9 +107,8 @@ end
 #
 ###############################################################################
 
-function AutGroup(G::FPGroup; outer=false, special=false)
-   length(G.rels) == 0 || throw("Don't know how to construct AutGroup of $G.")
-   n = length(G.generators)
+function AutGroup(G::FreeGroup; outer=false, special=false)
+   n = length(G.gens)
    indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
    rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
    lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
