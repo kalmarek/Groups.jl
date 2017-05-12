@@ -1,7 +1,6 @@
 using Permutations
 
 import Base: convert
-export AutSymbol, AutWord, rmul_AutSymbol, lmul_AutSymbol, flip_AutSymbol, symmetric_AutSymbol
 
 immutable AutSymbol <: GSymbol
    gen::String
@@ -16,6 +15,8 @@ type AutGroup <: Group
    objectGroup::Group
    generators::Vector{AutSymbol}
 end
+
+export AutSymbol, AutGroupElem, AutGroup
 
 
 elem_type(::AutGroup) = AutGroupElem
