@@ -177,7 +177,7 @@ function r_multiply!(W::GWord, x; reduced::Bool=true)
     return W
 end
 
-function l_multiply!(W::GWord, x; reduced::Bool=true)
+function l_multiply!(W::GWord, x; reduced=true)
     if length(x) > 0
         unshift!(W.symbols, reverse(x)...)
     end
@@ -187,9 +187,9 @@ function l_multiply!(W::GWord, x; reduced::Bool=true)
     return W
 end
 
-r_multiply(W::GWord, x; reduced::Bool=true) =
+r_multiply(W::GWord, x; reduced=true) =
     r_multiply!(deepcopy(W),x, reduced=reduced)
-l_multiply(W::GWord, x; reduced::Bool=true) =
+l_multiply(W::GWord, x; reduced=true) =
     l_multiply!(deepcopy(W),x, reduced=reduced)
 
 (*)(W::GWord, Z::GWord) = r_multiply(W, Z.symbols)
