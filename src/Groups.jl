@@ -51,7 +51,7 @@ type GWord{T<:GSymbol} <: GroupElem
     end
 end
 
-export GSymbol, GWord
+abstract FPGroup <: Group
 
 ###############################################################################
 #
