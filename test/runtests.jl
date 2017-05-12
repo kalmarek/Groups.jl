@@ -145,30 +145,32 @@ using Base.Test
 
 
    @testset "Automorphisms" begin
+      using Nemo
       @testset "AutSymbol" begin
+
          @test_throws MethodError AutSymbol("a")
          @test_throws MethodError AutSymbol("a", 1)
          f = AutSymbol("a", 1, :(a()), v -> v)
          @test isa(f, Groups.GSymbol)
          @test isa(f, Groups.AutSymbol)
-         @test isa(symmetric_AutSymbol([1,2,3,4]), AutSymbol)
-         @test isa(rmul_AutSymbol(1,2), AutSymbol)
-         @test isa(lmul_AutSymbol(3,4), AutSymbol)
-         @test isa(flip_AutSymbol(3), AutSymbol)
+         @test isa(Groups.perm_autsymbol(
+            PermutationGroup(4)([1,2,3,4])), AutSymbol)
+         @test isa(Groups.rmul_autsymbol(1,2), AutSymbol)
+         @test isa(Groups.lmul_autsymbol(3,4), AutSymbol)
+         @test isa(Groups.flip_autsymbol(3), AutSymbol)
       end
-
-   #    @testset "flip_AutSymbol correctness" begin
-   #       a,b,c,d = [FreeGroupElem(Groups.FreeSymbol(i)) for i in ["a", "b", "c", "d"]]
-   #       domain = [a,b,c,d]
-   #       @test flip_AutSymbol(1)(domain) == [a^-1, b,c,d]
-   #       @test flip_AutSymbol(2)(domain) == [a, b^-1,c,d]
-   #       @test flip_AutSymbol(3)(domain) == [a, b,c^-1,d]
-   #       @test flip_AutSymbol(4)(domain) == [a, b,c,d^-1]
-   #       @test inv(flip_AutSymbol(1))(domain) == [a^-1, b,c,d]
-   #       @test inv(flip_AutSymbol(2))(domain) == [a, b^-1,c,d]
-   #       @test inv(flip_AutSymbol(3))(domain) == [a, b,c^-1,d]
-   #       @test inv(flip_AutSymbol(4))(domain) == [a, b,c,d^-1]
-   #    end
+      @testset "flip_autsymbol correctness" begin
+         a,b,c,d = generators(FreeGroup(4))
+         domain = [a,b,c,d]
+         @test Groups.flip_autsymbol(1)(domain) == [a^-1, b,c,d]
+         @test Groups.flip_autsymbol(2)(domain) == [a, b^-1,c,d]
+         @test Groups.flip_autsymbol(3)(domain) == [a, b,c^-1,d]
+         @test Groups.flip_autsymbol(4)(domain) == [a, b,c,d^-1]
+         @test inv(Groups.flip_autsymbol(1))(domain) == [a^-1, b,c,d]
+         @test inv(Groups.flip_autsymbol(2))(domain) == [a, b^-1,c,d]
+         @test inv(Groups.flip_autsymbol(3))(domain) == [a, b,c^-1,d]
+         @test inv(Groups.flip_autsymbol(4))(domain) == [a, b,c,d^-1]
+      end
    #
    #    @testset "symmetric_AutSymbol correctness" begin
    #       a,b,c,d = [FreeGroupElem(Groups.FreeSymbol(i)) for i in ["a", "b", "c", "d"]]
