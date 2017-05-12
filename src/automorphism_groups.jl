@@ -74,11 +74,12 @@ function perm_autsymbol(p::perm; pow::Int=1)
 end
 
 function getperm(s::AutSymbol)
-    if s.ex.args[1] == :σ
-        return s.ex.args[2]
-    else
-        throw(ArgumentError("$s is not a permutation automorphism!"))
-    end
+   if s.ex.args[1] == :σ
+      p = s.ex.args[2]
+      return PermutationGroup(length(p))(p)
+   else
+      throw(ArgumentError("$s is not a permutation automorphism!"))
+   end
 end
 
 function AutGroup(G::FPGroup; outer=false, special=false)
