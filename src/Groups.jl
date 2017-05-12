@@ -336,7 +336,7 @@ replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W)
 #
 ###############################################################################
 
-include("FPGroups.jl")
-include("automorphism_groups.jl")
+include("FreeGroup.jl")
+include("AutGroup.jl")
 
 end # of module Groups
