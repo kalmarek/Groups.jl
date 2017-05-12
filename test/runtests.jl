@@ -60,8 +60,8 @@ using Base.Test
          @test isa(G(), FPGroupElem)
          @test eltype(G.gens) == FPSymbol
          @test length(G.gens) == 2
-         @test eltype(G.rels) == FPGroupElem
-         @test length(G.rels) == 0
+         @test_skip eltype(G.rels) == FPGroupElem
+         @test_skip length(G.rels) == 0
          @test eltype(generators(G)) == FPGroupElem
          @test length(generators(G)) == 2
       end
