@@ -42,6 +42,8 @@ elem_type(::FreeGroup) = FreeGroupElem
 
 FreeSymbol(s::String) = FreeSymbol(s,1)
 
+FreeGroup(n::Int, symbol::String="f") = FreeGroup(["$symbol$i" for i in 1:n])
+
 FreeGroup(a::Vector{String}) = FreeGroup([FreeSymbol(i) for i in a])
 
 ###############################################################################
