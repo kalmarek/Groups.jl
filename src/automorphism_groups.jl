@@ -19,7 +19,6 @@ end
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
 hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
 
-IdSymbol(::Type{AutSymbol}) = AutSymbol("(id)", 0, :(id()), id)
 
 function change_pow(s::AutSymbol, n::Int)
     if n == 0
