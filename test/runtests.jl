@@ -5,71 +5,73 @@ using Base.Test
 
 @testset "Groups" begin
 
-   @testset "FPSymbols" begin
-      s = FPSymbol("s")
-      t = FPSymbol("t")
+   @testset "Groups.FreeSymbols" begin
+      s = Groups.FreeSymbol("s")
+      t = Groups.FreeSymbol("t")
       @testset "defines" begin
-         @test isa(FPSymbol(string(Char(rand(50:2000)))), GSymbol)
-         @test FPSymbol("abc").pow == 1
-         @test isa(s, FPSymbol)
-         @test isa(t, FPSymbol)
+         @test isa(Groups.FreeSymbol("aaaaaaaaaaaaaaaa"), Groups.GSymbol)
+         @test Groups.FreeSymbol("abc").pow == 1
+         @test isa(s, Groups.FreeSymbol)
+         @test isa(t, Groups.FreeSymbol)
       end
       @testset "eltary functions" begin
          @test length(s) == 1
          @test Groups.change_pow(s, 0) == Groups.change_pow(t, 0)
          @test length(Groups.change_pow(s, 0)) == 0
          @test inv(s).pow == -1
-         @test FPSymbol("s", 3) == Groups.change_pow(s, 3)
-         @test FPSymbol("s", 3) != FPSymbol("t", 3)
+         @test Groups.FreeSymbol("s", 3) == Groups.change_pow(s, 3)
+         @test Groups.FreeSymbol("s", 3) != Groups.FreeSymbol("t", 3)
          @test Groups.change_pow(inv(s), -3) == inv(Groups.change_pow(s, 3))
       end
       @testset "powers" begin
          s⁴ = Groups.change_pow(s,4)
          @test s⁴.pow == 4
-         @test Groups.change_pow(s, 4) == FPSymbol("s", 4)
+         @test Groups.change_pow(s, 4) == Groups.FreeSymbol("s", 4)
       end
    end
 
-   @testset "FPGroupElems" begin
-      s = FPSymbol("s")
-      t = FPSymbol("t", -2)
+   @testset "FreeGroupElems" begin
+      s = Groups.FreeSymbol("s")
+      t = Groups.FreeSymbol("t", -2)
       @testset "defines" begin
          @test isa(Groups.GWord(s), Groups.GWord)
-         @test isa(Groups.GWord(s), FPGroupElem)
-         @test isa(FPGroupElem(s), Groups.GWord)
-         @test isa(convert(FPGroupElem, s), GWord)
-         @test isa(convert(FPGroupElem, s), FPGroupElem)
-         @test isa(Vector{FPGroupElem}([s,t]), Vector{FPGroupElem})
-         @test length(FPGroupElem(s)) == 1
-         @test length(FPGroupElem(t)) == 2
+         @test isa(Groups.GWord(s), FreeGroupElem)
+         @test isa(FreeGroupElem(s), Groups.GWord)
+         @test isa(convert(FreeGroupElem, s), Groups.GWord)
+         @test isa(convert(FreeGroupElem, s), FreeGroupElem)
+         @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
+         @test length(FreeGroupElem(s)) == 1
+         @test length(FreeGroupElem(t)) == 2
       end
 
       @testset "eltary functions" begin
          @test_skip (s*s).symbols == (s^2).symbols
-         @test_skip Vector{GWord{FPSymbol}}([s,t]) == Vector{FPGroupElem}([s,t])
-         @test_skip Vector{GWord}([s,t]) == [GWord(s), GWord(t)]
+         @test_skip Vector{Groups.GWord{Groups.FreeSymbol}}([s,t]) ==
+            Vector{FreeGroupElem}([s,t])
+         @test_skip Vector{Groups.GWord}([s,t]) ==
+            [Groups.GWord(s), Groups.GWord(t)]
          @test_skip hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
       end
    end
 
-   @testset "FPGroup" begin
-      @test isa(FPGroup(["s", "t"]), Nemo.Group)
-      G = FPGroup(["s", "t"])
+   @testset "FreeGroup" begin
+      @test isa(FreeGroup(["s", "t"]), Nemo.Group)
+      G = FreeGroup(["s", "t"])
 
       @testset "elements constructors" begin
-         @test isa(G(), FPGroupElem)
-         @test eltype(G.gens) == FPSymbol
+         @test isa(G(), FreeGroupElem)
+         @test eltype(G.gens) == Groups.FreeSymbol
          @test length(G.gens) == 2
-         @test_skip eltype(G.rels) == FPGroupElem
+         @test_skip eltype(G.rels) == FreeGroupElem
          @test_skip length(G.rels) == 0
-         @test eltype(generators(G)) == FPGroupElem
+         @test eltype(generators(G)) == FreeGroupElem
          @test length(generators(G)) == 2
       end
 
       s, t = generators(G)
 
       @testset "internal arithmetic" begin
-         t_symb = FPSymbol("t")
+         t_symb = Groups.FreeSymbol("t")
          tt = deepcopy(t)
          @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
             "(id)"
@@ -96,15 +98,15 @@ using Base.Test
          p = (t*s)^-3
          @test p == s^-1*t^-1*s^-1*t^-1*s^-1*t^-1
          @test o*p == parent(o*p)()
-         w = FPGroupElem([o.symbols..., p.symbols...])
+         w = FreeGroupElem([o.symbols..., p.symbols...])
          w.parent = G
-         @test Groups.reduce!(w).symbols ==Vector{FPSymbol}([])
+         @test Groups.reduce!(w).symbols ==Vector{Groups.FreeSymbol}([])
       end
 
       @testset "binary/inv operations" begin
          @test parent(s) == G
          @test parent(s) === parent(deepcopy(s))
-         @test isa(s*t, FPGroupElem)
+         @test isa(s*t, FreeGroupElem)
          @test parent(s*t) == parent(s^2)
          @test s*s == s^2
          @test inv(s*s) == inv(s^2)
