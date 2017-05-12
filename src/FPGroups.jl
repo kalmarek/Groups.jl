@@ -13,14 +13,11 @@ typealias FPGroupElem GWord{FPSymbol}
 
 type FPGroup <: Group
    gens::Vector{FPSymbol}
-   rels::Vector{FPGroupElem}
    #     order::Vector{T}
    #     fastmult_table::Array{Int,2}
-   function FPGroup{T<:GSymbol}(gens::Vector{T}, rels::Vector{GWord{T}})
-      G = new(gens, rels)
+   function FPGroup{T<:GSymbol}(gens::Vector{T})
+      G = new(gens)
       G.gens = gens
-      rels = [G(r) for r in rels]
-      G.rels = rels
       return G
    end
 end
@@ -45,7 +42,7 @@ elem_type(::FPGroup) = FPGroupElem
 
 FPSymbol(s::String) = FPSymbol(s,1)
 
-FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a], FPGroupElem[])
+FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
 
 ###############################################################################
 #
@@ -95,11 +92,8 @@ generators(G::FPGroup) = [G(FPGroupElem(g)) for g in G.gens]
 ###############################################################################
 
 function show(io::IO, G::FPGroup)
-   print(io, "Finitely presented group on $(length(G.gens)) generators and $(length(G.rels)) relations:\n")
-   print(io, "gens:\t", join([g.str for g in G.gens], ", "),"\n")
-   print(io, "rels:\t", join([rel for rel in G.rels], ", "))
-end
-
+   print(io, "Finitely presented group on $(length(G.gens)) generators:\n")
+   print(io, "gens:\t", join([g.str for g in G.gens], ", "))
 end
 
 ###############################################################################
@@ -128,10 +122,6 @@ inv(s::FPSymbol) = change_pow(s, -s.pow)
 #   Misc
 #
 ###############################################################################
-
-FreeGroup(n::Int, f::String=f) = FPGroup(["$f$i" for i in 1:n])
-
-FreeGroup(a::Vector{String}) = FPGroup(a)
 
 # function add_rel!{T<:FPSymbol}(G::FPGroup, w::GWord{T})
 #    if !(w in G.rels)
