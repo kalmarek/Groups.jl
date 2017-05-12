@@ -10,12 +10,6 @@ immutable AutSymbol <: GSymbol
     func::Function
 end
 
-function (f::AutSymbol){T}(v::Vector{GWord{T}})
-    if f.pow == 0
-        return v
-    end
-    return f.func(v)
-end
 
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
 hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
@@ -116,6 +110,12 @@ function getperm(s::AutSymbol)
 end
 
 typealias AutWord GWord{AutSymbol}
+function (f::AutSymbol){T}(v::Vector{GWord{T}})
+    if f.pow == 0
+        return v
+    end
+    return f.func(v)
+end
 
 function (F::AutWord)(v)
     for f in F.symbols
