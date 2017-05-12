@@ -114,6 +114,25 @@ function getperm(s::AutSymbol)
     end
 end
 
+function AutGroup(G::FPGroup; outer=false, special=false)
+   length(G.rels) == 0 || throw("Don't know how to construct AutGroup of $G.")
+   n = length(G.generators)
+   indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
+   rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
+   lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
+   S = [rmuls..., lmuls...]
+   if special
+      flips = [flip_autsymbol(i) for i in 1:n]
+      append!(S, flips...)
+   elseif outer
+      perms = collect(elements(PermutationGroup(n)))
+      perms = [perm_autsymbol(p) for p in perms[2:end]] # leave the identity
+      append!(S, perms)
+   end
+   return new(G, S)
+end
+
+
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
     if f.pow == 0
         return v
