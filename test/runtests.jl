@@ -56,6 +56,8 @@ using Base.Test
 
    @testset "FreeGroup" begin
       @test isa(FreeGroup(["s", "t"]), Nemo.Group)
+      @test isa(FreeGroup(["s", "t"]), Nemo.FPGroup)
+      @test isa(FreeGroup(2), Nemo.FPGroup)
       G = FreeGroup(["s", "t"])
 
       @testset "elements constructors" begin
