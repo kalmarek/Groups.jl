@@ -128,7 +128,6 @@ function (F::AutGroupElem)(v)
     return v
 end
 
-convert(::Type{AutWord}, s::AutSymbol) = GWord(s)
 
 function simplify_perms!(W::AutWord)
     reduced = true
