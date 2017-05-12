@@ -16,33 +16,9 @@ type AutGroup <: Group
    objectGroup::Group
    generators::Vector{AutSymbol}
 end
-(==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
-hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
 
 
-function change_pow(s::AutSymbol, n::Int)
-    if n == 0
-        return one(s)
-    end
-    symbol = s.ex.args[1]
-    if symbol == :ɛ
-        return flip_AutSymbol(s.ex.args[2], pow=n)
-    elseif symbol == :σ
-        return symmetric_AutSymbol(s.ex.args[2], pow=n)
-    elseif symbol == :ϱ
-        s.ex.args[2:end-1]
-        return rmul_AutSymbol(s.ex.args[2:end-1]..., pow=n)
-    elseif symbol == :λ
-        return lmul_AutSymbol(s.ex.args[2:end-1]..., pow=n)
-    elseif symbol == :id
-        return s
-    else
-        warn("Changing an unknown type of symbol! $s")
-        return AutSymbol(s.gen, n, s.ex, s.func)
-    end
-end
 
-inv(f::AutSymbol) = change_pow(f, -f.pow)
 
 function id()
     return v -> v
@@ -146,6 +122,36 @@ function (F::AutGroupElem)(v)
     return v
 end
 
+
+hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
+
+function change_pow(s::AutSymbol, n::Int)
+    if n == 0
+        return one(s)
+    end
+    symbol = s.ex.args[1]
+    if symbol == :ɛ
+        return flip_autsymbol(s.ex.args[2], pow=n)
+    elseif symbol == :σ
+        return perm_autsymbol(s.ex.args[2], pow=n)
+    elseif symbol == :ϱ
+        s.ex.args[2:end-1]
+        return rmul_autsymbol(s.ex.args[2:end-1]..., pow=n)
+    elseif symbol == :λ
+        return lmul_autsymbol(s.ex.args[2:end-1]..., pow=n)
+    elseif symbol == :id
+        return s
+    else
+        warn("Changing an unknown type of symbol! $s")
+        return AutSymbol(s.gen, n, s.ex, s.func)
+    end
+end
+
+
+(==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
+
+
+inv(f::AutSymbol) = change_pow(f, -f.pow)
 
 function simplify_perms!(W::AutGroupElem)
     reduced = true
