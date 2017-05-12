@@ -18,7 +18,9 @@ type AutGroup <: Group
 end
 
 
+elem_type(::AutGroup) = AutGroupElem
 
+parent_type(::AutGroupElem) = AutGroup
 
 
 function ϱ(i,j, pow=1)
@@ -140,6 +142,7 @@ function change_pow(s::AutSymbol, n::Int)
     end
 end
 
+generators(G::AutGroup) = [G(AutGroupElem(elt)) for elt in G.generators]
 
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
 
