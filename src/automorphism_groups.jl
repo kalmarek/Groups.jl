@@ -20,9 +20,6 @@ end
 
 
 
-function id()
-    return v -> v
-end
 
 function ϱ(i,j, pow=1)
     # @assert i ≠ j
@@ -34,15 +31,8 @@ function λ(i,j, pow=1)
     return v -> [(k==i ? v[j]^pow*v[i] : v[k]) for k in eachindex(v)]
 end
 
-function σ(perm, pow=1)
-    # @assert sort(perm) == collect(1:length(perm))
-    if pow == 1
-        return v -> [v[perm[k]] for k in eachindex(v)]
-    else
-        p = Permutations.Permutation(perm)
-        perm = array(p^pow)
-        return v -> [v[perm[k]] for k in eachindex(v)]
-    end
+function σ(p::perm, pow=1)
+   return v -> [v[(p^pow)[k]] for k in eachindex(v)]
 end
 
 ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(2+pow%2)%2) : v[k]) for k in eachindex(v)]
@@ -54,30 +44,32 @@ function subscriptify(n::Int)
     join([Char(subscript_0 + i) for i in dig])
 end
 
-function rmul_AutSymbol(i,j; pow::Int=1)
+function id_autsymbol()
+   return AutSymbol("(id)", 0, :(id()), identity)
+end
+
+function rmul_autsymbol(i, j; pow::Int=1)
     gen = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(gen, pow, :(ϱ($i,$j, $pow)), ϱ(i,j, pow))
+    return AutSymbol(gen, pow, :(ϱ($i, $j, $pow)), ϱ(i, j, pow))
 end
 
-function lmul_AutSymbol(i,j; pow::Int=1)
+function lmul_autsymbol(i, j; pow::Int=1)
     gen = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(gen, pow, :(λ($i,$j, $pow)), λ(i,j, pow))
+    return AutSymbol(gen, pow, :(λ($i, $j, $pow)), λ(i, j, pow))
 end
 
-function flip_AutSymbol(j; pow::Int=1)
-    gen = "ɛ"*subscriptify(j)
-    return AutSymbol(gen, (2+pow%2)%2, :(ɛ($j, $pow)), ɛ(j,pow))
+function flip_autsymbol(i; pow::Int=1)
+    gen = "ɛ"*subscriptify(i)
+    pow = (2+pow%2)%2
+    return AutSymbol(gen, pow, :(ɛ($i, $pow)), ɛ(i, pow))
 end
 
-function symmetric_AutSymbol(perm::Vector{Int}; pow::Int=1)
-    perm = Permutations.Permutation(perm)
-    perm = perm^pow
-    p = array(perm)
-    if p == collect(1:length(p))
+function perm_autsymbol(p::perm; pow::Int=1)
+    if p == parent(p)()
         return one(AutSymbol)
     else
         gen = "σ"*join([subscriptify(i) for i in p])
-        return AutSymbol(gen, 1, :(σ($p, 1)), σ(p, 1))
+        return AutSymbol(gen, 1, :(σ($(p.d), 1)), σ(p, 1))
     end
 end
 
