@@ -4,13 +4,18 @@ import Base: convert
 export AutSymbol, AutWord, rmul_AutSymbol, lmul_AutSymbol, flip_AutSymbol, symmetric_AutSymbol
 
 immutable AutSymbol <: GSymbol
-    gen::String
-    pow::Int
-    ex::Expr
-    func::Function
+   gen::String
+   pow::Int
+   ex::Expr
+   func::Function
 end
 
+typealias AutGroupElem GWord{AutSymbol}
 
+type AutGroup <: Group
+   objectGroup::Group
+   generators::Vector{AutSymbol}
+end
 (==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
 hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
 
@@ -109,7 +114,6 @@ function getperm(s::AutSymbol)
     end
 end
 
-typealias AutWord GWord{AutSymbol}
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
     if f.pow == 0
         return v
@@ -117,7 +121,7 @@ function (f::AutSymbol){T}(v::Vector{GWord{T}})
     return f.func(v)
 end
 
-function (F::AutWord)(v)
+function (F::AutGroupElem)(v)
     for f in F.symbols
         v = f(v)
     end
