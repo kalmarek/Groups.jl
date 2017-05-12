@@ -86,6 +86,8 @@ function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)
     return G(GWord{T}(deepcopy(W.symbols)))
 end
 
+isone{T<:GSymbol}(s::T) = s.pow == 0
+
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
 function free_reduce!(W::GWord)

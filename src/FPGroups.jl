@@ -82,8 +82,6 @@ end
 
 hash(s::FPSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FPSymbol, h)))
 
-isone(s::FPSymbol) = s.pow == 0
-
 change_pow(s::FPSymbol, n::Int) = FPSymbol(s.str, n)
 
 length(s::FPSymbol) = abs(s.pow)
