@@ -147,7 +147,7 @@ function (F::AutGroupElem)(v)
 end
 
 
-function simplify_perms!(W::AutWord)
+function simplify_perms!(W::AutGroupElem)
     reduced = true
     for i in 1:length(W.symbols) - 1
         current = W.symbols[i]
@@ -172,7 +172,7 @@ function simplify_perms!(W::AutWord)
     return reduced
 end
 
-function reduce!(W::AutWord)
+function reduce!(W::AutGroupElem)
     if length(W) < 2
         deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     else
