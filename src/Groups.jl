@@ -150,6 +150,16 @@ function show(io::IO, W::GWord)
     end
 end
 
+function show{T<:GSymbol}(io::IO, s::T)
+   if isone(s)
+      print(io, "(id)")
+   elseif s.pow == 1
+      print(io, s.str)
+   else
+      print(io, (s.str)*"^$(s.pow)")
+   end
+end
+
 ###############################################################################
 #
 #   Comparison

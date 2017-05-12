@@ -100,14 +100,6 @@ function show(io::IO, G::FPGroup)
    print(io, "rels:\t", join([rel for rel in G.rels], ", "))
 end
 
-function show(io::IO, s::FPSymbol)
-   if isone(s)
-      print(io, "(id)")
-   elseif s.pow == 1
-      print(io, s.str)
-   else
-      print(io, (s.str)*"^$(s.pow)")
-   end
 end
 
 ###############################################################################
