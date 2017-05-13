@@ -87,7 +87,7 @@ function perm_autsymbol(p::perm; pow::Int=1)
     if p == parent(p)()
         return id_autsymbol()
     else
-        gen = "σ"*join([subscriptify(i) for i in p])
+        gen = "σ"*join([subscriptify(i) for i in p.d])
         return AutSymbol(gen, 1, :(σ($(p.d), 1)), σ(p, 1))
     end
 end
