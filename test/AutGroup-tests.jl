@@ -5,7 +5,7 @@
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol("a")
       @test_throws MethodError Groups.AutSymbol("a", 1)
-      f = AutSymbol("a", 1, :(a()), v -> v)
+      f = Groups.AutSymbol("a", 1, :(a()), v -> v)
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
       @test isa(Groups.perm_autsymbol(G([1,2,3,4])), Groups.AutSymbol)
@@ -83,58 +83,94 @@
    end
 
    @testset "AutGroup/AutGroupElem constructors" begin
-      f = AutSymbol("a", 1, :(a()), v -> v)
-      @test isa(GWord(f), GWord)
-      @test isa(GWord(f), AutGroupElem)
+      f = Groups.AutSymbol("a", 1, :(a()), v -> v)
+      @test isa(AutGroupElem(f), Groups.GWord)
       @test isa(AutGroupElem(f), AutGroupElem)
-      @test isa(AutGroup(FreeGroup(3)), Group)
-      @test isa(AutGroup(FreeGroup(1)), FPGroup)
+      @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
+      @test isa(AutGroup(FreeGroup(1)), Groups.FPGroup)
       A = AutGroup(FreeGroup(1))
-      @test isa(f*f, AutWord)
-      @test isa(f^2, AutWord)
-      @test isa(f^-1, AutWord)
+      @test isa(generators(A), Vector{AutGroupElem})
+      @test length(generators(A)) == 1
+      A = AutGroup(FreeGroup(1), special=true)
+      @test length(generators(A)) == 0
+      A = AutGroup(FreeGroup(2))
+      @test length(generators(A)) == 7
+      gens = generators(A)
+
+      @test isa(A(Groups.rmul_autsymbol(1,2)), AutGroupElem)
+      @test A(Groups.rmul_autsymbol(1,2)) in gens
+
+      @test isa(A(Groups.rmul_autsymbol(2,1)), AutGroupElem)
+      @test A(Groups.rmul_autsymbol(2,1)) in gens
+
+      @test isa(A(Groups.lmul_autsymbol(1,2)), AutGroupElem)
+      @test A(Groups.lmul_autsymbol(1,2)) in gens
+
+      @test isa(A(Groups.lmul_autsymbol(2,1)), AutGroupElem)
+      @test A(Groups.lmul_autsymbol(2,1)) in gens
+
+      @test isa(A(Groups.flip_autsymbol(1)), AutGroupElem)
+      @test A(Groups.flip_autsymbol(1)) in gens
+
+      @test isa(A(Groups.flip_autsymbol(2)), AutGroupElem)
+      @test A(Groups.flip_autsymbol(2)) in gens
+
+      @test isa(A(Groups.perm_autsymbol(PermutationGroup(2)([2,1]))),
+         AutGroupElem)
+      @test A(Groups.perm_autsymbol(PermutationGroup(2)([2,1]))) in gens
    end
-#
-#    @testset "eltary functions" begin
-#       f = perm_autsymbol([2,1,4,3])
-#       @test isa(inv(f), AutSymbol)
-#       @test isa(f^-1, AutWord)
-#       @test f^-1 == GWord(inv(f))
-#       @test inv(f) == f
-#    end
-#
-#    @testset "reductions/arithmetic" begin
-#       f = perm_autsymbol([2,1,4,3])
-#       f² = Groups.r_multiply(AutWord(f), [f], reduced=false)
-#       @test Groups.simplify_perms!(f²) == false
-#       @test f² == one(typeof(f*f))
-#
-#       a = rmul_autsymbol(1,2)*flip_autsymbol(2)
-#       b = flip_autsymbol(2)*inv(rmul_autsymbol(1,2))
-#       @test a*b == b*a
-#       @test a^3 * b^3 == one(a)
-#    end
-#
-#    @testset "specific Aut(𝔽₄) tests" begin
-#       N = 4
-#       import Combinatorics.nthperm
-#       SymmetricGroup(n) = [nthperm(collect(1:n), k) for k in 1:factorial(n)]
-#       indexing = [[i,j] for i in 1:N for j in 1:N if i≠j]
-#
-#       σs = [perm_autsymbol(perm) for perm in SymmetricGroup(N)[2:end]];
-#       ϱs = [rmul_autsymbol(i,j) for (i,j) in indexing]
-#       λs = [lmul_autsymbol(i,j) for (i,j) in indexing]
-#       ɛs = [flip_autsymbol(i) for i in 1:N];
-#
-#       S = vcat(ϱs, λs, σs, ɛs)
-#       S = vcat(S, [inv(s) for s in S])
-#       @test isa(S, Vector{AutSymbol})
-#       @test length(S) == 102
-#       @test length(unique(S)) == 75
-#       S₁ = [GWord(s) for s in unique(S)]
-#       @test isa(S₁, Vector{AutWord})
-#       p = prod(S₁)
-#       @test length(p) == 53
-#    end
+
+   A = AutGroup(FreeGroup(4))
+
+   @testset "eltary functions" begin
+
+      f = Groups.perm_autsymbol(G([2,3,4,1]))
+      @test (Groups.change_pow(f, 2)).pow == 1
+      @test (Groups.change_pow(f, -2)).pow == 1
+      @test (inv(f)).pow == 1
+
+
+      f = Groups.perm_autsymbol(G([2,1,4,3]))
+      @test isa(inv(f), Groups.AutSymbol)
+
+      @test_throws DomainError f^-1
+      @test_throws MethodError f*f
+
+      @test A(f)^-1 == A(inv(f))
+   end
+
+   @testset "reductions/arithmetic" begin
+      f = Groups.perm_autsymbol(G([2,3,4,1]))
+
+      f² = Groups.r_multiply(A(f), [f], reduced=false)
+      @test Groups.simplify_perms!(f²) == false
+      @test f²^2 == A()
+
+      a = A(Groups.rmul_autsymbol(1,2))*Groups.flip_autsymbol(2)
+      b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
+      @test a*b == b*a
+      @test a^3 * b^3 == A()
+   end
+
+   @testset "specific Aut(F4) tests" begin
+      N = 4
+      G = AutGroup(FreeGroup(N))
+      S = G.gens
+      @test isa(S, Vector{Groups.AutSymbol})
+      S = [G(s) for s in unique(S)]
+      @test isa(S, Vector{AutGroupElem})
+      @test S == generators(G)
+      @test length(S) == 51
+      S_inv = [S..., [inv(s) for s in S]...]
+      @test length(unique(S_inv)) == 75
+
+      G = AutGroup(FreeGroup(N), special=true, outer=true)
+      S = generators(G)
+      S_inv = [G(), S..., [inv(s) for s in S]...]
+      S_inv = unique(S_inv)
+      B_2 = [i*j for (i,j) in Base.product(S_inv, S_inv)]
+      @test length(B_2) == 2401
+      @test length(unique(B_2)) == 1777
+   end
 
 end
