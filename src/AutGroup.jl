@@ -157,6 +157,11 @@ end
 #
 ###############################################################################
 
+function deepcopy_internal(g::AutGroupElem, dict::ObjectIdDict)
+   G = parent(g)
+   return G(AutGroupElem(g.str, g.pow, g.ex, g.func))
+end
+
 hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function change_pow(s::AutSymbol, n::Int)
