@@ -131,6 +131,29 @@ end
 #
 ###############################################################################
 
+function (G::AutGroup)()
+   id = AutGroupElem(id_autsymbol())
+   id.parent = G
+   return id
+end
+
+function (G::AutGroup)(f::AutSymbol)
+   g = AutGroupElem(f)
+   g.parent = G
+   return g
+end
+
+function (G::AutGroup)(g::AutGroupElem)
+   g.parent = G
+   return g
+end
+
+###############################################################################
+#
+#   Functional call overloads for evaluation of AutSymbol and AutGroupElem
+#
+###############################################################################
+
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
     if f.pow == 0
         return v
@@ -143,12 +166,6 @@ function (F::AutGroupElem)(v::Vector)
         v = f(v)
     end
     return v
-end
-
-function (G::AutGroup)(f::AutSymbol)
-   g = AutGroupElem(f)
-   g.parent = G
-   return g
 end
 
 ###############################################################################
