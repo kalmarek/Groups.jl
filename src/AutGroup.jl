@@ -145,6 +145,12 @@ function (F::AutGroupElem)(v::Vector)
     return v
 end
 
+function (G::AutGroup)(f::AutSymbol)
+   g = AutGroupElem(f)
+   g.parent = G
+   return g
+end
+
 ###############################################################################
 #
 #   Basic manipulation
