@@ -89,6 +89,11 @@ function perm_autsymbol(p::perm; pow::Int=1)
     end
 end
 
+function perm_autsymbol(a::Vector{Int})
+   G = PermutationGroup(length(a))
+   return perm_autsymbol(G(a))
+end
+
 function getperm(s::AutSymbol)
    if s.ex.args[1] == :σ
       p = s.ex.args[2]
