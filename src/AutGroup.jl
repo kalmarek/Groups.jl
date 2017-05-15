@@ -18,7 +18,7 @@ type AutGroup <: FPGroup
    gens::Vector{AutSymbol}
 end
 
-export AutSymbol, AutGroupElem, AutGroup
+export AutGroupElem, AutGroup
 
 ###############################################################################
 #
