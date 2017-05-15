@@ -249,24 +249,26 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 #
 ###############################################################################
 
+ispermauto(s::AutSymbol) = s.ex.args[1] == :σ
+
 function simplify_perms!(W::AutGroupElem)
     reduced = true
     for i in 1:length(W.symbols) - 1
         current = W.symbols[i]
-        if current.ex.args[1] == :σ
+        if ispermauto(current)
             if current.pow != 1
-                current = symmetric_AutSymbol(perm(current), pow=current.pow)
+                current = perm_autsymbol(perm(current), pow=current.pow)
             end
             next_s = W.symbols[i+1]
-            if  next_s.ex.args[1] == :σ
+            if  ispermauto(next_s)
                 reduced = false
                 if next_s.pow != 1
-                    next_s = symmetric_AutSymbol(perm(next_s), pow=next_s.pow)
+                    next_s = perm_autsymbol(perm(next_s), pow=next_s.pow)
                 end
-                p1 = Permutation(getperm(current))
-                p2 = Permutation(getperm(next_s))
+                p1 = getperm(current)
+                p2 = getperm(next_s)
                 W.symbols[i] = id_autsymbol()
-                W.symbols[i+1] = symmetric_AutSymbol(array(p1*p2))
+                W.symbols[i+1] = perm_autsymbol(p1*p2)
             end
         end
     end
