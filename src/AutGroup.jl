@@ -1,7 +1,3 @@
-using Permutations
-
-import Base: convert
-
 ###############################################################################
 #
 #   AutSymbol/ AutGroup / AutGroupElem
