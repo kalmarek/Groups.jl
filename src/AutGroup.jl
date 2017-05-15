@@ -138,7 +138,7 @@ function (f::AutSymbol){T}(v::Vector{GWord{T}})
     return f.func(v)
 end
 
-function (F::AutGroupElem)(v)
+function (F::AutGroupElem)(v::Vector)
     for f in F.symbols
         v = f(v)
     end
