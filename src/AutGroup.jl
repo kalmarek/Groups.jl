@@ -9,7 +9,7 @@ import Base: convert
 ###############################################################################
 
 immutable AutSymbol <: GSymbol
-   gen::String
+   str::String
    pow::Int
    ex::Expr
    func::Function
@@ -68,27 +68,28 @@ function id_autsymbol()
 end
 
 function rmul_autsymbol(i, j; pow::Int=1)
-    gen = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(gen, pow, :(ϱ($i, $j, $pow)), ϱ(i, j, pow))
+    str = "ϱ"*subscriptify(i)*subscriptify(j)
+    return AutSymbol(str, pow, :(ϱ($i, $j, $pow)), ϱ(i, j, pow))
 end
 
 function lmul_autsymbol(i, j; pow::Int=1)
-    gen = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(gen, pow, :(λ($i, $j, $pow)), λ(i, j, pow))
+    str = "λ"*subscriptify(i)*subscriptify(j)
+    return AutSymbol(str, pow, :(λ($i, $j, $pow)), λ(i, j, pow))
 end
 
 function flip_autsymbol(i; pow::Int=1)
-    gen = "ɛ"*subscriptify(i)
+    str = "ɛ"*subscriptify(i)
     pow = (2+pow%2)%2
-    return AutSymbol(gen, pow, :(ɛ($i, $pow)), ɛ(i, pow))
+    return AutSymbol(str, pow, :(ɛ($i, $pow)), ɛ(i, pow))
 end
 
 function perm_autsymbol(p::perm; pow::Int=1)
     if p == parent(p)()
         return id_autsymbol()
     else
-        gen = "σ"*join([subscriptify(i) for i in p.d])
-        return AutSymbol(gen, 1, :(σ($(p.d), 1)), σ(p, 1))
+        str = "σ"*join([subscriptify(i) for i in p.d])
+        p = p^pow
+        return AutSymbol(str, 1, :(σ($(p.d), 1)), σ(p, 1))
     end
 end
 
@@ -150,7 +151,7 @@ end
 #
 ###############################################################################
 
-hash(s::AutSymbol, h::UInt) = hash(s.gen, hash(s.pow, hash(:AutSymbol, h)))
+hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function change_pow(s::AutSymbol, n::Int)
     if n == 0
@@ -188,7 +189,7 @@ generators(G::AutGroup) = [G(AutGroupElem(elt)) for elt in G.generators]
 #
 ###############################################################################
 
-(==)(s::AutSymbol, t::AutSymbol) = s.gen == t.gen && s.pow == t.pow
+(==)(s::AutSymbol, t::AutSymbol) = s.str == t.str && s.pow == t.pow
 
 ###############################################################################
 #
