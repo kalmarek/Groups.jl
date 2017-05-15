@@ -187,7 +187,7 @@ function change_pow(s::AutSymbol, n::Int)
     end
 end
 
-generators(G::AutGroup) = [G(AutGroupElem(elt)) for elt in G.generators]
+generators(G::AutGroup) = [G(AutGroupElem(elt)) for elt in G.gens]
 
 ###############################################################################
 #
