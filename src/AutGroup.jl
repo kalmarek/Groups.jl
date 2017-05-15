@@ -172,7 +172,8 @@ function change_pow(s::AutSymbol, n::Int)
     if symbol == :ɛ
         return flip_autsymbol(s.ex.args[2], pow=n)
     elseif symbol == :σ
-        return perm_autsymbol(s.ex.args[2], pow=n)
+        G = PermutationGroup(length(s.ex.args[2]))
+        return perm_autsymbol(G(s.ex.args[2]), pow=n)
     elseif symbol == :ϱ
         s.ex.args[2:end-1]
         return rmul_autsymbol(s.ex.args[2:end-1]..., pow=n)
