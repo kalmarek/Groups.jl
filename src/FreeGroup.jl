@@ -79,11 +79,6 @@ end
 #
 ###############################################################################
 
-function deepcopy_internal(g::FreeGroupElem, dict::ObjectIdDict)
-   G = parent(g)
-   return G(FreeGroupElem(g.str, g.pow))
-end
-
 hash(s::FreeSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FreeSymbol, h)))
 
 change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.str, n)
