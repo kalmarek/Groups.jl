@@ -166,8 +166,8 @@ function change_pow(s::AutSymbol, n::Int)
     elseif symbol == :id
         return s
     else
-        warn("Changing an unknown type of symbol! $s")
-        return AutSymbol(s.gen, n, s.ex, s.func)
+        warn("Changing power of an unknown type of symbol! $s")
+        return AutSymbol(s.str, n, s.ex, s.func)
     end
 end
 
