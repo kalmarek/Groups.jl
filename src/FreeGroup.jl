@@ -99,8 +99,8 @@ generators(G::FreeGroup) = [G(FreeGroupElem(g)) for g in G.gens]
 ###############################################################################
 
 function show(io::IO, G::FreeGroup)
-   print(io, "Finitely presented group on $(length(G.gens)) generators:\n")
-   print(io, "gens:\t", join([g.str for g in G.gens], ", "))
+   print(io, "Free group on $(length(G.gens)) generators: ")
+   join(io, G.gens, ", ")
 end
 
 ###############################################################################
