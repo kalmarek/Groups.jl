@@ -282,8 +282,7 @@ function reduce!(W::AutGroupElem)
     else
         reduced = false
         while !reduced
-            reduced = simplify_perms!(W)
-            reduced = join_free_symbols!(W)
+            reduced = simplify_perms!(W) && free_reduce!(W)
             deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
         end
     end
