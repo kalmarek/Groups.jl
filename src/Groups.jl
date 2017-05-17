@@ -332,6 +332,39 @@ replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W)
 
 ###############################################################################
 #
+#   Misc
+#
+###############################################################################
+
+function products{T}(X::AbstractVector{T}, Y::AbstractVector{T})
+    result = Vector{T}()
+    seen = Set{T}()
+    for x in X
+        for y in Y
+            z = x*y
+            if !in(z, seen)
+                push!(seen, z)
+                push!(result, z)
+            end
+        end
+    end
+    return result
+end
+
+function generate_balls(S, Id; radius=2)
+    sizes = Vector{Int}()
+    S = unshift!(S, Id)
+    B = [Id]
+    for i in 1:radius
+        B = products(B, S);
+        push!(sizes, length(B))
+    end
+    return B, sizes
+end
+
+
+###############################################################################
+#
 #   Includes
 #
 ###############################################################################
