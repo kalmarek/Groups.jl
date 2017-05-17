@@ -1,7 +1,7 @@
 module Groups
 
 using Nemo
-import Nemo: Group, parent
+import Nemo: Group, parent, parent_type, elem_type
 
 import Base: length, ==, hash, show, convert
 import Base: inv, reduce, *, ^
