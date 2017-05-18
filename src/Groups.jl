@@ -272,11 +272,11 @@ function findfirst(W::GWord, Z::GWord)
         if idx + n - 1 > length(W.symbols)
             break
         end
-        first = is_subsymbol(Z.symbols[1],a)
-        if first
-            middle = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
-            last = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
-            if middle && last
+        foundfirst = is_subsymbol(Z.symbols[1],a)
+        if foundfirst
+            middlematch = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
+            lastmatch = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
+            if middlematch && lastmatch
                 return idx
             end
         end
