@@ -139,7 +139,7 @@ reduce(W::GWord) = reduce!(deepcopy(W))
 
 doc"""
     show(io::IO, W::GWord)
-> The actual string produced by show depends on the eltype of W.symbols.
+> The actual string produced by show depends on the eltype of `W.symbols`.
 
 """
 function show(io::IO, W::GWord)
