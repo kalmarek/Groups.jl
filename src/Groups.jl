@@ -336,7 +336,7 @@ replace_all(W::GWord, subst_dict::Dict{GWord, GWord}) = replace_all!(deepcopy(W)
 #
 ###############################################################################
 
-function products{T}(X::AbstractVector{T}, Y::AbstractVector{T})
+function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T})
     result = Vector{T}()
     seen = Set{T}()
     for x in X
@@ -351,7 +351,7 @@ function products{T}(X::AbstractVector{T}, Y::AbstractVector{T})
     return result
 end
 
-function generate_balls(S, Id; radius=2)
+function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2)
     sizes = Vector{Int}()
     S = unshift!(S, Id)
     B = [Id]
