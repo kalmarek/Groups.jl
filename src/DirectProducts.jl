@@ -1,12 +1,4 @@
-module DirectProducts
-
-using Nemo
-
-import Base: show, ==, hash, deepcopy_internal
-import Base: ×, *, inv
-
-import Nemo: parent, parent_type, elem_type
-import Nemo: elements, order, Group, GroupElem, Ring
+import Base: ×
 
 export DirectProductGroup, DirectProductGroupElem
 
@@ -244,5 +236,3 @@ doc"""
 
 """
 order(G::DirectProductGroup) = prod([order(H) for H in G.factors])
-
-end # of module DirectProduct

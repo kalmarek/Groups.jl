@@ -1,7 +1,9 @@
 module Groups
 
 using Nemo
-import Nemo: Group, parent, parent_type, elem_type
+import Nemo: Group, GroupElem, Ring
+import Nemo: parent, parent_type, elem_type
+import Nemo: elements, order
 
 import Base: length, ==, hash, show, convert
 import Base: inv, reduce, *, ^
@@ -371,5 +373,8 @@ end
 
 include("FreeGroup.jl")
 include("AutGroup.jl")
+
+include("DirectProducts.jl")
+include("WreathProducts.jl")
 
 end # of module Groups

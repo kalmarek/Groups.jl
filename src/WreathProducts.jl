@@ -1,12 +1,4 @@
-module WreathProducts
-
-using Nemo
-using DirectProducts
-
-import Base: convert, deepcopy_internal, show, isequal, ==, hash, size, inv
-import Base: +, -, *, //
-
-import Nemo: Group, GroupElem, elem_type, parent_type, parent, elements, order
+export WreathProduct, WreathProductElem
 
 ###############################################################################
 #
@@ -47,8 +39,6 @@ type WreathProductElem <: GroupElem
       return new(n, p)
    end
 end
-
-export WreathProduct, WreathProductElem
 
 ###############################################################################
 #
@@ -232,5 +222,3 @@ function elements(G::WreathProduct)
 end
 
 order(G::WreathProduct) = order(G.P)*order(G.N)
-
-end # of module WreatProduct
