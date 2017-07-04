@@ -80,7 +80,7 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
-    return W.savedhash $ h
+    return xor(W.savedhash, h)
 end
 
 function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)
