@@ -14,7 +14,7 @@
       @test isa(Groups.flip_autsymbol(3), Groups.AutSymbol)
    end
 
-   a,b,c,d = generators(FreeGroup(4))
+   a,b,c,d = Nemo.gens(FreeGroup(4))
    domain = [a,b,c,d]
 
    @testset "flip_autsymbol correctness" begin
@@ -89,13 +89,13 @@
       @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.FPGroup)
       A = AutGroup(FreeGroup(1))
-      @test isa(generators(A), Vector{AutGroupElem})
-      @test length(generators(A)) == 1
+      @test isa(Nemo.gens(A), Vector{AutGroupElem})
+      @test length(Nemo.gens(A)) == 1
       A = AutGroup(FreeGroup(1), special=true)
-      @test length(generators(A)) == 0
+      @test length(Nemo.gens(A)) == 0
       A = AutGroup(FreeGroup(2))
-      @test length(generators(A)) == 7
-      gens = generators(A)
+      @test length(Nemo.gens(A)) == 7
+      gens = Nemo.gens(A)
 
       @test isa(A(Groups.rmul_autsymbol(1,2)), AutGroupElem)
       @test A(Groups.rmul_autsymbol(1,2)) in gens
@@ -159,13 +159,13 @@
       @test isa(S, Vector{Groups.AutSymbol})
       S = [G(s) for s in unique(S)]
       @test isa(S, Vector{AutGroupElem})
-      @test S == generators(G)
+      @test S == Nemo.gens(G)
       @test length(S) == 51
       S_inv = [S..., [inv(s) for s in S]...]
       @test length(unique(S_inv)) == 75
 
       G = AutGroup(FreeGroup(N), special=true, outer=true)
-      S = generators(G)
+      S = Nemo.gens(G)
       S_inv = [G(), S..., [inv(s) for s in S]...]
       S_inv = unique(S_inv)
       B_2 = [i*j for (i,j) in Base.product(S_inv, S_inv)]

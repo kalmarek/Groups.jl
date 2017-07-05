@@ -57,11 +57,11 @@ end
       @test length(G.gens) == 2
       @test_skip eltype(G.rels) == FreeGroupElem
       @test_skip length(G.rels) == 0
-      @test eltype(generators(G)) == FreeGroupElem
-      @test length(generators(G)) == 2
+      @test eltype(Nemo.gens(G)) == FreeGroupElem
+      @test length(Nemo.gens(G)) == 2
    end
 
-   s, t = generators(G)
+   s, t = Nemo.gens(G)
 
    @testset "internal arithmetic" begin
       t_symb = Groups.FreeSymbol("t")
@@ -119,6 +119,7 @@ end
       @test Groups.is_subsymbol(a, Groups.change_pow(a,-2)) == false
       @test Groups.is_subsymbol(b, Groups.change_pow(a,-2)) == false
       @test Groups.is_subsymbol(inv(b), Groups.change_pow(b,-2)) == true
+
       c = s*t*s^-1*t^-1
       @test findfirst(c, s^-1*t^-1) == 3
       @test findnext(c*s^-1, s^-1*t^-1,3) == 3
