@@ -3,7 +3,7 @@ module Groups
 using Nemo
 import Nemo: Group, GroupElem, Ring
 import Nemo: parent, parent_type, elem_type
-import Nemo: elements, order
+import Nemo: elements, order, gens
 
 import Base: length, ==, hash, show, convert
 import Base: inv, reduce, *, ^
@@ -134,6 +134,8 @@ doc"""
 
 """
 reduce(W::GWord) = reduce!(deepcopy(W))
+
+gens(G::FPGroup) = [G(g) for g in G.gens]
 
 ###############################################################################
 #
@@ -389,7 +391,6 @@ function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2)
     end
     return B, sizes
 end
-
 
 ###############################################################################
 #

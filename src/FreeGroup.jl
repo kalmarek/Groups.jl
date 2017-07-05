@@ -85,8 +85,6 @@ change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.str, n)
 
 length(s::FreeSymbol) = abs(s.pow)
 
-generators(G::FreeGroup) = [G(FreeGroupElem(g)) for g in G.gens]
-
 ###############################################################################
 #
 #   String I/O

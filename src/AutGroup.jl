@@ -211,8 +211,6 @@ end
 
 length(s::AutSymbol) = abs(s.pow)
 
-generators(G::AutGroup) = [G(AutGroupElem(elt)) for elt in G.gens]
-
 ###############################################################################
 #
 #   String I/O
