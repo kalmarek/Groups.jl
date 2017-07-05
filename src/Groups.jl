@@ -309,22 +309,35 @@ function findnext(W::GWord, Z::GWord, i::Integer)
 end
 
 function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=true)
-    n = length(toreplace.symbols)
-    if check
-        @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
-        @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
-        @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
-    end
+   n = length(toreplace.symbols)
+   if n == 0
+      return reduce!(W)
 
-    first = change_pow(W.symbols[index],
+   elseif n == 1
+      if check
+         @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+      end
+
+      first = change_pow(W.symbols[index],
+         W.symbols[index].pow - toreplace.symbols[1].pow)
+      last = change_pow(W.symbols[index], 0)
+
+   else
+      if check
+         @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+         @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
+         @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
+      end
+
+      first = change_pow(W.symbols[index],
       W.symbols[index].pow - toreplace.symbols[1].pow)
-
-    last = change_pow(W.symbols[index+n-1],
+      last = change_pow(W.symbols[index+n-1],
       W.symbols[index+n-1].pow - toreplace.symbols[end].pow)
+   end
 
-    replacement = first * replacement * last
-    splice!(W.symbols, index:index+n-1, replacement.symbols)
-    return reduce!(W)
+   replacement = first * replacement * last
+   splice!(W.symbols, index:index+n-1, replacement.symbols)
+   return reduce!(W)
 end
 
 function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
