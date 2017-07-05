@@ -271,21 +271,32 @@ is_subsymbol(s::GSymbol, t::GSymbol) =
 function findfirst(W::GWord, Z::GWord)
     n = length(Z.symbols)
 
-    @assert n > 1
-    for (idx,a) in enumerate(W.symbols)
-        if idx + n - 1 > length(W.symbols)
+   if n == 0
+      return 0
+   elseif n == 1
+      for (i,s) in enumerate(W.symbols)
+         if is_subsymbol(Z.symbols[1], s)
+            return i
+         end
+      end
+      return 0
+   else
+      for (idx,a) in enumerate(W.symbols)
+         if idx + n - 1 > length(W.symbols)
             break
-        end
-        foundfirst = is_subsymbol(Z.symbols[1],a)
-        if foundfirst
+         end
+         foundfirst = is_subsymbol(Z.symbols[1], a)
+         if foundfirst
             middlematch = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
             lastmatch = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
             if middlematch && lastmatch
-                return idx
+               return idx
             end
-        end
-    end
-    return 0
+         end
+      end
+   end
+
+   return 0
 end
 
 function findnext(W::GWord, Z::GWord, i::Integer)
