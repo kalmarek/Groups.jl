@@ -131,5 +131,12 @@ end
       @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
       @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
       @test Groups.replace_all!(s*c*s*c*s, subst) == s*t^4*s*t^4*s
+
+      G = FreeGroup(["x", "y"])
+      x,y = Nemo.gens(G)
+
+      @test Groups.replace(x*y^9, 2, y^2, y) == x*y^8
+      @test Groups.replace(x^3, 1, x^2, y) == x*y
+      @test Groups.replace(y*x^3*y, 2, x^2, y) == y*x*y^2
    end
 end
