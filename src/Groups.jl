@@ -78,6 +78,8 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 #
 ###############################################################################
 
+xor(a,b) = a $ b
+
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
     return xor(W.savedhash, h)
