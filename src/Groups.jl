@@ -352,15 +352,17 @@ function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
 end
 
 function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+    modified = false
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
         i = findfirst(W, toreplace)
         while i ≠ 0
+            modified = true
             replace!(W,i,toreplace, replacement)
             i = findnext(W, toreplace, i)
         end
     end
-    return W
+    return modified
 end
 
 replace_all{T<:GSymbol}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}}) = replace_all!(deepcopy(W), subst_dict)
