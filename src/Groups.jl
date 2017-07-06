@@ -135,6 +135,11 @@ doc"""
 """
 reduce(W::GWord) = reduce!(deepcopy(W))
 
+doc"""
+    gens(G::AbstractFPGroups)
+> returns vector of generators of `G`, as its elements.
+
+"""
 gens(G::FPGroup) = [G(g) for g in G.gens]
 
 ###############################################################################
