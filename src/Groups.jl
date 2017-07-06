@@ -18,7 +18,7 @@ import Base: deepcopy_internal
 
 doc"""
     ::GSymbol
-> Abstract type which all group symbols of FPGroups should subtype. Each
+> Abstract type which all group symbols of AbstractFPGroups should subtype. Each
 > concrete subtype should implement fields:
 > * `str` which is the string representation/identification of a symbol
 > * `pow` which is the (multiplicative) exponent of a symbol.
