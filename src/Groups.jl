@@ -1,4 +1,5 @@
 module Groups
+using Compat
 
 using Nemo
 import Nemo: Group, GroupElem, Ring
@@ -24,7 +25,7 @@ doc"""
 > * `pow` which is the (multiplicative) exponent of a symbol.
 
 """
-abstract GSymbol
+abstract type GSymbol end
 
 doc"""
     W::GWord{T<:GSymbol} <:GroupElem
@@ -42,7 +43,7 @@ doc"""
 
 """
 
-type GWord{T<:GSymbol} <: GroupElem
+@compat mutable struct GWord{T<:GSymbol} <: GroupElem
     symbols::Vector{T}
     savedhash::UInt
     modified::Bool
@@ -78,11 +79,11 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 #
 ###############################################################################
 
-xor(a,b) = a $ b
 
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
-    return xor(W.savedhash, h)
+    @compat res = xor(W.savedhash, h)
+    return res
 end
 
 function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)

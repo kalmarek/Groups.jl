@@ -4,14 +4,14 @@
 #
 ###############################################################################
 
-immutable FPSymbol <: GSymbol
+@compat struct FPSymbol <: GSymbol
    str::String
    pow::Int
 end
 
-typealias FPGroupElem = GWord{FPSymbol}
+@compat FPGroupElem = GWord{FPSymbol}
 
-type FPGroup <: AbstractFPGroup
+@compat mutable struct FPGroup <: AbstractFPGroup
    gens::Vector{FPSymbol}
    rels::Dict{FPGroupElem, FPGroupElem}
 

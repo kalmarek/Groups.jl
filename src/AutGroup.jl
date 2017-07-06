@@ -4,16 +4,16 @@
 #
 ###############################################################################
 
-immutable AutSymbol <: GSymbol
+@compat struct AutSymbol <: GSymbol
    str::String
    pow::Int
    ex::Expr
    func::Function
 end
 
-typealias AutGroupElem GWord{AutSymbol}
+@compat AutGroupElem = GWord{AutSymbol}
 
-type AutGroup <: AbstractFPGroup
+@compat mutable struct AutGroup <: AbstractFPGroup
    objectGroup::Group
    gens::Vector{AutSymbol}
 end
