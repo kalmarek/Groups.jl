@@ -365,7 +365,12 @@ function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
     return modified
 end
 
-replace_all{T<:GSymbol}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}}) = replace_all!(deepcopy(W), subst_dict)
+function replace_all{T<:GSymbol}(W::GWord{T},
+   subst_dict::Dict{GWord{T}, GWord{T}})
+   W = deepcopy(W)
+   replace_all!(W, subst_dict)
+   return W
+end
 
 ###############################################################################
 #
