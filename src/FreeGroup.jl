@@ -22,7 +22,7 @@ type FreeGroup <: AbstractFPGroup
    end
 end
 
-export FreeGroupElem, FreeGroup, generators
+export FreeGroupElem, FreeGroup
 
 ###############################################################################
 #
