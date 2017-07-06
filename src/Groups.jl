@@ -25,7 +25,7 @@ doc"""
 > * `pow` which is the (multiplicative) exponent of a symbol.
 
 """
-abstract type GSymbol end
+@compat abstract type GSymbol end
 
 doc"""
     W::GWord{T<:GSymbol} <:GroupElem
@@ -44,17 +44,17 @@ doc"""
 """
 
 @compat mutable struct GWord{T<:GSymbol} <: GroupElem
-    symbols::Vector{T}
-    savedhash::UInt
-    modified::Bool
-    parent::Group
+   symbols::Vector{T}
+   savedhash::UInt
+   modified::Bool
+   parent::Group
 
-    function GWord(symbols::Vector{T})
-        return new(symbols, hash(symbols), true)
-    end
+   @compat function GWord{T}(symbols::Vector{T}) where {T<:GSymbol}
+      return new(symbols, hash(symbols), true)
+   end
 end
 
-abstract AbstractFPGroup <: Group
+@compat abstract type AbstractFPGroup <: Group end
 
 ###############################################################################
 #
@@ -70,7 +70,7 @@ parent{T<:GSymbol}(w::GWord{T}) = w.parent
 #
 ###############################################################################
 
-GWord{T<:GSymbol}(s::T) = GWord{T}(T[s])
+GWord(s::T) where {T<:GSymbol} = GWord{T}(T[s])
 convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 
 ###############################################################################
@@ -78,7 +78,6 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 #   Basic manipulation
 #
 ###############################################################################
-
 
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
