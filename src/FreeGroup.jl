@@ -11,7 +11,7 @@ end
 
 typealias FreeGroupElem GWord{FreeSymbol}
 
-type FreeGroup <: FPGroup
+type FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
    #     order::Vector{T}
    #     fastmult_table::Array{Int,2}
