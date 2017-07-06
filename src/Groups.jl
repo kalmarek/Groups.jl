@@ -404,6 +404,7 @@ end
 ###############################################################################
 
 include("FreeGroup.jl")
+include("FPGroups.jl")
 include("AutGroup.jl")
 
 include("DirectProducts.jl")
