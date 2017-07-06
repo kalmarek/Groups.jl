@@ -87,7 +87,7 @@
       @test isa(AutGroupElem(f), Groups.GWord)
       @test isa(AutGroupElem(f), AutGroupElem)
       @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
-      @test isa(AutGroup(FreeGroup(1)), Groups.FPGroup)
+      @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
       A = AutGroup(FreeGroup(1))
       @test isa(Nemo.gens(A), Vector{AutGroupElem})
       @test length(Nemo.gens(A)) == 1
