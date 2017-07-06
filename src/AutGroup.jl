@@ -182,8 +182,8 @@ end
 hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function hash(g::AutGroupElem, h::UInt)
-   gens = generators(parent(g).objectGroup)
-   return hash(g(gens), hash(typeof(g), hash(parent(g), h)))
+   gs = gens(parent(g).objectGroup)
+   return hash(g(gs), hash(typeof(g), hash(parent(g), h)))
 end
 
 function change_pow(s::AutSymbol, n::Int)
@@ -233,8 +233,8 @@ end
 function (==)(g::AutGroupElem, h::AutGroupElem)
    parent(g) == parent(h) || return false
    G = parent(g).objectGroup
-   gens = generators(G)
-   return g(gens) == h(gens)
+   gs = gens(G)
+   return g(gs) == h(gs)
 end
 
 ###############################################################################
