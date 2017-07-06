@@ -53,7 +53,7 @@ type GWord{T<:GSymbol} <: GroupElem
     end
 end
 
-abstract FPGroup <: Group
+abstract AbstractFPGroup <: Group
 
 ###############################################################################
 #
