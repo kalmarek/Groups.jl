@@ -11,7 +11,7 @@ end
 
 typealias FreeGroupElem GWord{FreeSymbol}
 
-type FreeGroup <: FPGroup
+type FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
    #     order::Vector{T}
    #     fastmult_table::Array{Int,2}
@@ -22,7 +22,7 @@ type FreeGroup <: FPGroup
    end
 end
 
-export FreeGroupElem, FreeGroup, generators
+export FreeGroupElem, FreeGroup
 
 ###############################################################################
 #
@@ -116,28 +116,3 @@ end
 ###############################################################################
 
 inv(s::FreeSymbol) = change_pow(s, -s.pow)
-
-###############################################################################
-#
-#   Misc
-#
-###############################################################################
-
-# function add_rel!{T<:FreeSymbol}(G::FreeGroup, w::GWord{T})
-#    if !(w in G.rels)
-#       w = G(w)
-#       push!(G.rels, w)
-#    end
-#    return G
-# end
-#
-# function quotientgroup(G::FreeGroup, rels::Vector{FreeGroupElem})
-#    for r in rels
-#       parent(r) == G || throw("Can not form quotient group: $r is not an element of $G")
-#    end
-#    H = deepcopy(G)
-#    for rel in rels
-#       add_rel!(H, rel)
-#    end
-#    return H
-# end

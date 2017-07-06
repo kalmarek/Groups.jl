@@ -131,7 +131,7 @@ end
       @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
       @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
       @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
-      @test Groups.replace_all!(s*c*s*c*s, subst) == s*t^4*s*t^4*s
+      @test Groups.replace_all(s*c*s*c*s, subst) == s*t^4*s*t^4*s
 
       G = FreeGroup(["x", "y"])
       x,y = Nemo.gens(G)

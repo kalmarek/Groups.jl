@@ -18,7 +18,7 @@ import Base: deepcopy_internal
 
 doc"""
     ::GSymbol
-> Abstract type which all group symbols of FPGroups should subtype. Each
+> Abstract type which all group symbols of AbstractFPGroups should subtype. Each
 > concrete subtype should implement fields:
 > * `str` which is the string representation/identification of a symbol
 > * `pow` which is the (multiplicative) exponent of a symbol.
@@ -53,7 +53,7 @@ type GWord{T<:GSymbol} <: GroupElem
     end
 end
 
-abstract FPGroup <: Group
+abstract AbstractFPGroup <: Group
 
 ###############################################################################
 #
@@ -140,7 +140,7 @@ doc"""
 > returns vector of generators of `G`, as its elements.
 
 """
-gens(G::FPGroup) = [G(g) for g in G.gens]
+gens(G::AbstractFPGroup) = [G(g) for g in G.gens]
 
 ###############################################################################
 #
@@ -352,18 +352,25 @@ function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
 end
 
 function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+    modified = false
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
         i = findfirst(W, toreplace)
         while i ≠ 0
+            modified = true
             replace!(W,i,toreplace, replacement)
             i = findnext(W, toreplace, i)
         end
     end
-    return W
+    return modified
 end
 
-replace_all{T<:GSymbol}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}}) = replace_all!(deepcopy(W), subst_dict)
+function replace_all{T<:GSymbol}(W::GWord{T},
+   subst_dict::Dict{GWord{T}, GWord{T}})
+   W = deepcopy(W)
+   replace_all!(W, subst_dict)
+   return W
+end
 
 ###############################################################################
 #
@@ -404,6 +411,7 @@ end
 ###############################################################################
 
 include("FreeGroup.jl")
+include("FPGroups.jl")
 include("AutGroup.jl")
 
 include("DirectProducts.jl")

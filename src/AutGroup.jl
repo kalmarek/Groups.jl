@@ -13,7 +13,7 @@ end
 
 typealias AutGroupElem GWord{AutSymbol}
 
-type AutGroup <: FPGroup
+type AutGroup <: AbstractFPGroup
    objectGroup::Group
    gens::Vector{AutSymbol}
 end
