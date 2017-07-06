@@ -140,7 +140,7 @@ doc"""
 > returns vector of generators of `G`, as its elements.
 
 """
-gens(G::FPGroup) = [G(g) for g in G.gens]
+gens(G::AbstractFPGroup) = [G(g) for g in G.gens]
 
 ###############################################################################
 #
