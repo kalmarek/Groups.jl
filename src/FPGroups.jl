@@ -9,7 +9,7 @@ immutable FPSymbol <: GSymbol
    pow::Int
 end
 
-typealias FPGroupElem = GWord{FPSymbol}
+typealias FPGroupElem GWord{FPSymbol}
 
 type FPGroup <: AbstractFPGroup
    gens::Vector{FPSymbol}
