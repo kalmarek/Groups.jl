@@ -38,12 +38,14 @@ end
    end
 
    @testset "eltary functions" begin
-      @test_skip (s*s).symbols == (s^2).symbols
-      @test_skip Vector{Groups.GWord{Groups.FreeSymbol}}([s,t]) ==
-         Vector{FreeGroupElem}([s,t])
-      @test_skip Vector{Groups.GWord}([s,t]) ==
-         [Groups.GWord(s), Groups.GWord(t)]
-      @test_skip hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
+      G = FreeGroup(["s", "t"])
+      s = G(s)
+      t = G(t)
+      @test Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+
+      @test (s*s).symbols == (s^2).symbols
+
+      @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
    end
 end
 
@@ -55,8 +57,6 @@ end
       @test isa(G(), FreeGroupElem)
       @test eltype(G.gens) == Groups.FreeSymbol
       @test length(G.gens) == 2
-      @test_skip eltype(G.rels) == FreeGroupElem
-      @test_skip length(G.rels) == 0
       @test eltype(Nemo.gens(G)) == FreeGroupElem
       @test length(Nemo.gens(G)) == 2
    end
