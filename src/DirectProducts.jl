@@ -98,7 +98,7 @@ function hash(G::DirectProductGroup, h::UInt)
 end
 
 function hash(g::DirectProductGroupElem, h::UInt)
-   return hash(g.elts, hash(g.parent, hash(DirectProductGroupElem, h)))
+   return hash(g.elts, hash(parent(g), hash(DirectProductGroupElem, h)))
 end
 
 doc"""
