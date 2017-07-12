@@ -152,9 +152,13 @@ end
 ###############################################################################
 
 function direct_mult(g::DirectProductGroupElem, h::DirectProductGroupElem)
-    parent(g) == parent(h) || throw("Can't multiply elements from different groups: $g, $h")
-    G = parent(g)
-    return G([op(a,b)  for (op,a,b) in zip(G.operations, g.elts, h.elts)])
+   G = parent(g)
+   # G == parent(h) || throw("Can't multiply elements from different groups: $G, $parent(h)")
+   if isa(first(G.factors), Ring)
+      return G(.+(g.elts,h.elts))
+   else
+      return G(.*(g.elts,h.elts))
+   end
 end
 
 doc"""
@@ -179,7 +183,11 @@ doc"""
 # TODO: dirty hack around `+` operation
 function inv(g::DirectProductGroupElem)
     G = parent(g)
-    return G([(op == (*) ? inv(elt): -elt) for (op,elt) in zip(G.operations, g.elts)])
+   if isa(first(G.factors), Ring)
+      return DirectProductGroupElem([-a for a in g.elts])
+   else
+      return DirectProductGroupElem([inv(a) for a in g.elts])
+   end
 end
 
 ###############################################################################
