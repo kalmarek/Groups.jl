@@ -40,30 +40,11 @@ parent(g::DirectProductGroupElem) = DirectProductGroup([parent(h) for h in g.elt
 #
 ###############################################################################
 
-DirectProductGroup(G::Group, H::Group) = DirectProductGroup([G, H], Function[(*),(*)])
-
-DirectProductGroup(G::Group, H::Ring) = DirectProductGroup([G, H], Function[(*),(+)])
-
-DirectProductGroup(G::Ring, H::Group) = DirectProductGroup([G, H], Function[(+),(*)])
-
-DirectProductGroup(G::Ring, H::Ring) = DirectProductGroup([G, H], Function[(+),(+)])
-
-DirectProductGroup{T<:Ring}(X::Vector{T}) = DirectProductGroup(Group[X...], Function[(+) for _ in X])
-
-×(G::Group, H::Group) = DirectProductGroup(G,H)
-
-function DirectProductGroup{T<:Group, S<:Group}(G::Tuple{T, Function}, H::Tuple{S, Function})
-   return DirectProductGroup([G[1], H[1]], Function[G[2],H[2]])
 end
 
-function DirectProductGroup(groups::Vector)
-   for G in groups
-      typeof(G) <: Group || throw("$G is not a group!")
-   end
-   ops = Function[typeof(G) <: Ring ? (+) : (*) for G in groups]
+DirectProductGroup{T<:Group}(G::T, H::T) = DirectProductGroup{T}([G, H])
 
-   return DirectProductGroup(groups, ops)
-end
+×(G::Group, H::Group) = DirectProductGroup([G,H])
 
 ###############################################################################
 #
@@ -71,16 +52,9 @@ end
 #
 ###############################################################################
 
-(G::DirectProductGroup)() = G([H() for H in G.factors]; checked=false)
+(G::DirectProductGroup)() = G([H() for H in G.factors])
 
-function (G::DirectProductGroup)(g::DirectProductGroupElem; checked=true)
-   if checked
-      return G(g.elts)
-   else
-      g.parent = G
-      return g
-   end
-end
+(G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
 doc"""
     (G::DirectProductGroup)(a::Vector; checked=true)
@@ -89,21 +63,11 @@ doc"""
 > `false` no checks on the correctness are performed.
 
 """
-function (G::DirectProductGroup)(a::Vector; checked=true)
+function (G::DirectProductGroup){T<:GroupElem}(a::Vector{T})
    length(a) == length(G.factors) || throw("Cannot coerce $a to $G: they have
       different number of factors")
-   if checked
-      for (F,g) in zip(G.factors, a)
-         try
-            F(g)
-         catch
-            throw("Cannot coerce to $G: $g cannot be coerced to $F.")
-         end
-      end
-   end
-   elt = DirectProductGroupElem([F(g) for (F,g) in zip(G.factors, a)])
-   elt.parent = G
-   return elt
+   @assert elem_type(first(G.factors)) == T
+   return DirectProductGroupElem(a)
 end
 
 ###############################################################################
