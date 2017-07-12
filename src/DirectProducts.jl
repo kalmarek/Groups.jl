@@ -36,11 +36,23 @@ parent(g::DirectProductGroupElem) = DirectProductGroup([parent(h) for h in g.elt
 
 ###############################################################################
 #
-#   DirectProductGroup / DirectProductGroupElem constructors
+#   AbstractVector interface
 #
 ###############################################################################
 
+Base.size(g::DirectProductGroupElem) = size(g.elts)
+Base.linearindexing(::Type{DirectProductGroupElem}) = Base.LinearFast()
+Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
+function Base.setindex!{T<:GroupElem}(g::DirectProductGroupElem{T}, v::T, i::Int)
+   p.part[i] = v
+   return p
 end
+
+###############################################################################
+#
+#   DirectProductGroup / DirectProductGroupElem constructors
+#
+###############################################################################
 
 DirectProductGroup{T<:Group}(G::T, H::T) = DirectProductGroup{T}([G, H])
 
