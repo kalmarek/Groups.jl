@@ -14,16 +14,12 @@ Implements direct product of groups as vector factors. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
 
-type DirectProductGroup <: Group
-   factors::Vector{Group}
-   operations::Vector{Function}
+immutable DirectProductGroup{T<:Group} <: Group
+   factors::Vector{T}
 end
 
-type DirectProductGroupElem <: GroupElem
-   elts::Vector{GroupElem}
-   parent::DirectProductGroup
-
-   DirectProductGroupElem{T<:GroupElem}(a::Vector{T}) = new(a)
+immutable DirectProductGroupElem{T<:GroupElem} <: GroupElem
+   elts::Vector{T}
 end
 
 ###############################################################################
