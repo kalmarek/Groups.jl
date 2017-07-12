@@ -28,7 +28,7 @@ end
 #
 ###############################################################################
 
-elem_type(G::DirectProductGroup) = DirectProductGroupElem
+elem_type{T<:Group}(G::DirectProductGroup{T}) = DirectProductGroupElem{elem_type(first(G.factors))}
 
 parent_type(::Type{DirectProductGroupElem}) = DirectProductGroup
 
