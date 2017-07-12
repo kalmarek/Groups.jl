@@ -32,7 +32,7 @@ elem_type(G::DirectProductGroup) = DirectProductGroupElem
 
 parent_type(::Type{DirectProductGroupElem}) = DirectProductGroup
 
-parent(g::DirectProductGroupElem) = g.parent
+parent(g::DirectProductGroupElem) = DirectProductGroup([parent(h) for h in g.elts])
 
 ###############################################################################
 #
