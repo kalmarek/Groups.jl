@@ -175,7 +175,7 @@ function wreath_multiplication(g::WreathProductElem, h::WreathProductElem)
    parent(g) == parent(h) || throw("Can not multiply elements from different
       groups!")
    G = parent(g)
-   w=G.N((h.n).elts[inv(g.p).d])
+   w = G.N((h.n).elts[inv(g.p).d])
    return G(g.n*w, g.p*h.p)
 end
 
