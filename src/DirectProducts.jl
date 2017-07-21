@@ -72,16 +72,16 @@ end
 (G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
 doc"""
-    (G::DirectProductGroup)(a::Vector; checked=true)
-> Constructs element of the direct product group `G` by coercing each element
-> of vector `a` to the corresponding factor of `G`. If `checked` flag is set to
-> `false` no checks on the correctness are performed.
-
+    (G::DirectProductGroup)(a::Vector, check::Bool=true)
+> Constructs element of the $n$-fold direct product group `G` by coercing each
+> element of vector `a` to `G.group`. If `check` flag is set to `false` no
+> checks on the correctness are performed.
 """
-function (G::DirectProductGroup){T<:GroupElem}(a::Vector{T})
-   length(a) == length(G.factors) || throw("Cannot coerce $a to $G: they have
-      different number of factors")
-   @assert elem_type(first(G.factors)) == T
+function (G::DirectProductGroup)(a::Vector, check::Bool=true)
+   if check
+      G.n == length(a) || throw("Can not coerce to DirectProductGroup: lengths differ")
+      a = G.group.(a)
+   end
    return DirectProductGroupElem(a)
 end
 
