@@ -126,7 +126,7 @@ function hash(G::WreathProduct, h::UInt)
 end
 
 function hash(g::WreathProductElem, h::UInt)
-   return hash(g.n, hash(g.p, hash(parent(g), h)))
+   return hash(g.n, hash(g.p, hash(WreathProductElem, h)))
 end
 
 ###############################################################################
