@@ -58,15 +58,16 @@ end
 #
 ###############################################################################
 
-×(G::Group, H::Group) = DirectProductGroup([G,H])
+function ×(G::Group, H::Group)
+   G == H || throw("Direct products are defined only for the same groups")
+   return DirectProductGroup(G,2)
+end
 
 ###############################################################################
 #
 #   Parent object call overloads
 #
 ###############################################################################
-
-(G::DirectProductGroup)() = G([H() for H in G.factors])
 
 (G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
