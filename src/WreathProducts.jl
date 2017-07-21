@@ -201,7 +201,7 @@ matrix_repr(g::WreathProductElem) = Any[matrix_repr(g.p) g.n]
 
 function elements(G::WreathProduct)
    iter = Base.product(collect(elements(G.N)), collect(elements(G.P)))
-   return (G(n)*G(p) for (n,p) in iter)
+   return (WreathProductElem(n, p, false) for (n,p) in iter)
 end
 
 order(G::WreathProduct) = order(G.P)*order(G.N)
