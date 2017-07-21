@@ -122,12 +122,11 @@ eye(G::DirectProductGroup) = G()
 ###############################################################################
 
 function show(io::IO, G::DirectProductGroup)
-    println(io, "Direct product of groups")
-    join(io, G.factors, ", ", " and ")
+    println(io, "$(G.n)-fold direct product of $(G.group)")
 end
 
 function show(io::IO, g::DirectProductGroupElem)
-    print(io, "("*join(g.elts,",")*")")
+    print(io, "($(join(g.elts,",")))")
 end
 
 ###############################################################################
@@ -136,15 +135,19 @@ end
 #
 ###############################################################################
 
+doc"""
+    ==(g::DirectProductGroup, h::DirectProductGroup)
+> Checks if two direct product groups are the same.
+"""
 function (==)(G::DirectProductGroup, H::DirectProductGroup)
-    G.factors == H.factors || return false
+    G.group == H.group || return false
+    G.n == G.n || return false
     return true
 end
 
 doc"""
     ==(g::DirectProductGroupElem, h::DirectProductGroupElem)
-> Return `true` if the given elements of direct products are equal, otherwise return `false`.
-
+> Checks if two direct product group elements are the same.
 """
 function (==)(g::DirectProductGroupElem, h::DirectProductGroupElem)
     parent(g) == parent(h) || return false
