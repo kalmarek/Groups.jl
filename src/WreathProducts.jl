@@ -45,9 +45,11 @@ end
 #
 ###############################################################################
 
-elem_type(::WreathProduct) = WreathProductElem
+elem_type{T<:Group}(G::WreathProduct{T}) =
+   WreathProductElem{G.N.n, elem_type(T)}
 
-parent_type(::WreathProductElem) = WreathProduct
+parent_type{T<:GroupElem}(::WreathProductElem{T}) =
+   WreathProduct{parent_type(T)}
 
 parent(g::WreathProductElem) = g.parent
 
