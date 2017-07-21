@@ -140,12 +140,10 @@ end
 ###############################################################################
 
 function show(io::IO, G::WreathProduct)
-   print(io, "Wreath Product of $(G.N.factors[1]) and $(G.P)")
+   print(io, "Wreath Product of $(G.N.group) by $(G.P)")
 end
 
 function show(io::IO, g::WreathProductElem)
-   # println(io, "Element of WreathProduct over $T of size $(size(X)):")
-   # show(io, "text/plain", matrix_repr(X))
    print(io, "($(g.n)≀$(g.p))")
 end
 
