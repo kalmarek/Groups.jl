@@ -101,7 +101,7 @@ function deepcopy_internal(g::DirectProductGroupElem, dict::ObjectIdDict)
 end
 
 function hash(G::DirectProductGroup, h::UInt)
-   return hash(G.factors, hash(DirectProductGroup,h))
+   return hash(G.group, hash(G.n, hash(DirectProductGroup,h)))
 end
 
 function hash(g::DirectProductGroupElem, h::UInt)
