@@ -94,7 +94,7 @@ doc"""
 """
 function (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
    result = WreathProductElem(n,p)
-   result.parent = G
+   # result.parent = G
    return result
 end
 
