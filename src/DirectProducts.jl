@@ -208,15 +208,15 @@ end
 
 doc"""
     elements(G::DirectProductGroup)
-> Returns `Task` that produces all elements of group `G` (provided that factors
-> implement the elements function).
-
+> Returns `generator` that produces all elements of group `G` (provided that
+> `G.group` implements the `elements` method).
 """
 # TODO: can Base.product handle generators?
 #   now it returns nothing's so we have to collect ellements...
 function elements(G::DirectProductGroup)
-    cartesian_prod = Base.product([collect(elements(H)) for H in G.factors]...)
-    return (G(collect(elt)) for elt in cartesian_prod)
+    elts = collect(elements(G.group))
+    cartesian_prod = Base.product([elts for _ in 1:G.n]...)
+    return (DirectProductGroupElem([elt...]) for elt in cartesian_prod)
 end
 
 doc"""
@@ -224,4 +224,4 @@ doc"""
 > Returns the order (number of elements) in the group.
 
 """
-order(G::DirectProductGroup) = prod([order(H) for H in G.factors])
+order(G::DirectProductGroup) = order(G.group)^G.n
