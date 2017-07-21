@@ -171,14 +171,6 @@ end
 #
 ###############################################################################
 
-function wreath_multiplication(g::WreathProductElem, h::WreathProductElem)
-   parent(g) == parent(h) || throw("Can not multiply elements from different
-      groups!")
-   G = parent(g)
-   w = G.N((h.n).elts[inv(g.p).d])
-   return G(g.n*w, g.p*h.p)
-end
-
 doc"""
     *(g::WreathProductElem, h::WreathProductElem)
 > Return the wreath product group operation of elements, i.e.
@@ -188,9 +180,10 @@ doc"""
 > where g.p(h.n) denotes the action of `g.p::perm` on
 > `h.n::DirectProductGroupElem` via standard permutation of coordinates.
 """
-(*)(g::WreathProductElem, h::WreathProductElem) = wreath_multiplication(g,h)
-
-
+function *(g::WreathProductElem, h::WreathProductElem)
+   w = DirectProductGroupElem((h.n).elts[inv(g.p).d])
+   return WreathProductElem(g.n*w, g.p*h.p)
+end
 
 doc"""
     inv(g::WreathProductElem)
