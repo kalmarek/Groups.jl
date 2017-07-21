@@ -69,8 +69,6 @@ end
 #
 ###############################################################################
 
-(G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
-
 doc"""
     (G::DirectProductGroup)(a::Vector, check::Bool=true)
 > Constructs element of the $n$-fold direct product group `G` by coercing each
@@ -84,6 +82,10 @@ function (G::DirectProductGroup)(a::Vector, check::Bool=true)
    end
    return DirectProductGroupElem(a)
 end
+
+(G::DirectProductGroup)() = DirectProductGroupElem([G.group() for _ in 1:G.n])
+
+(G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
 ###############################################################################
 #
