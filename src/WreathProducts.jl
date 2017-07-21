@@ -68,18 +68,18 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 ###############################################################################
 
 function (G::WreathProduct)(g::WreathProductElem)
-   try
+   n = try
       G.N(g.n)
    catch
       throw("Can't coerce $(g.n) to $(G.N) factor of $G")
    end
-   try
+   p = try
       G.P(g.p)
    catch
       throw("Can't coerce $(g.p) to $(G.P) factor of $G")
    end
-   elt = WreathProductElem(G.N(g.n), G.P(g.p))
-   elt.parent = G
+   elt = WreathProductElem(n, p)
+   # elt.parent = G
    return elt
 end
 
