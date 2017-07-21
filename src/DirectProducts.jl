@@ -29,9 +29,11 @@ end
 #
 ###############################################################################
 
-elem_type{T<:Group}(G::DirectProductGroup{T}) = DirectProductGroupElem{elem_type(first(G.factors))}
+elem_type{T<:Group}(G::DirectProductGroup{T}) =
+   DirectProductGroupElem{elem_type(G.group)}
 
-parent_type(::Type{DirectProductGroupElem}) = DirectProductGroup
+parent_type{T<:GroupElem}(::Type{DirectProductGroupElem{T}}) =
+   DirectProductGroup{parent_type(T)}
 
 parent(g::DirectProductGroupElem) = DirectProductGroup([parent(h) for h in g.elts])
 
