@@ -18,24 +18,23 @@ doc"""
 * `::Group` : the single factor of group N
 * `::PermutationGroup` : full PermutationGroup
 """
+immutable WreathProduct{T<:Group} <: Group
+   N::DirectProductGroup{T}
+   P::PermGroup
 
-type WreathProduct <: Group
-   N::DirectProductGroup
-   P::PermutationGroup
-
-   function WreathProduct(G::Group, P::PermutationGroup)
-      N = DirectProductGroup(typeof(G)[G for _ in 1:P.n])
+   function WreathProduct(G::Group, P::PermGroup)
+      N = DirectProductGroup(G, P.n)
       return new(N, P)
    end
 end
 
-type WreathProductElem <: GroupElem
-   n::DirectProductGroupElem
+immutable WreathProductElem{T<:GroupElem} <: GroupElem
+   n::DirectProductGroupElem{T}
    p::perm
-   parent::WreathProduct
+   # parent::WreathProduct
 
    function WreathProductElem(n::DirectProductGroupElem, p::perm)
-      length(n.elts) == parent(p).n
+      length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
       return new(n, p)
    end
 end
