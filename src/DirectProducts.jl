@@ -87,6 +87,8 @@ end
 
 (G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
+(G::DirectProductGroup){T<:GroupElem, N}(a::Vararg{T, N}) = G([a...])
+
 ###############################################################################
 #
 #   Basic manipulation
