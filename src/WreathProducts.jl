@@ -84,22 +84,15 @@ function (G::WreathProduct)(g::WreathProductElem)
    catch
       throw("Can't coerce $(g.p) to $(G.P) factor of $G")
    end
-   elt = WreathProductElem(n, p)
-   # elt.parent = G
-   return elt
+   return WreathProductElem(n, p)
 end
 
 doc"""
     (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
-
 """
-function (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
-   result = WreathProductElem(n,p)
-   # result.parent = G
-   return result
-end
+(G::WreathProduct)(n::DirectProductGroupElem, p::perm) = WreathProductElem(n,p)
 
 (G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
