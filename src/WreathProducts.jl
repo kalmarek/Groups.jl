@@ -184,12 +184,11 @@ end
 doc"""
     inv(g::WreathProductElem)
 > Returns the inverse of element of a wreath product, according to the formula
->   g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1).
+>   `g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1)`.
 """
 function inv(g::WreathProductElem)
-   G = parent(g)
-   w = G.N(inv(g.n).elts[g.p.d])
-   return G(w, inv(g.p))
+   w = DirectProductGroupElem(inv(g.n).elts[g.p.d])
+   return WreathProductElem(w, inv(g.p), false)
 end
 
 ###############################################################################
