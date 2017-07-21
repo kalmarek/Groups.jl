@@ -108,13 +108,6 @@ function hash(g::DirectProductGroupElem, h::UInt)
    return hash(g.elts, hash(parent(g), hash(DirectProductGroupElem, h)))
 end
 
-doc"""
-    eye(G::DirectProductGroup)
-> Return the identity element for the given direct product of groups.
-
-"""
-eye(G::DirectProductGroup) = G()
-
 ###############################################################################
 #
 #   String I/O
