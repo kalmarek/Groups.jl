@@ -143,7 +143,6 @@ doc"""
 > Checks if two direct product group elements are the same.
 """
 function (==)(g::DirectProductGroupElem, h::DirectProductGroupElem)
-    parent(g) == parent(h) || return false
     g.elts == h.elts || return false
     return true
 end

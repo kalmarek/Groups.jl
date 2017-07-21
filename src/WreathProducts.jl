@@ -163,7 +163,6 @@ function (==)(G::WreathProduct, H::WreathProduct)
 end
 
 function (==)(g::WreathProductElem, h::WreathProductElem)
-   parent(g) == parent(h) || return false
    g.n == h.n || return false
    g.p == h.p || return false
    return true
