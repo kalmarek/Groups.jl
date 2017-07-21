@@ -9,13 +9,14 @@ export DirectProductGroup, DirectProductGroupElem
 ###############################################################################
 
 doc"""
-   DirectProductGroup(factors::Vector{Group}) <: Group
-Implements direct product of groups as vector factors. The group operation is
+   DirectProductGroup(G::Group, n::Int) <: Group
+Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
 
 immutable DirectProductGroup{T<:Group} <: Group
-   factors::Vector{T}
+   group::T
+   n::Int
 end
 
 immutable DirectProductGroupElem{T<:GroupElem} <: GroupElem
