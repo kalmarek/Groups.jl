@@ -7,16 +7,17 @@ export WreathProduct, WreathProductElem
 ###############################################################################
 
 doc"""
-    WreathProduct <: Group
-> Implements Wreath product of a group N by permutation (sub)group P < Sₖ,
+    WreathProduct{T<:Group} <: Group
+> Implements Wreath product of a group $N$ by permutation (sub)group $P < S_k$,
 > usually written as $N \wr P$.
 > The multiplication inside wreath product is defined as
->    (n, σ) * (m, τ) = (n*ψ(σ)(m), σ*τ),
-> where ψ:P → Aut(Nᵏ) is the permutation representation of Sₖ restricted to P.
+>    $$(n, \sigma) * (m, \tau) = (n\psi(\sigma)(m), \sigma\tau),$$
+> where $\psi:P → Aut(N^k)$ is the permutation representation of $S_k$
+> restricted to $P$.
 
 # Arguments:
-* `::Group` : the single factor of group N
-* `::PermutationGroup` : full PermutationGroup
+* `::Group` : the single factor of group $N$
+* `::PermGroup` : full `PermutationGroup`
 """
 immutable WreathProduct{T<:Group} <: Group
    N::DirectProductGroup{T}
@@ -99,7 +100,6 @@ doc"""
 doc"""
     (G::WreathProduct)(p::perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
-
 """
 (G::WreathProduct)(p::perm) = G(G.N(), p)
 
@@ -107,7 +107,6 @@ doc"""
     (G::WreathProduct)(n::DirectProductGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
 > embedding that makes sequence `1 -> N -> G -> P -> 1` exact.
-
 """
 (G::WreathProduct)(n::DirectProductGroupElem) = G(n, G.P())
 
@@ -171,9 +170,9 @@ doc"""
     *(g::WreathProductElem, h::WreathProductElem)
 > Return the wreath product group operation of elements, i.e.
 >
-> g*h = (g.n*g.p(h.n), g.p*h.p),
+> `g*h = (g.n*g.p(h.n), g.p*h.p)`,
 >
-> where g.p(h.n) denotes the action of `g.p::perm` on
+> where `g.p(h.n)` denotes the action of `g.p::perm` on
 > `h.n::DirectProductGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
