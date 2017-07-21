@@ -161,23 +161,25 @@ end
 #
 ###############################################################################
 
-function direct_mult(g::DirectProductGroupElem, h::DirectProductGroupElem)
-   G = parent(g)
-   # G == parent(h) || throw("Can't multiply elements from different groups: $G, $parent(h)")
-   if isa(first(G.factors), Ring)
-      return G(.+(g.elts,h.elts))
-   else
-      return G(.*(g.elts,h.elts))
-   end
-end
-
 doc"""
     *(g::DirectProductGroupElem, h::DirectProductGroupElem)
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
-
 """
-(*)(g::DirectProductGroupElem, h::DirectProductGroupElem) = direct_mult(g,h)
+# TODO: dirty hack around `+/*` operations
+function *{T<:GroupElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+   if check
+      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
+   end
+   return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
+end
+
+function *{T<:RingElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+   if check
+      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
+   end
+   return DirectProductGroupElem([a+b for (a,b) in zip(g.elts,h.elts)])
+end
 
 ###############################################################################
 #
@@ -188,16 +190,14 @@ doc"""
 doc"""
     inv(g::DirectProductGroupElem)
 > Return the inverse of the given element in the direct product group.
-
 """
-# TODO: dirty hack around `+` operation
-function inv(g::DirectProductGroupElem)
-    G = parent(g)
-   if isa(first(G.factors), Ring)
-      return DirectProductGroupElem([-a for a in g.elts])
-   else
-      return DirectProductGroupElem([inv(a) for a in g.elts])
-   end
+# TODO: dirty hack around `+/*` operation
+function inv{T<:GroupElem}(g::DirectProductGroupElem{T})
+   return DirectProductGroupElem([inv(a) for a in g.elts])
+end
+
+function inv{T<:RingElem}(g::DirectProductGroupElem{T})
+   return DirectProductGroupElem([-a for a in g.elts])
 end
 
 ###############################################################################
