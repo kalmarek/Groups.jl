@@ -170,7 +170,7 @@ function *{T<:RingElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{
    if check
       parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
    end
-   return DirectProductGroupElem([a+b for (a,b) in zip(g.elts,h.elts)])
+   return DirectProductGroupElem(g.elts + h.elts)
 end
 
 ###############################################################################
@@ -189,7 +189,7 @@ function inv{T<:GroupElem}(g::DirectProductGroupElem{T})
 end
 
 function inv{T<:RingElem}(g::DirectProductGroupElem{T})
-   return DirectProductGroupElem([-a for a in g.elts])
+   return DirectProductGroupElem(-g.elts)
 end
 
 ###############################################################################
