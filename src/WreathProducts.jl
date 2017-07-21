@@ -59,7 +59,10 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 #
 ###############################################################################
 
-# converts???
+WreathProduct{T<:Group}(G::T, P::PermGroup) = WreathProduct{T}(G, P)
+
+WreathProductElem{T<:GroupElem}(n::DirectProductGroupElem{T},
+   p::perm) = WreathProductElem{T}(n, p)
 
 ###############################################################################
 #
