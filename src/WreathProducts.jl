@@ -33,8 +33,11 @@ immutable WreathProductElem{T<:GroupElem} <: GroupElem
    p::perm
    # parent::WreathProduct
 
-   function WreathProductElem(n::DirectProductGroupElem, p::perm)
-      length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
+   function WreathProductElem(n::DirectProductGroupElem, p::perm,
+      check::Bool=true)
+      if check
+         length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
+      end
       return new(n, p)
    end
 end
@@ -62,7 +65,7 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 WreathProduct{T<:Group}(G::T, P::PermGroup) = WreathProduct{T}(G, P)
 
 WreathProductElem{T<:GroupElem}(n::DirectProductGroupElem{T},
-   p::perm) = WreathProductElem{T}(n, p)
+   p::perm, check::Bool=true) = WreathProductElem{T}(n, p, check)
 
 ###############################################################################
 #
@@ -98,7 +101,7 @@ function (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
    return result
 end
 
-(G::WreathProduct)() = G(G.N(), G.P())
+(G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
 doc"""
     (G::WreathProduct)(p::perm)
@@ -122,7 +125,7 @@ doc"""
 ###############################################################################
 
 function deepcopy_internal(g::WreathProductElem, dict::ObjectIdDict)
-   return WreathProductElem(deepcopy(g.n), deepcopy(g.p))
+   return WreathProductElem(deepcopy(g.n), deepcopy(g.p), false)
 end
 
 function hash(G::WreathProduct, h::UInt)
@@ -182,7 +185,7 @@ doc"""
 """
 function *(g::WreathProductElem, h::WreathProductElem)
    w = DirectProductGroupElem((h.n).elts[inv(g.p).d])
-   return WreathProductElem(g.n*w, g.p*h.p)
+   return WreathProductElem(g.n*w, g.p*h.p, false)
 end
 
 doc"""
