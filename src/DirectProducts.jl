@@ -35,7 +35,8 @@ elem_type{T<:Group}(G::DirectProductGroup{T}) =
 parent_type{T<:GroupElem}(::Type{DirectProductGroupElem{T}}) =
    DirectProductGroup{parent_type(T)}
 
-parent(g::DirectProductGroupElem) = DirectProductGroup([parent(h) for h in g.elts])
+parent(g::DirectProductGroupElem) =
+   DirectProductGroup(parent(first(g.elts)), length(g.elts))
 
 ###############################################################################
 #
