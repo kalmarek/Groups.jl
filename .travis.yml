@@ -14,7 +14,6 @@ git:
 matrix:
   fast_finish: true
   allow_failures:
-    - julia: 0.6
     - julia: nightly
 
 ## uncomment and modify the following lines to manually install system packages
