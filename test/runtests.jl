@@ -6,4 +6,5 @@ using Base.Test
 @testset "Groups" begin
    include("FreeGroup-tests.jl")
    include("AutGroup-tests.jl")
+   include("DirectProd-tests.jl")
 end
