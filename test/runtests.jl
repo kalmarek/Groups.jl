@@ -7,4 +7,5 @@ using Base.Test
    include("FreeGroup-tests.jl")
    include("AutGroup-tests.jl")
    include("DirectProd-tests.jl")
+   include("WreathProd-tests.jl")
 end
