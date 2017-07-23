@@ -73,8 +73,8 @@ end
 doc"""
     (G::DirectProductGroup)(a::Vector, check::Bool=true)
 > Constructs element of the $n$-fold direct product group `G` by coercing each
-> element of vector `a` to `G.group`. If `check` flag is set to `false` no
-> checks on the correctness are performed.
+> element of vector `a` to `G.group`. If `check` flag is set to `false` neither
+> check on the correctness nor coercion is performed.
 """
 function (G::DirectProductGroup)(a::Vector, check::Bool=true)
    if check
