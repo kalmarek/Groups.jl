@@ -37,10 +37,10 @@
       @test h == GG(g, G())
    end
 
-   @testset "Types" begin
-      GG = Groups.DirectProductGroup(G,2)
-      FF = Groups.DirectProductGroup(F,2)
+   GG = Groups.DirectProductGroup(G,2)
+   FF = Groups.DirectProductGroup(F,2)
 
+   @testset "Types" begin
       @test elem_type(GG) == Groups.DirectProductGroupElem{elem_type(G)}
       @test elem_type(FF) == Groups.DirectProductGroupElem{elem_type(F)}
       @test parent_type(typeof(GG(g,g^2))) == Groups.DirectProductGroup{typeof(G)}
@@ -52,7 +52,7 @@
       @test_throws MethodError FF(1,0)
    end
 
-   @testset "Basis arithmetic" begin
+   @testset "Group arithmetic" begin
       g = G([2,3,1])
       h = GG([g,g^2])
 
@@ -72,7 +72,6 @@
    @testset "Misc" begin
       @test order(GG) == 36
       @test order(FF) == 64
-
 
       @test isa([elements(GG)...], Vector{Groups.DirectProductGroupElem{elem_type(G)}})
       elts = [elements(GG)...]
