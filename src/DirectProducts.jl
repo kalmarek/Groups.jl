@@ -150,7 +150,7 @@ end
 
 ###############################################################################
 #
-#   Binary operators
+#   Group operations
 #
 ###############################################################################
 
@@ -173,12 +173,6 @@ function *{T<:RingElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{
    end
    return DirectProductGroupElem(g.elts + h.elts)
 end
-
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
 
 doc"""
     inv(g::DirectProductGroupElem)
