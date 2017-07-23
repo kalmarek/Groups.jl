@@ -1,7 +1,9 @@
+
 @testset "Groups.FreeSymbols" begin
    s = Groups.FreeSymbol("s")
    t = Groups.FreeSymbol("t")
-   @testset "defines" begin
+
+   @testset "constructors" begin
       @test isa(Groups.FreeSymbol("aaaaaaaaaaaaaaaa"), Groups.GSymbol)
       @test Groups.FreeSymbol("abc").pow == 1
       @test isa(s, Groups.FreeSymbol)
@@ -53,6 +55,11 @@ end
    s, t = Nemo.gens(G)
 
    @testset "internal arithmetic" begin
+
+      @test Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+      @test (s*s).symbols == (s^2).symbols
+      @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
+
       t_symb = Groups.FreeSymbol("t")
       tt = deepcopy(t)
       @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
@@ -85,7 +92,7 @@ end
       @test Groups.reduce!(w).symbols ==Vector{Groups.FreeSymbol}([])
    end
 
-   @testset "binary/inv operations" begin
+   @testset "Group operations" begin
       @test parent(s) == G
       @test parent(s) === parent(deepcopy(s))
       @test isa(s*t, FreeGroupElem)
