@@ -23,30 +23,19 @@
    end
 end
 
-@testset "FreeGroupElems" begin
+@testset "FreeGroupSymbols manipulation" begin
    s = Groups.FreeSymbol("s")
    t = Groups.FreeSymbol("t", -2)
-   @testset "defines" begin
-      @test isa(Groups.GWord(s), Groups.GWord)
-      @test isa(Groups.GWord(s), FreeGroupElem)
-      @test isa(FreeGroupElem(s), Groups.GWord)
-      @test isa(convert(FreeGroupElem, s), Groups.GWord)
-      @test isa(convert(FreeGroupElem, s), FreeGroupElem)
-      @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
-      @test length(FreeGroupElem(s)) == 1
-      @test length(FreeGroupElem(t)) == 2
-   end
 
-   @testset "eltary functions" begin
-      G = FreeGroup(["s", "t"])
-      s = G(s)
-      t = G(t)
-      @test Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+   @test isa(Groups.GWord(s), Groups.GWord)
+   @test isa(Groups.GWord(s), FreeGroupElem)
+   @test isa(FreeGroupElem(s), Groups.GWord)
+   @test isa(convert(FreeGroupElem, s), Groups.GWord)
+   @test isa(convert(FreeGroupElem, s), FreeGroupElem)
+   @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
+   @test length(FreeGroupElem(s)) == 1
+   @test length(FreeGroupElem(t)) == 2
 
-      @test (s*s).symbols == (s^2).symbols
-
-      @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
-   end
 end
 
 @testset "FreeGroup" begin
