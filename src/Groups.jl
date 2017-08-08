@@ -395,6 +395,7 @@ end
 
 function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2, op=*)
     sizes = Vector{Int}()
+    S = deepcopy(S)
     S = unshift!(S, Id)
     B = [Id]
     for i in 1:radius
