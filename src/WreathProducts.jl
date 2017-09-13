@@ -23,7 +23,7 @@ immutable WreathProduct{T<:Group} <: Group
    N::DirectProductGroup{T}
    P::PermGroup
 
-   function WreathProduct(G::Group, P::PermGroup)
+   function WreathProduct{T}(G::T, P::PermGroup) where {T}
       N = DirectProductGroup(G, P.n)
       return new(N, P)
    end
@@ -34,12 +34,12 @@ immutable WreathProductElem{T<:GroupElem} <: GroupElem
    p::perm
    # parent::WreathProduct
 
-   function WreathProductElem(n::DirectProductGroupElem, p::perm,
-      check::Bool=true)
+   function WreathProductElem{T}(n::DirectProductGroupElem{T}, p::perm,
+      check::Bool=true) where {T}
       if check
          length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
       end
-      return new(n, p)
+      return new{T}(n, p)
    end
 end
 
@@ -62,10 +62,9 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 #
 ###############################################################################
 
-WreathProduct{T<:Group}(G::T, P::PermGroup) = WreathProduct{T}(G, P)
+WreathProduct(G::Gr, P::PermGroup) where {Gr} = WreathProduct{Gr}(G, P)
 
-WreathProductElem{T<:GroupElem}(n::DirectProductGroupElem{T},
-   p::perm, check::Bool=true) = WreathProductElem{T}(n, p, check)
+WreathProductElem(n::DirectProductGroupElem{T}, p, check=true) where {T} = WreathProductElem{T}(n, p, check)
 
 ###############################################################################
 #

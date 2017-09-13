@@ -45,7 +45,7 @@ parent(g::DirectProductGroupElem) =
 ###############################################################################
 
 Base.size(g::DirectProductGroupElem) = size(g.elts)
-Base.linearindexing(::Type{DirectProductGroupElem}) = Base.LinearFast()
+Base.IndexStyle(::Type{DirectProductGroupElem}) = Base.LinearFast()
 Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
 function Base.setindex!{T<:GroupElem}(g::DirectProductGroupElem{T}, v::T, i::Int)
    parent(v) == parent(first(g.elts)) || throw("$g is not an element of $i-th factor of $(parent(G))")
