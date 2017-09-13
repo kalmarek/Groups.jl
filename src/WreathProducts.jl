@@ -7,35 +7,38 @@ export WreathProduct, WreathProductElem
 ###############################################################################
 
 doc"""
-    WreathProduct <: Group
-> Implements Wreath product of a group N by permutation (sub)group P < Sₖ,
+    WreathProduct{T<:Group} <: Group
+> Implements Wreath product of a group $N$ by permutation (sub)group $P < S_k$,
 > usually written as $N \wr P$.
 > The multiplication inside wreath product is defined as
->    (n, σ) * (m, τ) = (n*ψ(σ)(m), σ*τ),
-> where ψ:P → Aut(Nᵏ) is the permutation representation of Sₖ restricted to P.
+>    $$(n, \sigma) * (m, \tau) = (n\psi(\sigma)(m), \sigma\tau),$$
+> where $\psi:P → Aut(N^k)$ is the permutation representation of $S_k$
+> restricted to $P$.
 
 # Arguments:
-* `::Group` : the single factor of group N
-* `::PermutationGroup` : full PermutationGroup
+* `::Group` : the single factor of group $N$
+* `::PermGroup` : full `PermutationGroup`
 """
+immutable WreathProduct{T<:Group} <: Group
+   N::DirectProductGroup{T}
+   P::PermGroup
 
-type WreathProduct <: Group
-   N::DirectProductGroup
-   P::PermutationGroup
-
-   function WreathProduct(G::Group, P::PermutationGroup)
-      N = DirectProductGroup(typeof(G)[G for _ in 1:P.n])
+   function WreathProduct(G::Group, P::PermGroup)
+      N = DirectProductGroup(G, P.n)
       return new(N, P)
    end
 end
 
-type WreathProductElem <: GroupElem
-   n::DirectProductGroupElem
+immutable WreathProductElem{T<:GroupElem} <: GroupElem
+   n::DirectProductGroupElem{T}
    p::perm
-   parent::WreathProduct
+   # parent::WreathProduct
 
-   function WreathProductElem(n::DirectProductGroupElem, p::perm)
-      length(n.elts) == parent(p).n
+   function WreathProductElem(n::DirectProductGroupElem, p::perm,
+      check::Bool=true)
+      if check
+         length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
+      end
       return new(n, p)
    end
 end
@@ -46,11 +49,12 @@ end
 #
 ###############################################################################
 
-elem_type(::WreathProduct) = WreathProductElem
+elem_type{T<:Group}(::WreathProduct{T}) = WreathProductElem{elem_type(T)}
 
-parent_type(::WreathProductElem) = WreathProduct
+parent_type{T<:GroupElem}(::Type{WreathProductElem{T}}) =
+   WreathProduct{parent_type(T)}
 
-parent(g::WreathProductElem) = g.parent
+parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
 ###############################################################################
 #
@@ -58,7 +62,10 @@ parent(g::WreathProductElem) = g.parent
 #
 ###############################################################################
 
-# converts???
+WreathProduct{T<:Group}(G::T, P::PermGroup) = WreathProduct{T}(G, P)
+
+WreathProductElem{T<:GroupElem}(n::DirectProductGroupElem{T},
+   p::perm, check::Bool=true) = WreathProductElem{T}(n, p, check)
 
 ###############################################################################
 #
@@ -67,39 +74,31 @@ parent(g::WreathProductElem) = g.parent
 ###############################################################################
 
 function (G::WreathProduct)(g::WreathProductElem)
-   try
+   n = try
       G.N(g.n)
    catch
       throw("Can't coerce $(g.n) to $(G.N) factor of $G")
    end
-   try
+   p = try
       G.P(g.p)
    catch
       throw("Can't coerce $(g.p) to $(G.P) factor of $G")
    end
-   elt = WreathProductElem(G.N(g.n), G.P(g.p))
-   elt.parent = G
-   return elt
+   return WreathProductElem(n, p)
 end
 
 doc"""
     (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
-
 """
-function (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
-   result = WreathProductElem(n,p)
-   result.parent = G
-   return result
-end
+(G::WreathProduct)(n::DirectProductGroupElem, p::perm) = WreathProductElem(n,p)
 
-(G::WreathProduct)() = G(G.N(), G.P())
+(G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
 doc"""
     (G::WreathProduct)(p::perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
-
 """
 (G::WreathProduct)(p::perm) = G(G.N(), p)
 
@@ -107,7 +106,6 @@ doc"""
     (G::WreathProduct)(n::DirectProductGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
 > embedding that makes sequence `1 -> N -> G -> P -> 1` exact.
-
 """
 (G::WreathProduct)(n::DirectProductGroupElem) = G(n, G.P())
 
@@ -118,8 +116,7 @@ doc"""
 ###############################################################################
 
 function deepcopy_internal(g::WreathProductElem, dict::ObjectIdDict)
-   G = parent(g)
-   return G(deepcopy(g.n), deepcopy(g.p))
+   return WreathProductElem(deepcopy(g.n), deepcopy(g.p), false)
 end
 
 function hash(G::WreathProduct, h::UInt)
@@ -127,7 +124,7 @@ function hash(G::WreathProduct, h::UInt)
 end
 
 function hash(g::WreathProductElem, h::UInt)
-   return hash(g.n, hash(g.p, hash(parent(g), h)))
+   return hash(g.n, hash(g.p, hash(WreathProductElem, h)))
 end
 
 ###############################################################################
@@ -137,12 +134,10 @@ end
 ###############################################################################
 
 function show(io::IO, G::WreathProduct)
-   print(io, "Wreath Product of $(G.N.factors[1]) and $(G.P)")
+   print(io, "Wreath Product of $(G.N.group) by $(G.P)")
 end
 
 function show(io::IO, g::WreathProductElem)
-   # println(io, "Element of WreathProduct over $T of size $(size(X)):")
-   # show(io, "text/plain", matrix_repr(X))
    print(io, "($(g.n)≀$(g.p))")
 end
 
@@ -159,7 +154,6 @@ function (==)(G::WreathProduct, H::WreathProduct)
 end
 
 function (==)(g::WreathProductElem, h::WreathProductElem)
-   parent(g) == parent(h) || return false
    g.n == h.n || return false
    g.p == h.p || return false
    return true
@@ -167,45 +161,32 @@ end
 
 ###############################################################################
 #
-#   Binary operators
+#   Group operations
 #
 ###############################################################################
-
-function wreath_multiplication(g::WreathProductElem, h::WreathProductElem)
-   parent(g) == parent(h) || throw("Can not multiply elements from different
-      groups!")
-   G = parent(g)
-   w=G.N((h.n).elts[inv(g.p).d])
-   return G(g.n*w, g.p*h.p)
-end
 
 doc"""
     *(g::WreathProductElem, h::WreathProductElem)
 > Return the wreath product group operation of elements, i.e.
 >
-> g*h = (g.n*g.p(h.n), g.p*h.p),
+> `g*h = (g.n*g.p(h.n), g.p*h.p)`,
 >
-> where g.p(h.n) denotes the action of `g.p::perm` on
+> where `g.p(h.n)` denotes the action of `g.p::perm` on
 > `h.n::DirectProductGroupElem` via standard permutation of coordinates.
 """
-(*)(g::WreathProductElem, h::WreathProductElem) = wreath_multiplication(g,h)
-
-
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
+function *(g::WreathProductElem, h::WreathProductElem)
+   w = DirectProductGroupElem((h.n).elts[inv(g.p).d])
+   return WreathProductElem(g.n*w, g.p*h.p, false)
+end
 
 doc"""
     inv(g::WreathProductElem)
 > Returns the inverse of element of a wreath product, according to the formula
->   g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1).
+>   `g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1)`.
 """
 function inv(g::WreathProductElem)
-   G = parent(g)
-   w = G.N(inv(g.n).elts[g.p.d])
-   return G(w, inv(g.p))
+   w = DirectProductGroupElem(inv(g.n).elts[g.p.d])
+   return WreathProductElem(w, inv(g.p), false)
 end
 
 ###############################################################################
@@ -218,7 +199,7 @@ matrix_repr(g::WreathProductElem) = Any[matrix_repr(g.p) g.n]
 
 function elements(G::WreathProduct)
    iter = Base.product(collect(elements(G.N)), collect(elements(G.P)))
-   return (G(n)*G(p) for (n,p) in iter)
+   return (WreathProductElem(n, p, false) for (n,p) in iter)
 end
 
 order(G::WreathProduct) = order(G.P)*order(G.N)

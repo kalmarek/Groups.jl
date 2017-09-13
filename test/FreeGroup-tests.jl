@@ -1,7 +1,9 @@
+
 @testset "Groups.FreeSymbols" begin
    s = Groups.FreeSymbol("s")
    t = Groups.FreeSymbol("t")
-   @testset "defines" begin
+
+   @testset "constructors" begin
       @test isa(Groups.FreeSymbol("aaaaaaaaaaaaaaaa"), Groups.GSymbol)
       @test Groups.FreeSymbol("abc").pow == 1
       @test isa(s, Groups.FreeSymbol)
@@ -23,28 +25,19 @@
    end
 end
 
-@testset "FreeGroupElems" begin
+@testset "FreeGroupSymbols manipulation" begin
    s = Groups.FreeSymbol("s")
    t = Groups.FreeSymbol("t", -2)
-   @testset "defines" begin
-      @test isa(Groups.GWord(s), Groups.GWord)
-      @test isa(Groups.GWord(s), FreeGroupElem)
-      @test isa(FreeGroupElem(s), Groups.GWord)
-      @test isa(convert(FreeGroupElem, s), Groups.GWord)
-      @test isa(convert(FreeGroupElem, s), FreeGroupElem)
-      @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
-      @test length(FreeGroupElem(s)) == 1
-      @test length(FreeGroupElem(t)) == 2
-   end
 
-   @testset "eltary functions" begin
-      @test_skip (s*s).symbols == (s^2).symbols
-      @test_skip Vector{Groups.GWord{Groups.FreeSymbol}}([s,t]) ==
-         Vector{FreeGroupElem}([s,t])
-      @test_skip Vector{Groups.GWord}([s,t]) ==
-         [Groups.GWord(s), Groups.GWord(t)]
-      @test_skip hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
-   end
+   @test isa(Groups.GWord(s), Groups.GWord)
+   @test isa(Groups.GWord(s), FreeGroupElem)
+   @test isa(FreeGroupElem(s), Groups.GWord)
+   @test isa(convert(FreeGroupElem, s), Groups.GWord)
+   @test isa(convert(FreeGroupElem, s), FreeGroupElem)
+   @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
+   @test length(FreeGroupElem(s)) == 1
+   @test length(FreeGroupElem(t)) == 2
+
 end
 
 @testset "FreeGroup" begin
@@ -55,8 +48,6 @@ end
       @test isa(G(), FreeGroupElem)
       @test eltype(G.gens) == Groups.FreeSymbol
       @test length(G.gens) == 2
-      @test_skip eltype(G.rels) == FreeGroupElem
-      @test_skip length(G.rels) == 0
       @test eltype(Nemo.gens(G)) == FreeGroupElem
       @test length(Nemo.gens(G)) == 2
    end
@@ -64,6 +55,11 @@ end
    s, t = Nemo.gens(G)
 
    @testset "internal arithmetic" begin
+
+      @test Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+      @test (s*s).symbols == (s^2).symbols
+      @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
+
       t_symb = Groups.FreeSymbol("t")
       tt = deepcopy(t)
       @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
@@ -96,7 +92,7 @@ end
       @test Groups.reduce!(w).symbols ==Vector{Groups.FreeSymbol}([])
    end
 
-   @testset "binary/inv operations" begin
+   @testset "Group operations" begin
       @test parent(s) == G
       @test parent(s) === parent(deepcopy(s))
       @test isa(s*t, FreeGroupElem)

@@ -378,12 +378,12 @@ end
 #
 ###############################################################################
 
-function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T})
+function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T}, op=*)
     result = Vector{T}()
     seen = Set{T}()
     for x in X
         for y in Y
-            z = x*y
+            z = op(x,y)
             if !in(z, seen)
                 push!(seen, z)
                 push!(result, z)
@@ -393,12 +393,13 @@ function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T})
     return result
 end
 
-function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2)
+function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2, op=*)
     sizes = Vector{Int}()
+    S = deepcopy(S)
     S = unshift!(S, Id)
     B = [Id]
     for i in 1:radius
-        B = products(B, S);
+        B = products(B, S, op);
         push!(sizes, length(B))
     end
     return B, sizes

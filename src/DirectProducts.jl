@@ -9,21 +9,18 @@ export DirectProductGroup, DirectProductGroupElem
 ###############################################################################
 
 doc"""
-   DirectProductGroup(factors::Vector{Group}) <: Group
-Implements direct product of groups as vector factors. The group operation is
+   DirectProductGroup(G::Group, n::Int) <: Group
+Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
 
-type DirectProductGroup <: Group
-   factors::Vector{Group}
-   operations::Vector{Function}
+immutable DirectProductGroup{T<:Group} <: Group
+   group::T
+   n::Int
 end
 
-type DirectProductGroupElem <: GroupElem
-   elts::Vector{GroupElem}
-   parent::DirectProductGroup
-
-   DirectProductGroupElem{T<:GroupElem}(a::Vector{T}) = new(a)
+immutable DirectProductGroupElem{T<:GroupElem} <: GroupElem
+   elts::Vector{T}
 end
 
 ###############################################################################
@@ -32,11 +29,29 @@ end
 #
 ###############################################################################
 
-elem_type(G::DirectProductGroup) = DirectProductGroupElem
+elem_type{T<:Group}(G::DirectProductGroup{T}) =
+   DirectProductGroupElem{elem_type(G.group)}
 
-parent_type(::Type{DirectProductGroupElem}) = DirectProductGroup
+parent_type{T<:GroupElem}(::Type{DirectProductGroupElem{T}}) =
+   DirectProductGroup{parent_type(T)}
 
-parent(g::DirectProductGroupElem) = g.parent
+parent(g::DirectProductGroupElem) =
+   DirectProductGroup(parent(first(g.elts)), length(g.elts))
+
+###############################################################################
+#
+#   AbstractVector interface
+#
+###############################################################################
+
+Base.size(g::DirectProductGroupElem) = size(g.elts)
+Base.linearindexing(::Type{DirectProductGroupElem}) = Base.LinearFast()
+Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
+function Base.setindex!{T<:GroupElem}(g::DirectProductGroupElem{T}, v::T, i::Int)
+   parent(v) == parent(first(g.elts)) || throw("$g is not an element of $i-th factor of $(parent(G))")
+   g.elts[i] = v
+   return g
+end
 
 ###############################################################################
 #
@@ -44,29 +59,9 @@ parent(g::DirectProductGroupElem) = g.parent
 #
 ###############################################################################
 
-DirectProductGroup(G::Group, H::Group) = DirectProductGroup([G, H], Function[(*),(*)])
-
-DirectProductGroup(G::Group, H::Ring) = DirectProductGroup([G, H], Function[(*),(+)])
-
-DirectProductGroup(G::Ring, H::Group) = DirectProductGroup([G, H], Function[(+),(*)])
-
-DirectProductGroup(G::Ring, H::Ring) = DirectProductGroup([G, H], Function[(+),(+)])
-
-DirectProductGroup{T<:Ring}(X::Vector{T}) = DirectProductGroup(Group[X...], Function[(+) for _ in X])
-
-×(G::Group, H::Group) = DirectProductGroup(G,H)
-
-function DirectProductGroup{T<:Group, S<:Group}(G::Tuple{T, Function}, H::Tuple{S, Function})
-   return DirectProductGroup([G[1], H[1]], Function[G[2],H[2]])
-end
-
-function DirectProductGroup(groups::Vector)
-   for G in groups
-      typeof(G) <: Group || throw("$G is not a group!")
-   end
-   ops = Function[typeof(G) <: Ring ? (+) : (*) for G in groups]
-
-   return DirectProductGroup(groups, ops)
+function ×(G::Group, H::Group)
+   G == H || throw("Direct products are defined only for the same groups")
+   return DirectProductGroup(G,2)
 end
 
 ###############################################################################
@@ -75,40 +70,25 @@ end
 #
 ###############################################################################
 
-(G::DirectProductGroup)() = G([H() for H in G.factors]; checked=false)
-
-function (G::DirectProductGroup)(g::DirectProductGroupElem; checked=true)
-   if checked
-      return G(g.elts)
-   else
-      g.parent = G
-      return g
-   end
-end
-
 doc"""
-    (G::DirectProductGroup)(a::Vector; checked=true)
-> Constructs element of the direct product group `G` by coercing each element
-> of vector `a` to the corresponding factor of `G`. If `checked` flag is set to
-> `false` no checks on the correctness are performed.
-
+    (G::DirectProductGroup)(a::Vector, check::Bool=true)
+> Constructs element of the $n$-fold direct product group `G` by coercing each
+> element of vector `a` to `G.group`. If `check` flag is set to `false` neither
+> check on the correctness nor coercion is performed.
 """
-function (G::DirectProductGroup)(a::Vector; checked=true)
-   length(a) == length(G.factors) || throw("Cannot coerce $a to $G: they have
-      different number of factors")
-   if checked
-      for (F,g) in zip(G.factors, a)
-         try
-            F(g)
-         catch
-            throw("Cannot coerce to $G: $g cannot be coerced to $F.")
-         end
-      end
+function (G::DirectProductGroup)(a::Vector, check::Bool=true)
+   if check
+      G.n == length(a) || throw("Can not coerce to DirectProductGroup: lengths differ")
+      a = G.group.(a)
    end
-   elt = DirectProductGroupElem([F(g) for (F,g) in zip(G.factors, a)])
-   elt.parent = G
-   return elt
+   return DirectProductGroupElem(a)
 end
+
+(G::DirectProductGroup)() = DirectProductGroupElem([G.group() for _ in 1:G.n])
+
+(G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
+
+(G::DirectProductGroup){T<:GroupElem, N}(a::Vararg{T, N}) = G([a...])
 
 ###############################################################################
 #
@@ -122,19 +102,12 @@ function deepcopy_internal(g::DirectProductGroupElem, dict::ObjectIdDict)
 end
 
 function hash(G::DirectProductGroup, h::UInt)
-   return hash(G.factors, hash(G.operations, hash(DirectProductGroup,h)))
+   return hash(G.group, hash(G.n, hash(DirectProductGroup,h)))
 end
 
 function hash(g::DirectProductGroupElem, h::UInt)
-   return hash(g.elts, hash(g.parent, hash(DirectProductGroupElem, h)))
+   return hash(g.elts, hash(parent(g), hash(DirectProductGroupElem, h)))
 end
-
-doc"""
-    eye(G::DirectProductGroup)
-> Return the identity element for the given direct product of groups.
-
-"""
-eye(G::DirectProductGroup) = G()
 
 ###############################################################################
 #
@@ -143,12 +116,11 @@ eye(G::DirectProductGroup) = G()
 ###############################################################################
 
 function show(io::IO, G::DirectProductGroup)
-    println(io, "Direct product of groups")
-    join(io, G.factors, ", ", " and ")
+    println(io, "$(G.n)-fold direct product of $(G.group)")
 end
 
 function show(io::IO, g::DirectProductGroupElem)
-    print(io, "("*join(g.elts,",")*")")
+    print(io, "($(join(g.elts,",")))")
 end
 
 ###############################################################################
@@ -157,58 +129,62 @@ end
 #
 ###############################################################################
 
+doc"""
+    ==(g::DirectProductGroup, h::DirectProductGroup)
+> Checks if two direct product groups are the same.
+"""
 function (==)(G::DirectProductGroup, H::DirectProductGroup)
-    G.factors == H.factors || return false
-    G.operations == H.operations || return false
+    G.group == H.group || return false
+    G.n == G.n || return false
     return true
 end
 
 doc"""
     ==(g::DirectProductGroupElem, h::DirectProductGroupElem)
-> Return `true` if the given elements of direct products are equal, otherwise return `false`.
-
+> Checks if two direct product group elements are the same.
 """
 function (==)(g::DirectProductGroupElem, h::DirectProductGroupElem)
-    parent(g) == parent(h) || return false
     g.elts == h.elts || return false
     return true
 end
 
 ###############################################################################
 #
-#   Binary operators
+#   Group operations
 #
 ###############################################################################
-
-function direct_mult(g::DirectProductGroupElem, h::DirectProductGroupElem)
-    parent(g) == parent(h) || throw("Can't multiply elements from different groups: $g, $h")
-    G = parent(g)
-    return G([op(a,b)  for (op,a,b) in zip(G.operations, g.elts, h.elts)])
-end
 
 doc"""
     *(g::DirectProductGroupElem, h::DirectProductGroupElem)
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
-
 """
-(*)(g::DirectProductGroupElem, h::DirectProductGroupElem) = direct_mult(g,h)
+# TODO: dirty hack around `+/*` operations
+function *{T<:GroupElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+   if check
+      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
+   end
+   return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
+end
 
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
+function *{T<:RingElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+   if check
+      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
+   end
+   return DirectProductGroupElem(g.elts + h.elts)
+end
 
 doc"""
     inv(g::DirectProductGroupElem)
 > Return the inverse of the given element in the direct product group.
-
 """
-# TODO: dirty hack around `+` operation
-function inv(g::DirectProductGroupElem)
-    G = parent(g)
-    return G([(op == (*) ? inv(elt): -elt) for (op,elt) in zip(G.operations, g.elts)])
+# TODO: dirty hack around `+/*` operation
+function inv{T<:GroupElem}(g::DirectProductGroupElem{T})
+   return DirectProductGroupElem([inv(a) for a in g.elts])
+end
+
+function inv{T<:RingElem}(g::DirectProductGroupElem{T})
+   return DirectProductGroupElem(-g.elts)
 end
 
 ###############################################################################
@@ -219,15 +195,15 @@ end
 
 doc"""
     elements(G::DirectProductGroup)
-> Returns `Task` that produces all elements of group `G` (provided that factors
-> implement the elements function).
-
+> Returns `generator` that produces all elements of group `G` (provided that
+> `G.group` implements the `elements` method).
 """
 # TODO: can Base.product handle generators?
 #   now it returns nothing's so we have to collect ellements...
 function elements(G::DirectProductGroup)
-    cartesian_prod = Base.product([collect(elements(H)) for H in G.factors]...)
-    return (G(collect(elt)) for elt in cartesian_prod)
+    elts = collect(elements(G.group))
+    cartesian_prod = Base.product([elts for _ in 1:G.n]...)
+    return (DirectProductGroupElem([elt...]) for elt in cartesian_prod)
 end
 
 doc"""
@@ -235,4 +211,4 @@ doc"""
 > Returns the order (number of elements) in the group.
 
 """
-order(G::DirectProductGroup) = prod([order(H) for H in G.factors])
+order(G::DirectProductGroup) = order(G.group)^G.n
