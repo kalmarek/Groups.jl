@@ -19,7 +19,7 @@ doc"""
 * `::Group` : the single factor of group $N$
 * `::PermGroup` : full `PermutationGroup`
 """
-immutable WreathProduct{T<:Group} <: Group
+struct WreathProduct{T<:Group} <: Group
    N::DirectProductGroup{T}
    P::PermGroup
 
@@ -29,7 +29,7 @@ immutable WreathProduct{T<:Group} <: Group
    end
 end
 
-immutable WreathProductElem{T<:GroupElem} <: GroupElem
+struct WreathProductElem{T<:GroupElem} <: GroupElem
    n::DirectProductGroupElem{T}
    p::perm
    # parent::WreathProduct
@@ -49,9 +49,9 @@ end
 #
 ###############################################################################
 
-elem_type{T<:Group}(::WreathProduct{T}) = WreathProductElem{elem_type(T)}
+elem_type(::WreathProduct{T}) where {T} = WreathProductElem{elem_type(T)}
 
-parent_type{T<:GroupElem}(::Type{WreathProductElem{T}}) =
+parent_type(::Type{WreathProductElem{T}}) where {T} =
    WreathProduct{parent_type(T)}
 
 parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
