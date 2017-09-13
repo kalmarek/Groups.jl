@@ -1,5 +1,4 @@
 module Groups
-using Compat
 
 using Nemo
 import Nemo: Group, GroupElem, Ring
@@ -25,7 +24,7 @@ doc"""
 > * `pow` which is the (multiplicative) exponent of a symbol.
 
 """
-@compat abstract type GSymbol end
+abstract type GSymbol end
 
 doc"""
     W::GWord{T<:GSymbol} <:GroupElem
@@ -43,18 +42,18 @@ doc"""
 
 """
 
-@compat mutable struct GWord{T<:GSymbol} <: GroupElem
+mutable struct GWord{T<:GSymbol} <: GroupElem
    symbols::Vector{T}
    savedhash::UInt
    modified::Bool
    parent::Group
 
-   @compat function GWord{T}(symbols::Vector{T}) where {T<:GSymbol}
+   function GWord{T}(symbols::Vector{T}) where {T<:GSymbol}
       return new(symbols, hash(symbols), true)
    end
 end
 
-@compat abstract type AbstractFPGroup <: Group end
+abstract type AbstractFPGroup <: Group end
 
 ###############################################################################
 #
@@ -81,7 +80,7 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
-    @compat res = xor(W.savedhash, h)
+    res = xor(W.savedhash, h)
     return res
 end
 

@@ -4,14 +4,14 @@
 #
 ###############################################################################
 
-@compat struct FreeSymbol <: GSymbol
+struct FreeSymbol <: GSymbol
    str::String
    pow::Int
 end
 
-@compat FreeGroupElem = GWord{FreeSymbol}
+FreeGroupElem = GWord{FreeSymbol}
 
-@compat mutable struct FreeGroup <: AbstractFPGroup
+mutable struct FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
    #     order::Vector{T}
    #     fastmult_table::Array{Int,2}
