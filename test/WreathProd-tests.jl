@@ -73,7 +73,7 @@
 
       Wr = WreathProduct(PermutationGroup(2),S_3)
 
-      @test isa([elements(Wr)...], Vector{Groups.WreathProductElem{Nemo.perm}})
+      @test isa([elements(Wr)...], Vector{Groups.WreathProductElem{Generic.perm}})
 
       elts = [elements(Wr)...]
 

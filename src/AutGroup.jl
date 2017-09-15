@@ -46,7 +46,7 @@ function λ(i,j, pow=1)
     return v -> [(k==i ? v[j]^pow*v[i] : v[k]) for k in eachindex(v)]
 end
 
-function σ(p::perm, pow=1)
+function σ(p::Generic.perm, pow=1)
    return v -> [v[(p^pow)[k]] for k in eachindex(v)]
 end
 
@@ -79,7 +79,7 @@ function flip_autsymbol(i; pow::Int=1)
     return AutSymbol(str, pow, :(ɛ($i, $pow)), ɛ(i, pow))
 end
 
-function perm_autsymbol(p::perm; pow::Int=1)
+function perm_autsymbol(p::Generic.perm; pow::Int=1)
     if p == parent(p)()
         return id_autsymbol()
     else

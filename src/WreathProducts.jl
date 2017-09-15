@@ -17,13 +17,13 @@ doc"""
 
 # Arguments:
 * `::Group` : the single factor of group $N$
-* `::PermGroup` : full `PermutationGroup`
+* `::Generic.PermGroup` : full `PermutationGroup`
 """
 struct WreathProduct{T<:Group} <: Group
    N::DirectProductGroup{T}
-   P::PermGroup
+   P::Generic.PermGroup
 
-   function WreathProduct{T}(G::T, P::PermGroup) where {T}
+   function WreathProduct{T}(G::T, P::Generic.PermGroup) where {T}
       N = DirectProductGroup(G, P.n)
       return new(N, P)
    end
@@ -31,10 +31,10 @@ end
 
 struct WreathProductElem{T<:GroupElem} <: GroupElem
    n::DirectProductGroupElem{T}
-   p::perm
+   p::Generic.perm
    # parent::WreathProduct
 
-   function WreathProductElem{T}(n::DirectProductGroupElem{T}, p::perm,
+   function WreathProductElem{T}(n::DirectProductGroupElem{T}, p::Generic.perm,
       check::Bool=true) where {T}
       if check
          length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
@@ -62,7 +62,7 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 #
 ###############################################################################
 
-WreathProduct(G::Gr, P::PermGroup) where {Gr} = WreathProduct{Gr}(G, P)
+WreathProduct(G::Gr, P::Generic.PermGroup) where {Gr} = WreathProduct{Gr}(G, P)
 
 WreathProductElem(n::DirectProductGroupElem{T}, p, check=true) where {T} = WreathProductElem{T}(n, p, check)
 
@@ -87,19 +87,19 @@ function (G::WreathProduct)(g::WreathProductElem)
 end
 
 doc"""
-    (G::WreathProduct)(n::DirectProductGroupElem, p::perm)
+    (G::WreathProduct)(n::DirectProductGroupElem, p::Generic.perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
 """
-(G::WreathProduct)(n::DirectProductGroupElem, p::perm) = WreathProductElem(n,p)
+(G::WreathProduct)(n::DirectProductGroupElem, p::Generic.perm) = WreathProductElem(n,p)
 
 (G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
 doc"""
-    (G::WreathProduct)(p::perm)
+    (G::WreathProduct)(p::Generic.perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
 """
-(G::WreathProduct)(p::perm) = G(G.N(), p)
+(G::WreathProduct)(p::Generic.perm) = G(G.N(), p)
 
 doc"""
     (G::WreathProduct)(n::DirectProductGroupElem)
@@ -170,7 +170,7 @@ doc"""
 >
 > `g*h = (g.n*g.p(h.n), g.p*h.p)`,
 >
-> where `g.p(h.n)` denotes the action of `g.p::perm` on
+> where `g.p(h.n)` denotes the action of `g.p::Generic.perm` on
 > `h.n::DirectProductGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
