@@ -109,7 +109,7 @@ end
 #
 ###############################################################################
 
-function AutGroup(G::FreeGroup; outer=false, special=false)
+function AutGroup(G::FreeGroup; special=false)
    n = length(G.gens)
    n == 0 && return AutGroup(G, AutSymbol[])
    S = AutSymbol[]
@@ -121,11 +121,6 @@ function AutGroup(G::FreeGroup; outer=false, special=false)
    if !special
       flips = [flip_autsymbol(i) for i in 1:n]
       append!(S, flips)
-   end
-   if !outer
-      perms = collect(elements(PermutationGroup(n)))
-      perms = [perm_autsymbol(p) for p in perms[2:end]] # leave the identity
-      append!(S, perms)
    end
    return AutGroup(G, S)
 end
