@@ -129,7 +129,6 @@
       @test (Groups.change_pow(f, -2)).pow == 1
       @test (inv(f)).pow == 1
 
-
       f = Groups.perm_autsymbol(G([2,1,4,3]))
       @test isa(inv(f), Groups.AutSymbol)
 
@@ -164,7 +163,7 @@
       S_inv = [S..., [inv(s) for s in S]...]
       @test length(unique(S_inv)) == 75
 
-      G = AutGroup(FreeGroup(N), special=true, outer=true)
+      G = AutGroup(FreeGroup(N), special=true)
       S = Nemo.gens(G)
       S_inv = [G(), S..., [inv(s) for s in S]...]
       S_inv = unique(S_inv)
