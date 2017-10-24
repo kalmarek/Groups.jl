@@ -8,7 +8,6 @@ immutable AutSymbol <: GSymbol
    str::String
    pow::Int
    ex::Expr
-   func::Function
 end
 
 typealias AutGroupElem GWord{AutSymbol}
@@ -60,23 +59,23 @@ function subscriptify(n::Int)
 end
 
 function id_autsymbol()
-   return AutSymbol("(id)", 0, :(id()), identity)
+   return AutSymbol("(id)", 0, :(id()))
 end
 
 function rmul_autsymbol(i, j; pow::Int=1)
     str = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, :(ϱ($i, $j, $pow)), ϱ(i, j, pow))
+    return AutSymbol(str, pow, :(ϱ($i, $j, $pow)))
 end
 
 function lmul_autsymbol(i, j; pow::Int=1)
     str = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, :(λ($i, $j, $pow)), λ(i, j, pow))
+    return AutSymbol(str, pow, :(λ($i, $j, $pow)))
 end
 
 function flip_autsymbol(i; pow::Int=1)
     str = "ɛ"*subscriptify(i)
     pow = (2+pow%2)%2
-    return AutSymbol(str, pow, :(ɛ($i, $pow)), ɛ(i, pow))
+    return AutSymbol(str, pow, :(ɛ($i, $pow)))
 end
 
 function perm_autsymbol(p::perm; pow::Int=1)
@@ -85,7 +84,7 @@ function perm_autsymbol(p::perm; pow::Int=1)
     else
         p = p^pow
         str = "σ"*join([subscriptify(i) for i in p.d])
-        return AutSymbol(str, 1, :(σ($(p.d), 1)), σ(p, 1))
+        return AutSymbol(str, 1, :(σ($(p.d), 1)))
     end
 end
 
@@ -200,7 +199,7 @@ function change_pow(s::AutSymbol, n::Int)
         return s
     else
         warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.str, n, s.ex, s.func)
+        return AutSymbol(s.str, n, s.ex)
     end
 end
 
