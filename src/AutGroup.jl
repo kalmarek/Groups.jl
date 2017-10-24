@@ -112,14 +112,20 @@ function AutGroup(G::FreeGroup; special=false)
    n = length(G.gens)
    n == 0 && return AutGroup(G, AutSymbol[])
    S = AutSymbol[]
+
    indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
+
    rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
-   append!(S, rmuls)
    lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
-   append!(S, lmuls)
+
+   append!(S, [rmuls; lmuls])
+
    if !special
       flips = [flip_autsymbol(i) for i in 1:n]
-      append!(S, flips)
+      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(n))][2:end]
+
+      append!(S, [flips; syms])
+
    end
    return AutGroup(G, S)
 end
