@@ -209,22 +209,20 @@ function change_pow(s::AutSymbol, n::Int)
     if n == 0
         return id_autsymbol()
     end
-    symbol = s.ex.args[1]
-    if symbol == :ɛ
-        return flip_autsymbol(s.ex.args[2], pow=n)
-    elseif symbol == :σ
-        G = PermutationGroup(length(s.ex.args[2]))
-        return perm_autsymbol(G(s.ex.args[2]), pow=n)
-    elseif symbol == :ϱ
-        s.ex.args[2:end-1]
-        return rmul_autsymbol(s.ex.args[2:end-1]..., pow=n)
-    elseif symbol == :λ
-        return lmul_autsymbol(s.ex.args[2:end-1]..., pow=n)
-    elseif symbol == :id
+    symbol = s.typ
+    if isa(symbol, FlipAut)
+        return flip_autsymbol(symbol.i, pow=n)
+    elseif isa(symbol, PermAut)
+        return perm_autsymbol(symbol.p, pow=n)
+    elseif isa(symbol, RTransvect)
+        return rmul_autsymbol(symbol.i, symbol.j, pow=n)
+    elseif isa(symbol, LTransvect)
+        return lmul_autsymbol(symbol.i, symbol.j, pow=n)
+    elseif isa(symbol, Identity)
         return s
     else
         warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.str, n, s.ex)
+        return AutSymbol(s.str, n, s.typ)
     end
 end
 
