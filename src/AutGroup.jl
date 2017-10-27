@@ -81,32 +81,36 @@ function subscriptify(n::Int)
 end
 
 function id_autsymbol()
-   return AutSymbol("(id)", 0, :(id()))
+   return AutSymbol("(id)", 0, Identity())
 end
 
 function rmul_autsymbol(i, j; pow::Int=1)
     str = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, :(ϱ($i, $j, $pow)))
+    return AutSymbol(str, pow, RTransvect(i, j))
 end
 
 function lmul_autsymbol(i, j; pow::Int=1)
     str = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, :(λ($i, $j, $pow)))
+    return AutSymbol(str, pow, LTransvect(i, j))
 end
 
 function flip_autsymbol(i; pow::Int=1)
-    str = "ɛ"*subscriptify(i)
     pow = (2+pow%2)%2
-    return AutSymbol(str, pow, :(ɛ($i, $pow)))
+    if pow == 0
+       return id_autsymbol()
+    else
+        str = "ɛ"*subscriptify(i)
+        return AutSymbol(str, pow, FlipAut(i))
+    end
 end
 
 function perm_autsymbol(p::perm; pow::Int=1)
+    p = p^pow
     if p == parent(p)()
-        return id_autsymbol()
+       return id_autsymbol()
     else
-        p = p^pow
-        str = "σ"*join([subscriptify(i) for i in p.d])
-        return AutSymbol(str, 1, :(σ($(p.d), 1)))
+       str = "σ"*join([subscriptify(i) for i in p.d])
+       return AutSymbol(str, 1, PermAut(p))
     end
 end
 
