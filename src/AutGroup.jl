@@ -186,24 +186,12 @@ end
 ###############################################################################
 
 function (f::AutSymbol){T}(v::Vector{GWord{T}})
-    if f.pow == 0
-        return v
-    end
-    if f.ex == :(id())
-        func = identity(v)
-    elseif f.ex.args[1] == :ϱ
-        func = ϱ(f.ex.args[2], f.ex.args[3], f.pow)
-    elseif f.ex.args[1] == :λ
-        func = λ(f.ex.args[2], f.ex.args[3], f.pow)
-    elseif f.ex.args[1] == :ɛ
-        func = ɛ(f.ex.args[2], f.pow)
-    elseif f.ex.args[1] == :σ
-        g = PermutationGroup(length(f.ex.args[2]))(f.ex.args[2])
-        func = σ(g, f.ex.args[3])
-    else
-        throw("Unknown AutSymbol!")
-    end
-    return func(v)
+   if f.pow == 0
+      nothing
+   else
+      v = f.typ(v, f.pow)
+   end
+   return v
 end
 
 function (F::AutGroupElem)(v::Vector)
