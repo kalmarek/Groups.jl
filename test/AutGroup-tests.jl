@@ -5,7 +5,7 @@
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol("a")
       @test_throws MethodError Groups.AutSymbol("a", 1)
-      f = Groups.AutSymbol("a", 1, :(a()))
+      f = Groups.AutSymbol("a", 1, Groups.FlipAut(2))
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
       @test isa(Groups.perm_autsymbol(G([1,2,3,4])), Groups.AutSymbol)
@@ -83,7 +83,7 @@
    end
 
    @testset "AutGroup/AutGroupElem constructors" begin
-      f = Groups.AutSymbol("a", 1, :(a()))
+      f = Groups.AutSymbol("a", 1, Groups.FlipAut(1))
       @test isa(AutGroupElem(f), Groups.GWord)
       @test isa(AutGroupElem(f), AutGroupElem)
       @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
