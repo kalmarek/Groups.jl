@@ -119,15 +119,6 @@ function perm_autsymbol(a::Vector{Int})
    return perm_autsymbol(G(a))
 end
 
-function getperm(s::AutSymbol)
-   if s.ex.args[1] == :σ
-      p = s.ex.args[2]
-      return PermutationGroup(length(p))(p)
-   else
-      throw(ArgumentError("$s is not a permutation automorphism!"))
-   end
-end
-
 ###############################################################################
 #
 #   AutGroup / AutGroupElem constructors
@@ -286,6 +277,10 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 ###############################################################################
 
 ispermauto(s::AutSymbol) = s.ex.args[1] == :σ
+function getperm(s::AutSymbol)
+    isa(s.typ, PermAut) || throw("$s is not a permutation automorphism")
+    return s.typ.p
+end
 
 function simplify_perms!(W::AutGroupElem)
     reduced = true
