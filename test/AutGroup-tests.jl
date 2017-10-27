@@ -149,6 +149,16 @@
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == A()
+      g,h = Nemo.gens(A)[[1,8]]
+      domain = Nemo.gens(A.objectGroup)
+      @test (g*h)(domain) == (h*g)(domain)
+      @test (g*h).savedhash != (h*g).savedhash
+      a = g*h
+      b = h*g
+      @test hash(a) == hash(b)
+      @test a.savedhash == b.savedhash
+      @test length(unique([a,b])) == 1
+      @test length(unique([g*h, h*g])) == 1
    end
 
    @testset "specific Aut(F4) tests" begin

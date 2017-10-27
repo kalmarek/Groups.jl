@@ -201,8 +201,11 @@ end
 hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function hash(g::AutGroupElem, h::UInt)
-   gs = gens(parent(g).objectGroup)
-   return hash(g(gs), hash(typeof(g), hash(parent(g), h)))
+   if g.modified
+      g.savedhash = hash(g(gens(parent(g).objectGroup)), hash(typeof(g), hash(parent(g), h)))
+      g.modified = false
+   end
+   return g.savedhash
 end
 
 function change_pow(s::AutSymbol, n::Int)
@@ -316,7 +319,7 @@ function reduce!(W::AutGroupElem)
         end
     end
 
-    W.modified = false
-    W.savedhash = hash(W.symbols,hash(typeof(W)))
+    W.modified = true
+
     return W
 end
