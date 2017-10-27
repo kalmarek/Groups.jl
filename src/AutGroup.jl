@@ -274,7 +274,6 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 #
 ###############################################################################
 
-ispermauto(s::AutSymbol) = s.ex.args[1] == :σ
 function getperm(s::AutSymbol)
     isa(s.typ, PermAut) || throw("$s is not a permutation automorphism")
     return s.typ.p
@@ -284,12 +283,13 @@ function simplify_perms!(W::AutGroupElem)
     reduced = true
     for i in 1:length(W.symbols) - 1
         current = W.symbols[i]
-        if ispermauto(current)
-            if current.pow != 1
-                current = perm_autsymbol(perm(current), pow=current.pow)
-            end
+        if isa(current.typ, PermAut)
             next_s = W.symbols[i+1]
-            if  ispermauto(next_s)
+            if isa(next_s.typ, PermAut)
+                if current.pow != 1
+                    current = perm_autsymbol(perm(current), pow=current.pow)
+                end
+
                 reduced = false
                 if next_s.pow != 1
                     next_s = perm_autsymbol(perm(next_s), pow=next_s.pow)
