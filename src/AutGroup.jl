@@ -4,10 +4,30 @@
 #
 ###############################################################################
 
+immutable RTransvect
+    i::Int
+    j::Int
+end
+
+immutable LTransvect
+    i::Int
+    j::Int
+end
+
+immutable FlipAut
+    i::Int
+end
+
+immutable PermAut
+    p::perm
+end
+
+immutable Identity end
+
 immutable AutSymbol <: GSymbol
    str::String
    pow::Int
-   ex::Expr
+   typ::Union{RTransvect, LTransvect, FlipAut, PermAut, Identity}
 end
 
 typealias AutGroupElem GWord{AutSymbol}
