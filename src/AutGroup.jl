@@ -55,21 +55,23 @@ parent_type(::AutGroupElem) = AutGroup
 #
 ###############################################################################
 
-function ϱ(i,j, pow=1)
-    # @assert i ≠ j
-    return v -> [(k==i ? v[i]*v[j]^pow : v[k]) for k in eachindex(v)]
+function (ϱ::RTransvect)(v, pow=1::Int)
+    return [(k==ϱ.i ? v[ϱ.i]*v[ϱ.j]^pow : v[k]) for k in eachindex(v)]
 end
 
-function λ(i,j, pow=1)
-    # @assert i ≠ j
-    return v -> [(k==i ? v[j]^pow*v[i] : v[k]) for k in eachindex(v)]
+function (λ::LTransvect)(v, pow=1::Int)
+    return [(k==λ.i ? v[λ.j]^pow*v[λ.i] : v[k]) for k in eachindex(v)]
 end
 
-function σ(p::perm, pow=1)
-   return v -> [v[(p^pow)[k]] for k in eachindex(v)]
+function (σ::PermAut)(v, pow=1::Int)
+   return v[(σ.p^pow).d]
 end
 
-ɛ(i, pow=1) = v -> [(k==i ? v[k]^(-1*(2+pow%2)%2) : v[k]) for k in eachindex(v)]
+function (ɛ::FlipAut)(v, pow=1::Int)
+   return [(k==ɛ.i ? v[k]^(-1^pow) : v[k]) for k in eachindex(v)]
+end
+
+(::Identity)(v, pow=1::Int) = v
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
