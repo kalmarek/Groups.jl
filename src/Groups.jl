@@ -390,6 +390,17 @@ function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T=parent(first(S))(); ra
     return B, sizes
 end
 
+function generate_balls{T<:RingElem}(S::Vector{T}, Id::T=one(parent(first(S))); radius=2, op=*)
+    sizes = Int[]
+    B = [Id]
+    for i in 1:radius
+        BB = [op(i,j) for (i,j) in Base.product(B,S)]
+        B = unique([B; vec(BB)])
+        push!(sizes, length(B))
+    end
+    return B, sizes
+end
+
 ###############################################################################
 #
 #   Includes
