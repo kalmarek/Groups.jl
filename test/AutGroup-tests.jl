@@ -5,7 +5,7 @@
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol("a")
       @test_throws MethodError Groups.AutSymbol("a", 1)
-      f = Groups.AutSymbol("a", 1, :(a()), v -> v)
+      f = Groups.AutSymbol("a", 1, Groups.FlipAut(2))
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
       @test isa(Groups.perm_autsymbol(G([1,2,3,4])), Groups.AutSymbol)
@@ -83,7 +83,7 @@
    end
 
    @testset "AutGroup/AutGroupElem constructors" begin
-      f = Groups.AutSymbol("a", 1, :(a()), v -> v)
+      f = Groups.AutSymbol("a", 1, Groups.FlipAut(1))
       @test isa(AutGroupElem(f), Groups.GWord)
       @test isa(AutGroupElem(f), AutGroupElem)
       @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
@@ -129,7 +129,6 @@
       @test (Groups.change_pow(f, -2)).pow == 1
       @test (inv(f)).pow == 1
 
-
       f = Groups.perm_autsymbol(G([2,1,4,3]))
       @test isa(inv(f), Groups.AutSymbol)
 
@@ -150,6 +149,16 @@
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == A()
+      g,h = Nemo.gens(A)[[1,8]]
+      domain = Nemo.gens(A.objectGroup)
+      @test (g*h)(domain) == (h*g)(domain)
+      @test (g*h).savedhash != (h*g).savedhash
+      a = g*h
+      b = h*g
+      @test hash(a) == hash(b)
+      @test a.savedhash == b.savedhash
+      @test length(unique([a,b])) == 1
+      @test length(unique([g*h, h*g])) == 1
    end
 
    @testset "specific Aut(F4) tests" begin
@@ -164,7 +173,7 @@
       S_inv = [S..., [inv(s) for s in S]...]
       @test length(unique(S_inv)) == 75
 
-      G = AutGroup(FreeGroup(N), special=true, outer=true)
+      G = AutGroup(FreeGroup(N), special=true)
       S = Nemo.gens(G)
       S_inv = [G(), S..., [inv(s) for s in S]...]
       S_inv = unique(S_inv)
