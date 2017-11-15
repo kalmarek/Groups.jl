@@ -4,7 +4,27 @@
 #
 ###############################################################################
 
-struct AutSymbol <: GSymbol
+immutable RTransvect
+    i::Int
+    j::Int
+end
+
+immutable LTransvect
+    i::Int
+    j::Int
+end
+
+immutable FlipAut
+    i::Int
+end
+
+immutable PermAut
+    p::Nemo.Generic.perm
+end
+
+immutable Identity end
+
+immutable AutSymbol <: GSymbol
    str::String
    pow::Int
    typ::Union{RTransvect, LTransvect, FlipAut, PermAut, Identity}
