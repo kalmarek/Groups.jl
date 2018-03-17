@@ -56,23 +56,23 @@ parent_type(::AutGroupElem) = AutGroup
 #
 ###############################################################################
 
-function (ϱ::RTransvect)(v, pow=1::Int)
-    return [(k==ϱ.i ? v[ϱ.i]*v[ϱ.j]^pow : v[k]) for k in eachindex(v)]
+function (ϱ::RTransvect)(v::NTuple{N, T}, pow=1::Int) where {N, T}
+    return ntuple(k -> (k==ϱ.i ? v[ϱ.i]*v[ϱ.j]^pow : v[k]), N)::NTuple{N, T}
 end
 
-function (λ::LTransvect)(v, pow=1::Int)
-    return [(k==λ.i ? v[λ.j]^pow*v[λ.i] : v[k]) for k in eachindex(v)]
+function (λ::LTransvect)(v::NTuple{N, T}, pow=1::Int) where {N, T}
+    return ntuple(k -> (k==λ.i ? v[λ.j]^pow*v[λ.i] : v[k]), N)::NTuple{N, T}
 end
 
-function (σ::PermAut)(v, pow=1::Int)
-   return v[(σ.p^pow).d]
+function (σ::PermAut)(v::NTuple{N, T}, pow=1::Int) where {N, T}
+   return ntuple(k -> v[(σ.p^pow).d[k]], N)::NTuple{N, T}
 end
 
-function (ɛ::FlipAut)(v, pow=1::Int)
-   return [(k==ɛ.i ? v[k]^(-1^pow) : v[k]) for k in eachindex(v)]
+function (ɛ::FlipAut)(v::NTuple{N, T}, pow=1::Int) where {N, T}
+   return ntuple(k -> (k==ɛ.i ? v[k]^(-1^pow) : v[k]), N)::NTuple{N, T}
 end
 
-(::Identity)(v, pow=1::Int) = v
+(::Identity)(v::NTuple{N, T}, pow=1::Int) where {N, T} = v::NTuple{N, T}
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
@@ -177,18 +177,18 @@ end
 #
 ###############################################################################
 
-function (f::AutSymbol){T}(v::Vector{GWord{T}})
+function (f::AutSymbol)(v::NTuple{N, T}) where {N, T}
    if f.pow == 0
       nothing
    else
-      v = f.typ(v, f.pow)
+      v = f.typ(v, f.pow)::NTuple{N, T}
    end
    return v
 end
 
-function (F::AutGroupElem)(v::Vector)
+function (F::AutGroupElem)(v::NTuple{N, T}) where {N, T}
     for f in F.symbols
-        v = f(v)
+        v = f(v)::NTuple{N, T}
     end
     return v
 end
