@@ -32,9 +32,10 @@ end
 
 AutGroupElem = GWord{AutSymbol}
 
-mutable struct AutGroup <: AbstractFPGroup
+mutable struct AutGroup{N} <: AbstractFPGroup
    objectGroup::Group
    gens::Vector{AutSymbol}
+   domain::NTuple{N, FreeGroupElem}
 end
 
 export AutGroupElem, AutGroup
@@ -144,7 +145,7 @@ function AutGroup(G::FreeGroup; special=false)
       append!(S, [flips; syms])
 
    end
-   return AutGroup(G, S)
+   return AutGroup{n}(G, S, NTuple{n, FreeGroupElem}(G.(G.gens)))
 end
 
 ###############################################################################
