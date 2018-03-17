@@ -203,7 +203,7 @@ hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function hash(g::AutGroupElem, h::UInt)
    if g.modified
-      g.savedhash = hash(g(gens(parent(g).objectGroup)), hash(typeof(g), hash(parent(g), h)))
+      g.savedhash = hash(g(parent(g).domain), hash(typeof(g), hash(parent(g), h)))
       g.modified = false
    end
    return g.savedhash
@@ -253,8 +253,7 @@ end
 
 function (==)(g::AutGroupElem, h::AutGroupElem)
    parent(g) == parent(h) || return false
-   G = parent(g).objectGroup
-   gs = gens(G)
+   gs = parent(g).domain
    return g(gs) == h(gs)
 end
 
