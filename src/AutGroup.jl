@@ -120,6 +120,8 @@ function perm_autsymbol(a::Vector{Int})
    return perm_autsymbol(G(a))
 end
 
+domain(G::AutGroup) = deepcopy(G.domain)
+
 ###############################################################################
 #
 #   AutGroup / AutGroupElem constructors
@@ -203,7 +205,7 @@ hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
 function hash(g::AutGroupElem, h::UInt)
    if g.modified
-      g.savedhash = hash(g(parent(g).domain), hash(typeof(g), hash(parent(g), h)))
+      g.savedhash = hash(g(domain(parent(g))), hash(typeof(g), hash(parent(g), h)))
       g.modified = false
    end
    return g.savedhash
@@ -253,8 +255,7 @@ end
 
 function (==)(g::AutGroupElem, h::AutGroupElem)
    parent(g) == parent(h) || return false
-   gs = parent(g).domain
-   return g(gs) == h(gs)
+   return g(domain(parent(g))) == h(domain(parent(h)))
 end
 
 ###############################################################################
