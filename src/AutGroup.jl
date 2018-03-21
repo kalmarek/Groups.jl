@@ -56,23 +56,33 @@ parent_type(::AutGroupElem) = AutGroup
 #
 ###############################################################################
 
-function (ϱ::RTransvect)(v::NTuple{N, T}, pow=1::Int) where {N, T}
-    return ntuple(k -> (k==ϱ.i ? v[ϱ.i]*v[ϱ.j]^pow : v[k]), N)::NTuple{N, T}
+function (ϱ::RTransvect)(v, pow=1::Int)
+    @inbounds Groups.r_multiply!(v[ϱ.i], (v[ϱ.j]^pow).symbols, reduced=false)
+    return v
 end
 
-function (λ::LTransvect)(v::NTuple{N, T}, pow=1::Int) where {N, T}
-    return ntuple(k -> (k==λ.i ? v[λ.j]^pow*v[λ.i] : v[k]), N)::NTuple{N, T}
+function (λ::LTransvect)(v, pow=1::Int)
+    @inbounds Groups.l_multiply!(v[λ.i], (v[λ.j]^pow).symbols, reduced=false)
+    return v
 end
 
-function (σ::PermAut)(v::NTuple{N, T}, pow=1::Int) where {N, T}
-   return ntuple(k -> v[(σ.p^pow).d[k]], N)::NTuple{N, T}
+function (σ::PermAut)(v, pow=1::Int)
+   w = deepcopy(v)
+   s = (σ.p^pow).d
+   @inbounds for k in eachindex(v)
+       v[k].symbols = w[s[k]].symbols
+   end
+   return v
 end
 
-function (ɛ::FlipAut)(v::NTuple{N, T}, pow=1::Int) where {N, T}
-   return ntuple(k -> (k==ɛ.i ? v[k]^(-1^pow) : v[k]), N)::NTuple{N, T}
+function (ɛ::FlipAut)(v, pow=1::Int)
+   @inbounds if isodd(pow)
+       v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
+   end
+   return v
 end
 
-(::Identity)(v::NTuple{N, T}, pow=1::Int) where {N, T} = v::NTuple{N, T}
+(::Identity)(v, pow=1::Int) = v
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
