@@ -192,7 +192,7 @@ end
 
 function r_multiply!(W::GWord, x; reduced::Bool=true)
     if length(x) > 0
-        push!(W.symbols, x...)
+        append!(W.symbols, x)
     end
     if reduced
         reduce!(W)
@@ -200,9 +200,9 @@ function r_multiply!(W::GWord, x; reduced::Bool=true)
     return W
 end
 
-function l_multiply!(W::GWord, x; reduced=true)
+function l_multiply!(W::GWord, x; reduced::Bool=true)
     if length(x) > 0
-        unshift!(W.symbols, reverse(x)...)
+        prepend!(W.symbols, x)
     end
     if reduced
         reduce!(W)
