@@ -159,6 +159,24 @@
       @test a.savedhash == b.savedhash
       @test length(unique([a,b])) == 1
       @test length(unique([g*h, h*g])) == 1
+
+      # Not so simple arithmetic: applying starting on the left:
+      # ϱ₁₂*ϱ₂₁⁻¹*λ₁₂*ε₂ == σ₂₁₃₄
+
+      g = A(Groups.rmul_autsymbol(1,2))
+      x1, x2, x3, x4 = Groups.domain(A)
+      @test g(Groups.domain(A)) == (x1*x2, x2, x3, x4)
+      g = g*inv(A(Groups.rmul_autsymbol(2,1)))
+      @test g(Groups.domain(A)) == (x1*x2, x1^-1, x3, x4)
+      g = g*A(Groups.lmul_autsymbol(1,2))
+      @test g(Groups.domain(A)) == (x2, x1^-1, x3, x4)
+      g = g*A(Groups.flip_autsymbol(2))
+      @test g(Groups.domain(A)) == (x2, x1, x3, x4)
+
+      @test g(Groups.domain(A)) == A(Groups.perm_autsymbol([2,1,3,4]))(Groups.domain(A))
+
+      @test g == A(Groups.perm_autsymbol([2,1,3,4]))
+
    end
 
    @testset "specific Aut(F4) tests" begin
