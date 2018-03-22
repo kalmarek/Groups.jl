@@ -25,7 +25,7 @@ doc"""
 > * `pow` which is the (multiplicative) exponent of a symbol.
 
 """
-abstract GSymbol
+abstract type GSymbol end
 
 doc"""
     W::GWord{T<:GSymbol} <:GroupElem
@@ -43,18 +43,18 @@ doc"""
 
 """
 
-type GWord{T<:GSymbol} <: GroupElem
-    symbols::Vector{T}
-    savedhash::UInt
-    modified::Bool
-    parent::Group
+mutable struct GWord{T<:GSymbol} <: GroupElem
+   symbols::Vector{T}
+   savedhash::UInt
+   modified::Bool
+   parent::Group
 
-    function GWord(symbols::Vector{T})
-        return new(symbols, hash(symbols), true)
-    end
+   function GWord{T}(symbols::Vector{T}) where {T}
+      return new{T}(symbols, hash(symbols), true)
+   end
 end
 
-abstract AbstractFPGroup <: Group
+abstract type AbstractFPGroup <: Group end
 
 ###############################################################################
 #
@@ -70,8 +70,8 @@ parent{T<:GSymbol}(w::GWord{T}) = w.parent
 #
 ###############################################################################
 
-GWord{T<:GSymbol}(s::T) = GWord{T}(T[s])
-convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
+GWord(s::T) where {T} = GWord{T}(T[s])
+convert(::Type{GWord{T}}, s::T) where {T<:GSymbol} = GWord{T}(T[s])
 
 ###############################################################################
 #
@@ -79,19 +79,18 @@ convert{T<:GSymbol}(::Type{GWord{T}}, s::T) = GWord{T}(T[s])
 #
 ###############################################################################
 
-xor(a,b) = a $ b
-
 function hash(W::GWord, h::UInt)
     W.modified && reduce!(W)
-    return xor(W.savedhash, h)
+    res = xor(W.savedhash, h)
+    return res
 end
 
-function deepcopy_internal{T<:GSymbol}(W::GWord{T}, dict::ObjectIdDict)
+function deepcopy_internal(W::GWord{T}, dict::ObjectIdDict) where {T<:GSymbol}
     G = parent(W)
     return G(GWord{T}(deepcopy(W.symbols)))
 end
 
-isone{T<:GSymbol}(s::T) = s.pow == 0
+isone(s::GSymbol) = s.pow == 0
 
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
@@ -162,7 +161,7 @@ function show(io::IO, W::GWord)
     end
 end
 
-function show{T<:GSymbol}(io::IO, s::T)
+function show(io::IO, s::T) where {T<:GSymbol}
    if isone(s)
       print(io, "(id)")
    elseif s.pow == 1
@@ -256,7 +255,7 @@ end
 #
 ###############################################################################
 
-function inv{T}(W::GWord{T})
+function inv(W::GWord{T}) where {T}
     if length(W) == 0
         return W
     else
@@ -352,7 +351,7 @@ function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
     replace!(deepcopy(W), index, toreplace, replacement)
 end
 
-function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
+function replace_all!(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
     modified = false
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
@@ -366,8 +365,7 @@ function replace_all!{T}(W::GWord{T}, subst_dict::Dict{GWord{T}, GWord{T}})
     return modified
 end
 
-function replace_all{T<:GSymbol}(W::GWord{T},
-   subst_dict::Dict{GWord{T}, GWord{T}})
+function replace_all(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
    W = deepcopy(W)
    replace_all!(W, subst_dict)
    return W
