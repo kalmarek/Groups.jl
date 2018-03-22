@@ -15,71 +15,70 @@
    end
 
    a,b,c,d = Nemo.gens(FreeGroup(4))
-   domain = [a,b,c,d]
+   D = NTuple{4,FreeGroupElem}([a,b,c,d])
 
    @testset "flip_autsymbol correctness" begin
-      @test Groups.flip_autsymbol(1)(domain) == [a^-1, b,c,d]
-      @test Groups.flip_autsymbol(2)(domain) == [a, b^-1,c,d]
-      @test Groups.flip_autsymbol(3)(domain) == [a, b,c^-1,d]
-      @test Groups.flip_autsymbol(4)(domain) == [a, b,c,d^-1]
-      @test inv(Groups.flip_autsymbol(1))(domain) == [a^-1, b,c,d]
-      @test inv(Groups.flip_autsymbol(2))(domain) == [a, b^-1,c,d]
-      @test inv(Groups.flip_autsymbol(3))(domain) == [a, b,c^-1,d]
-      @test inv(Groups.flip_autsymbol(4))(domain) == [a, b,c,d^-1]
+      @test Groups.flip_autsymbol(1)(deepcopy(D)) == (a^-1, b,c,d)
+      @test Groups.flip_autsymbol(2)(deepcopy(D)) == (a, b^-1,c,d)
+      @test Groups.flip_autsymbol(3)(deepcopy(D)) == (a, b,c^-1,d)
+      @test Groups.flip_autsymbol(4)(deepcopy(D)) == (a, b,c,d^-1)
+      @test inv(Groups.flip_autsymbol(1))(deepcopy(D)) == (a^-1, b,c,d)
+      @test inv(Groups.flip_autsymbol(2))(deepcopy(D)) == (a, b^-1,c,d)
+      @test inv(Groups.flip_autsymbol(3))(deepcopy(D)) == (a, b,c^-1,d)
+      @test inv(Groups.flip_autsymbol(4))(deepcopy(D)) == (a, b,c,d^-1)
    end
 
    @testset "perm_autsymbol correctness" begin
-      @test σ(domain) == domain
-      @test inv(σ)(domain) == domain
       σ = Groups.perm_autsymbol([1,2,3,4])
+      @test      σ(deepcopy(D)) == deepcopy(D)
+      @test inv(σ)(deepcopy(D)) == deepcopy(D)
 
-      @test σ(domain) == [b, c, d, a]
-      @test inv(σ)(domain) == [d, a, b, c]
       σ = Groups.perm_autsymbol([2,3,4,1])
+      @test      σ(deepcopy(D)) == (b, c, d, a)
+      @test inv(σ)(deepcopy(D)) == (d, a, b, c)
 
-      @test σ(domain) == [b, a, d, c]
-      @test inv(σ)(domain) == [b, a, d, c]
       σ = Groups.perm_autsymbol([2,1,4,3])
+      @test      σ(deepcopy(D)) == (b, a, d, c)
+      @test inv(σ)(deepcopy(D)) == (b, a, d, c)
 
-      @test σ(domain) == [b,c,a,d]
-      @test inv(σ)(domain) == [c,a,b,d]
       σ = Groups.perm_autsymbol([2,3,1,4])
+      @test      σ(deepcopy(D)) == (b, c, a, d)
+      @test inv(σ)(deepcopy(D)) == (c, a, b, d)
    end
 
    @testset "rmul/lmul_autsymbol correctness" begin
       i,j = 1,2
       r = Groups.rmul_autsymbol(i,j)
       l = Groups.lmul_autsymbol(i,j)
-      @test r(domain) == [a*b,b,c,d]
-      @test inv(r)(domain) == [a*b^-1,b,c,d]
-      @test l(domain) == [b*a,b,c,d]
-      @test inv(l)(domain) == [b^-1*a,b,c,d]
+      @test      r(deepcopy(D)) == (a*b,   b, c, d)
+      @test inv(r)(deepcopy(D)) == (a*b^-1,b, c, d)
+      @test      l(deepcopy(D)) == (b*a,   b, c, d)
+      @test inv(l)(deepcopy(D)) == (b^-1*a,b, c, d)
 
       i,j = 3,1
       r = Groups.rmul_autsymbol(i,j)
       l = Groups.lmul_autsymbol(i,j)
-      @test r(domain) == [a,b,c*a,d]
-      @test inv(r)(domain) == [a,b,c*a^-1,d]
-      @test l(domain) == [a,b,a*c,d]
-      @test inv(l)(domain) == [a,b,a^-1*c,d]
-
+      @test      r(deepcopy(D)) == (a, b, c*a,   d)
+      @test inv(r)(deepcopy(D)) == (a, b, c*a^-1,d)
+      @test      l(deepcopy(D)) == (a, b, a*c,   d)
+      @test inv(l)(deepcopy(D)) == (a, b, a^-1*c,d)
 
       i,j = 4,3
       r = Groups.rmul_autsymbol(i,j)
       l = Groups.lmul_autsymbol(i,j)
-      @test r(domain) == [a,b,c,d*c]
-      @test inv(r)(domain) == [a,b,c,d*c^-1]
-      @test l(domain) == [a,b,c,c*d]
-      @test inv(l)(domain) == [a,b,c,c^-1*d]
+      @test      r(deepcopy(D)) == (a, b, c, d*c)
+      @test inv(r)(deepcopy(D)) == (a, b, c, d*c^-1)
+      @test      l(deepcopy(D)) == (a, b, c, c*d)
+      @test inv(l)(deepcopy(D)) == (a, b, c, c^-1*d)
 
 
       i,j = 2,4
       r = Groups.rmul_autsymbol(i,j)
       l = Groups.lmul_autsymbol(i,j)
-      @test r(domain) == [a,b*d,c,d]
-      @test inv(r)(domain) == [a,b*d^-1,c,d]
-      @test l(domain) == [a,d*b,c,d]
-      @test inv(l)(domain) == [a,d^-1*b,c,d]
+      @test      r(deepcopy(D)) == (a, b*d,   c, d)
+      @test inv(r)(deepcopy(D)) == (a, b*d^-1,c, d)
+      @test      l(deepcopy(D)) == (a, d*b,   c, d)
+      @test inv(l)(deepcopy(D)) == (a, d^-1*b,c, d)
    end
 
    @testset "AutGroup/AutGroupElem constructors" begin
@@ -149,8 +148,10 @@
       @test a*b == b*a
       @test a^3 * b^3 == A()
       g,h = Nemo.gens(A)[[1,8]]
-      domain = Nemo.gens(A.objectGroup)
-      @test (g*h)(domain) == (h*g)(domain)
+
+      @test Groups.domain(A) == NTuple{4, FreeGroupElem}(gens(A.objectGroup))
+
+      @test (g*h)(Groups.domain(A)) == (h*g)(Groups.domain(A))
       @test (g*h).savedhash != (h*g).savedhash
       a = g*h
       b = h*g
