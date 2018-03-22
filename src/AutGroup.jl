@@ -19,7 +19,7 @@ immutable FlipAut
 end
 
 immutable PermAut
-    p::perm
+    p::Nemo.Generic.perm
 end
 
 immutable Identity end
@@ -30,9 +30,9 @@ immutable AutSymbol <: GSymbol
    typ::Union{RTransvect, LTransvect, FlipAut, PermAut, Identity}
 end
 
-typealias AutGroupElem GWord{AutSymbol}
+AutGroupElem = GWord{AutSymbol}
 
-type AutGroup <: AbstractFPGroup
+mutable struct AutGroup <: AbstractFPGroup
    objectGroup::Group
    gens::Vector{AutSymbol}
 end
@@ -104,7 +104,7 @@ function flip_autsymbol(i; pow::Int=1)
     end
 end
 
-function perm_autsymbol(p::perm; pow::Int=1)
+function perm_autsymbol(p::Generic.perm; pow::Int=1)
     p = p^pow
     if p == parent(p)()
        return id_autsymbol()

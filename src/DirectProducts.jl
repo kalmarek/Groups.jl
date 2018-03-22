@@ -14,12 +14,12 @@ Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
 
-immutable DirectProductGroup{T<:Group} <: Group
+struct DirectProductGroup{T<:Group} <: Group
    group::T
    n::Int
 end
 
-immutable DirectProductGroupElem{T<:GroupElem} <: GroupElem
+struct DirectProductGroupElem{T<:GroupElem} <: GroupElem
    elts::Vector{T}
 end
 
@@ -29,10 +29,10 @@ end
 #
 ###############################################################################
 
-elem_type{T<:Group}(G::DirectProductGroup{T}) =
+elem_type(G::DirectProductGroup{T}) where {T} =
    DirectProductGroupElem{elem_type(G.group)}
 
-parent_type{T<:GroupElem}(::Type{DirectProductGroupElem{T}}) =
+parent_type(::Type{DirectProductGroupElem{T}}) where {T} =
    DirectProductGroup{parent_type(T)}
 
 parent(g::DirectProductGroupElem) =
@@ -45,9 +45,9 @@ parent(g::DirectProductGroupElem) =
 ###############################################################################
 
 Base.size(g::DirectProductGroupElem) = size(g.elts)
-Base.linearindexing(::Type{DirectProductGroupElem}) = Base.LinearFast()
+Base.IndexStyle(::Type{DirectProductGroupElem}) = Base.LinearFast()
 Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
-function Base.setindex!{T<:GroupElem}(g::DirectProductGroupElem{T}, v::T, i::Int)
+function Base.setindex!(g::DirectProductGroupElem{T}, v::T, i::Int) where {T}
    parent(v) == parent(first(g.elts)) || throw("$g is not an element of $i-th factor of $(parent(G))")
    g.elts[i] = v
    return g
@@ -160,14 +160,14 @@ doc"""
 > operation as defined by `operations` field of the parent object.
 """
 # TODO: dirty hack around `+/*` operations
-function *{T<:GroupElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T}
    if check
       parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
    end
    return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
 
-function *{T<:RingElem}(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true)
+function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T<:RingElem}
    if check
       parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
    end
@@ -179,11 +179,11 @@ doc"""
 > Return the inverse of the given element in the direct product group.
 """
 # TODO: dirty hack around `+/*` operation
-function inv{T<:GroupElem}(g::DirectProductGroupElem{T})
+function inv(g::DirectProductGroupElem{T}) where {T<:GroupElem}
    return DirectProductGroupElem([inv(a) for a in g.elts])
 end
 
-function inv{T<:RingElem}(g::DirectProductGroupElem{T})
+function inv(g::DirectProductGroupElem{T}) where {T<:RingElem}
    return DirectProductGroupElem(-g.elts)
 end
 
