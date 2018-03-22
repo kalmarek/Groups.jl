@@ -8,7 +8,7 @@
    @testset "Constructors" begin
       @test isa(Groups.DirectProductGroup(G,2), Nemo.Group)
       @test isa(G×G, Nemo.Group)
-      @test isa(Groups.DirectProductGroup(G,2), Groups.DirectProductGroup{Nemo.PermGroup})
+      @test isa(Groups.DirectProductGroup(G,2), Groups.DirectProductGroup{Generic.PermGroup{Int64}})
 
       GG = Groups.DirectProductGroup(G,2)
 
@@ -18,7 +18,7 @@
       @test GG(G(), G()) == GG()
 
       @test isa(GG([g, g^2]), GroupElem)
-      @test isa(GG([g, g^2]), Groups.DirectProductGroupElem{Nemo.perm})
+      @test isa(GG([g, g^2]), Groups.DirectProductGroupElem{Generic.perm{Int64}})
 
       h = GG([g,g^2])
 
