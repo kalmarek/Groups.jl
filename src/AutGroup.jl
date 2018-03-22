@@ -19,7 +19,7 @@ immutable FlipAut
 end
 
 immutable PermAut
-    p::Nemo.Generic.perm
+    p::Nemo.Generic.perm{Int8}
 end
 
 immutable Identity end
@@ -86,7 +86,7 @@ end
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
-function subscriptify(n::Int)
+function subscriptify(n::Integer)
     subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
     return join([Char(subscript_0 + i) for i in reverse(digits(n))])
 end
@@ -115,7 +115,7 @@ function flip_autsymbol(i; pow::Int=1)
     end
 end
 
-function perm_autsymbol(p::Generic.perm; pow::Int=1)
+function perm_autsymbol(p::Generic.perm{Int8}; pow::Int=1)
     p = p^pow
     if p == parent(p)()
        return id_autsymbol()
@@ -125,9 +125,9 @@ function perm_autsymbol(p::Generic.perm; pow::Int=1)
     end
 end
 
-function perm_autsymbol(a::Vector{Int})
-   G = PermutationGroup(length(a))
-   return perm_autsymbol(G(a))
+function perm_autsymbol(a::Vector{T}) where T<:Integer
+   G = PermutationGroup(Int8(length(a)))
+   return perm_autsymbol(G(Vector{Int8}(a)))
 end
 
 domain(G::AutGroup) = deepcopy(G.domain)
@@ -152,7 +152,7 @@ function AutGroup(G::FreeGroup; special=false)
 
    if !special
       flips = [flip_autsymbol(i) for i in 1:n]
-      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(n))][2:end]
+      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(Int8(n)))][2:end]
 
       append!(S, [flips; syms])
 

@@ -1,6 +1,6 @@
 @testset "Automorphisms" begin
    using Nemo
-   G = PermutationGroup(4)
+   G = PermutationGroup(Int8(4))
 
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol("a")
@@ -8,7 +8,7 @@
       f = Groups.AutSymbol("a", 1, Groups.FlipAut(2))
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
-      @test isa(Groups.perm_autsymbol(G([1,2,3,4])), Groups.AutSymbol)
+      @test isa(Groups.perm_autsymbol([1,2,3,4]), Groups.AutSymbol)
       @test isa(Groups.rmul_autsymbol(1,2), Groups.AutSymbol)
       @test isa(Groups.lmul_autsymbol(3,4), Groups.AutSymbol)
       @test isa(Groups.flip_autsymbol(3), Groups.AutSymbol)
@@ -29,21 +29,21 @@
    end
 
    @testset "perm_autsymbol correctness" begin
-      σ = Groups.perm_autsymbol(G([1,2,3,4]))
       @test σ(domain) == domain
       @test inv(σ)(domain) == domain
+      σ = Groups.perm_autsymbol([1,2,3,4])
 
-      σ = Groups.perm_autsymbol(G([2,3,4,1]))
       @test σ(domain) == [b, c, d, a]
       @test inv(σ)(domain) == [d, a, b, c]
+      σ = Groups.perm_autsymbol([2,3,4,1])
 
-      σ = Groups.perm_autsymbol(G([2,1,4,3]))
       @test σ(domain) == [b, a, d, c]
       @test inv(σ)(domain) == [b, a, d, c]
+      σ = Groups.perm_autsymbol([2,1,4,3])
 
-      σ = Groups.perm_autsymbol(G([2,3,1,4]))
       @test σ(domain) == [b,c,a,d]
       @test inv(σ)(domain) == [c,a,b,d]
+      σ = Groups.perm_autsymbol([2,3,1,4])
    end
 
    @testset "rmul/lmul_autsymbol correctness" begin
@@ -115,21 +115,20 @@
       @test isa(A(Groups.flip_autsymbol(2)), AutGroupElem)
       @test A(Groups.flip_autsymbol(2)) in gens
 
-      @test isa(A(Groups.perm_autsymbol(PermutationGroup(2)([2,1]))),
-         AutGroupElem)
-      @test A(Groups.perm_autsymbol(PermutationGroup(2)([2,1]))) in gens
+      @test isa(A(Groups.perm_autsymbol([2,1])), AutGroupElem)
+      @test A(Groups.perm_autsymbol([2,1])) in gens
    end
 
    A = AutGroup(FreeGroup(4))
 
    @testset "eltary functions" begin
 
-      f = Groups.perm_autsymbol(G([2,3,4,1]))
+      f = Groups.perm_autsymbol([2,3,4,1])
       @test (Groups.change_pow(f, 2)).pow == 1
       @test (Groups.change_pow(f, -2)).pow == 1
       @test (inv(f)).pow == 1
 
-      f = Groups.perm_autsymbol(G([2,1,4,3]))
+      f = Groups.perm_autsymbol([2,1,4,3])
       @test isa(inv(f), Groups.AutSymbol)
 
       @test_throws DomainError f^-1
@@ -139,7 +138,7 @@
    end
 
    @testset "reductions/arithmetic" begin
-      f = Groups.perm_autsymbol(G([2,3,4,1]))
+      f = Groups.perm_autsymbol([2,3,4,1])
 
       f² = Groups.r_multiply(A(f), [f], reduced=false)
       @test Groups.simplify_perms!(f²) == false
