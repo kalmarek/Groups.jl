@@ -104,8 +104,13 @@ length(s::FPSymbol) = abs(s.pow)
 ###############################################################################
 
 function show(io::IO, G::FPGroup)
-   print(io, "FPgroup on $(length(G.gens)) generators: ")
-   print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
+   print(io, "FPgroup on $(length(G.gens)) generators ")
+   strrels = join(G.rels, ", ")
+   if length(strrels) > 300
+      print(io, "⟨ ", join(G.gens, ", "), " | $(length(G.rels)) relation(s) ⟩.")
+   else
+      print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
+   end
 end
 
 ###############################################################################
