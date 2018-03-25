@@ -9,7 +9,7 @@ struct FPSymbol <: GSymbol
    pow::Int
 end
 
-FPGroupElem = GWord{FPSymbol}
+FPGroupElem = GroupWord{FPSymbol}
 
 mutable struct FPGroup <: AbstractFPGroup
    gens::Vector{FPSymbol}

@@ -9,7 +9,7 @@ struct FreeSymbol <: GSymbol
    pow::Int
 end
 
-FreeGroupElem = GWord{FreeSymbol}
+FreeGroupElem = GroupWord{FreeSymbol}
 
 mutable struct FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
@@ -58,8 +58,7 @@ function (G::FreeGroup)()
    return id
 end
 
-function (G::FreeGroup)(w::GWord)
-   eltype(w.symbols) == FreeSymbol || throw("Can not coerce $w to FreeGroup $G.")
+function (G::FreeGroup)(w::GroupWord{FreeSymbol})
    if length(w) > 0
       for s in w.symbols
          i = findfirst(g -> g.str == s.str, G.gens)

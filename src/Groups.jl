@@ -43,13 +43,15 @@ doc"""
 
 """
 
-mutable struct GWord{T<:GSymbol} <: GroupElem
+abstract type GWord{T<:GSymbol} <:GroupElem end
+
+mutable struct GroupWord{T} <: GWord{T}
    symbols::Vector{T}
    savedhash::UInt
    modified::Bool
    parent::Group
 
-   function GWord{T}(symbols::Vector{T}) where {T}
+   function GroupWord{T}(symbols::Vector{T}) where {T}
       return new{T}(symbols, hash(symbols), true)
    end
 end
@@ -70,8 +72,8 @@ parent{T<:GSymbol}(w::GWord{T}) = w.parent
 #
 ###############################################################################
 
-GWord(s::T) where {T} = GWord{T}(T[s])
-convert(::Type{GWord{T}}, s::T) where {T<:GSymbol} = GWord{T}(T[s])
+GroupWord(s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
+convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 
 ###############################################################################
 #
@@ -85,9 +87,9 @@ function hash(W::GWord, h::UInt)
     return res
 end
 
-function deepcopy_internal(W::GWord{T}, dict::ObjectIdDict) where {T<:GSymbol}
+function deepcopy_internal(W::T, dict::ObjectIdDict) where {T<:GWord}
     G = parent(W)
-    return G(GWord{T}(deepcopy(W.symbols)))
+    return G(T(deepcopy(W.symbols)))
 end
 
 isone(s::GSymbol) = s.pow == 0
@@ -255,12 +257,12 @@ end
 #
 ###############################################################################
 
-function inv(W::GWord{T}) where {T}
+function inv(W::T) where {T<:GWord}
     if length(W) == 0
         return W
     else
         G = parent(W)
-        w = GWord{T}(reverse([inv(s) for s in W.symbols]))
+        w = T(reverse([inv(s) for s in W.symbols]))
         w.modified = true
         return G(w)
     end
@@ -377,7 +379,7 @@ end
 #
 ###############################################################################
 
-function generate_balls{T<:GroupElem}(S::Vector{T}, Id::T=parent(first(S))(); radius=2, op=*)
+function generate_balls(S::Vector{T}, Id::T=parent(first(S))(); radius=2, op=*) where T<:GWord
     sizes = Int[]
     B = [Id]
     for i in 1:radius
