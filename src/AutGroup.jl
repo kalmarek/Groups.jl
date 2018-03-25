@@ -35,7 +35,6 @@ AutGroupElem = GWord{AutSymbol}
 mutable struct AutGroup{N} <: AbstractFPGroup
    objectGroup::FreeGroup
    gens::Vector{AutSymbol}
-   domain::NTuple{N, FreeGroupElem}
 end
 
 export AutGroupElem, AutGroup
@@ -130,7 +129,7 @@ function perm_autsymbol(a::Vector{T}) where T<:Integer
    return perm_autsymbol(G(Vector{Int8}(a)))
 end
 
-domain(G::AutGroup) = deepcopy(G.domain)
+domain(G::AutGroup)= NTuple{length(G.objectGroup.gens), FreeGroupElem}(gens(G.objectGroup))
 
 ###############################################################################
 #
@@ -140,7 +139,7 @@ domain(G::AutGroup) = deepcopy(G.domain)
 
 function AutGroup(G::FreeGroup; special=false)
    n = length(gens(G))
-   n == 0 && return AutGroup(G, AutSymbol[], NTuple{n, FreeGroupElem}())
+   n == 0 && return AutGroup{n}(G, AutSymbol[])
    S = AutSymbol[]
 
    indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
@@ -157,7 +156,7 @@ function AutGroup(G::FreeGroup; special=false)
       append!(S, [flips; syms])
 
    end
-   return AutGroup{n}(G, S, NTuple{n, FreeGroupElem}(G.(G.gens)))
+   return AutGroup{n}(G, S)
 end
 
 ###############################################################################
