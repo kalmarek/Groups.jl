@@ -60,6 +60,19 @@ abstract type AbstractFPGroup <: Group end
 
 ###############################################################################
 #
+#   Includes
+#
+###############################################################################
+
+include("FreeGroup.jl")
+include("FPGroups.jl")
+include("AutGroup.jl")
+
+include("DirectProducts.jl")
+include("WreathProducts.jl")
+
+###############################################################################
+#
 #   Type and parent object methods
 #
 ###############################################################################
@@ -400,18 +413,5 @@ function generate_balls{T<:RingElem}(S::Vector{T}, Id::T=one(parent(first(S))); 
     end
     return B, sizes
 end
-
-###############################################################################
-#
-#   Includes
-#
-###############################################################################
-
-include("FreeGroup.jl")
-include("FPGroups.jl")
-include("AutGroup.jl")
-
-include("DirectProducts.jl")
-include("WreathProducts.jl")
 
 end # of module Groups
