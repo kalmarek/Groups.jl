@@ -174,6 +174,10 @@ end
 #
 ###############################################################################
 
+function convert(::Type{Automorphism{N}}, s::AutSymbol) where N
+    return Automorphism{N}(AutSymbol[s])
+end
+
 function (G::AutGroup{N})() where N
    id = Automorphism{N}(id_autsymbol())
    id.parent = G
