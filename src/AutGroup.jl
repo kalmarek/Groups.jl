@@ -1,6 +1,6 @@
 ###############################################################################
 #
-#   AutSymbol/ AutGroup / AutGroupElem
+#   AutSymbol/ AutGroup / Automorphism
 #
 ###############################################################################
 
@@ -30,14 +30,23 @@ struct AutSymbol <: GSymbol
    typ::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
 
-AutGroupElem = GWord{AutSymbol}
-
 mutable struct AutGroup{N} <: AbstractFPGroup
    objectGroup::FreeGroup
    gens::Vector{AutSymbol}
 end
 
-export AutGroupElem, AutGroup
+mutable struct Automorphism{N} <: GWord{AutSymbol}
+    symbols::Vector{AutSymbol}
+    modified::Bool
+    savedhash::UInt
+    savedimage::NTuple{N, FreeGroupElem}
+    parent::AutGroup{N}
+
+    Automorphism{N}(f::Vector{AutSymbol}) where N = new(f, true, UInt(0))
+
+end
+
+export Automorphism, AutGroup
 
 ###############################################################################
 #
@@ -45,9 +54,9 @@ export AutGroupElem, AutGroup
 #
 ###############################################################################
 
-elem_type(::AutGroup) = AutGroupElem
+elem_type(::AutGroup{N}) where N = Automorphism{N}
 
-parent_type(::AutGroupElem) = AutGroup
+parent_type(::Automorphism{N}) where N = AutGroup{N}
 
 ###############################################################################
 #
@@ -133,7 +142,7 @@ domain(G::AutGroup)= NTuple{length(G.objectGroup.gens), FreeGroupElem}(gens(G.ob
 
 ###############################################################################
 #
-#   AutGroup / AutGroupElem constructors
+#   AutGroup / Automorphism constructors
 #
 ###############################################################################
 
@@ -165,26 +174,26 @@ end
 #
 ###############################################################################
 
-function (G::AutGroup)()
-   id = AutGroupElem(id_autsymbol())
+function (G::AutGroup{N})() where N
+   id = Automorphism{N}(id_autsymbol())
    id.parent = G
    return id
 end
 
-function (G::AutGroup)(f::AutSymbol)
-   g = AutGroupElem(f)
+function (G::AutGroup{N})(f::AutSymbol) where N
+   g = Automorphism{N}([f])
    g.parent = G
    return g
 end
 
-function (G::AutGroup)(g::AutGroupElem)
+function (G::AutGroup{N})(g::Automorphism{N}) where N
    g.parent = G
    return g
 end
 
 ###############################################################################
 #
-#   Functional call overloads for evaluation of AutSymbol and AutGroupElem
+#   Functional call overloads for evaluation of AutSymbol and Automorphism
 #
 ###############################################################################
 
@@ -197,7 +206,7 @@ function (f::AutSymbol)(v::NTuple{N, T}) where {N, T}
    return v
 end
 
-function (F::AutGroupElem)(v::NTuple{N, T}) where {N, T}
+function (F::Automorphism{N})(v::NTuple{N, T}) where {N, T}
     for f in F.symbols
         v = f(v)::NTuple{N, T}
     end
@@ -212,7 +221,7 @@ end
 
 hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
 
-function hash(g::AutGroupElem, h::UInt)
+function hash(g::Automorphism, h::UInt)
    if g.modified
       g.savedhash = hash(g(domain(parent(g))), hash(typeof(g), hash(parent(g), h)))
       g.modified = false
@@ -262,7 +271,7 @@ end
 
 (==)(s::AutSymbol, t::AutSymbol) = s.str == t.str && s.pow == t.pow
 
-function (==)(g::AutGroupElem, h::AutGroupElem)
+function (==)(g::Automorphism, h::Automorphism)
    parent(g) == parent(h) || return false
    return g(domain(parent(g))) == h(domain(parent(h)))
 end
@@ -292,7 +301,7 @@ function getperm(s::AutSymbol)
     return s.typ.p
 end
 
-function simplify_perms!(W::AutGroupElem)
+function simplify_perms!(W::Automorphism)
     reduced = true
     for i in 1:length(W.symbols) - 1
         current = W.symbols[i]
@@ -318,7 +327,7 @@ function simplify_perms!(W::AutGroupElem)
     return reduced
 end
 
-function reduce!(W::AutGroupElem)
+function reduce!(W::Automorphism)
     if length(W) < 2
         deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
     else
