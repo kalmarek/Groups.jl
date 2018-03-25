@@ -4,30 +4,30 @@
 #
 ###############################################################################
 
-immutable RTransvect
+struct RTransvect
     i::Int
     j::Int
 end
 
-immutable LTransvect
+struct LTransvect
     i::Int
     j::Int
 end
 
-immutable FlipAut
+struct FlipAut
     i::Int
 end
 
-immutable PermAut
+struct PermAut
     p::Nemo.Generic.perm{Int8}
 end
 
-immutable Identity end
+struct Identity end
 
-immutable AutSymbol <: GSymbol
+struct AutSymbol <: GSymbol
    str::String
    pow::Int
-   typ::Union{RTransvect, LTransvect, FlipAut, PermAut, Identity}
+   typ::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
 
 AutGroupElem = GWord{AutSymbol}
