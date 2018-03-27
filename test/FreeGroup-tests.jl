@@ -29,8 +29,8 @@ end
    s = Groups.FreeSymbol("s")
    t = Groups.FreeSymbol("t", -2)
 
-   @test isa(Groups.GWord(s), Groups.GWord)
-   @test isa(Groups.GWord(s), FreeGroupElem)
+   @test isa(Groups.GroupWord(s), Groups.GWord{Groups.FreeSymbol})
+   @test isa(Groups.GroupWord(s), FreeGroupElem)
    @test isa(FreeGroupElem(s), Groups.GWord)
    @test isa(convert(FreeGroupElem, s), Groups.GWord)
    @test isa(convert(FreeGroupElem, s), FreeGroupElem)
@@ -56,7 +56,7 @@ end
 
    @testset "internal arithmetic" begin
 
-      @test_broken Vector{Groups.GWord}([s,t]) == [Groups.GWord(s), Groups.GWord(t)]
+      @test_broken Vector{Groups.FreeGroupElem}([s,t]) == [Groups.GroupWord(s), Groups.GroupWord(t)]
       @test (s*s).symbols == (s^2).symbols
       @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
 
@@ -111,10 +111,10 @@ end
    @testset "replacements" begin
       a = Groups.FreeSymbol("a")
       b = Groups.FreeSymbol("b")
-      @test Groups.is_subsymbol(a, Groups.change_pow(a,2)) == true
-      @test Groups.is_subsymbol(a, Groups.change_pow(a,-2)) == false
-      @test Groups.is_subsymbol(b, Groups.change_pow(a,-2)) == false
-      @test Groups.is_subsymbol(inv(b), Groups.change_pow(b,-2)) == true
+      @test Groups.issubsymbol(a, Groups.change_pow(a,2)) == true
+      @test Groups.issubsymbol(a, Groups.change_pow(a,-2)) == false
+      @test Groups.issubsymbol(b, Groups.change_pow(a,-2)) == false
+      @test Groups.issubsymbol(inv(b), Groups.change_pow(b,-2)) == true
 
       c = s*t*s^-1*t^-1
       @test findfirst(c, s^-1*t^-1) == 3
