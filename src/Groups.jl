@@ -289,45 +289,36 @@ end
 issubsymbol(s::GSymbol, t::GSymbol) =
     s.str == t.str && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
-function findfirst(W::GWord, Z::GWord)
+"""doc
+Find the first linear index k>=i such that Z < W.symbols[k:k+length(Z)-1]
+"""
+function findnext(W::GWord, Z::GWord, i::Int)
     n = length(Z.symbols)
-
    if n == 0
       return 0
    elseif n == 1
-      for (i,s) in enumerate(W.symbols)
-         if is_subsymbol(Z.symbols[1], s)
-            return i
+      for idx in i:endof(W.symbols)
+         if issubsymbol(Z.symbols[1], W.symbols[idx])
+            return idx
          end
       end
       return 0
    else
-      for (idx,a) in enumerate(W.symbols)
-         if idx + n - 1 > length(W.symbols)
-            break
-         end
-         foundfirst = is_subsymbol(Z.symbols[1], a)
-         if foundfirst
-            middlematch = W.symbols[idx+1:idx+n-2] == Z.symbols[2:end-1]
-            lastmatch = is_subsymbol(Z.symbols[end], W.symbols[idx+n-1])
-            if middlematch && lastmatch
+      for idx in i:endof(W.symbols) - n + 1
+         foundfirst = issubsymbol(Z.symbols[1], W.symbols[idx])
+         lastmatch = issubsymbol(Z.symbols[end], W.symbols[idx+n-1])
+         if foundfirst && lastmatch
+            # middles match:
+            if view(Z.symbols, 2:n-1) == view(W.symbols, idx+1:idx+n-2)
                return idx
             end
          end
       end
    end
-
    return 0
 end
 
-function findnext(W::GWord, Z::GWord, i::Integer)
-    t = findfirst(GWord{eltype(W.symbols)}(W.symbols[i:end]), Z)
-    if t > 0
-        return t+i-1
-    else
-        return 0
-    end
-end
+findfirst(W::GWord, Z::GWord) = findnext(W, Z, 1)
 
 function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=true)
    n = length(toreplace.symbols)
