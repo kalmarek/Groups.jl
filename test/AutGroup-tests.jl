@@ -177,6 +177,13 @@
 
       @test g == A(Groups.perm_autsymbol([2,1,3,4]))
 
+      g_im = g(Groups.domain(A))
+      @test length(g_im[1]) == 5
+      @test length(g_im[2]) == 3
+      @test length(g_im[3]) == 1
+      @test length(g_im[4]) == 1
+      @test length.(Groups.reduce!.(g_im)) == (1,1,1,1)
+
    end
 
    @testset "specific Aut(F4) tests" begin
