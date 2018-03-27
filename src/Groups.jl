@@ -27,8 +27,10 @@ doc"""
 """
 abstract type GSymbol end
 
+abstract type GWord{T<:GSymbol} <:GroupElem end
+
 doc"""
-    W::GWord{T<:GSymbol} <:GroupElem
+    W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
 > Basic representation of element of a finitely presented group. `W.symbols`
 > fieldname contains particular group symbols which multiplied constitute a
 > group element, i.e. a word in generators.
@@ -42,9 +44,6 @@ doc"""
 > `modified` flag remains `false`.
 
 """
-
-abstract type GWord{T<:GSymbol} <:GroupElem end
-
 mutable struct GroupWord{T} <: GWord{T}
    symbols::Vector{T}
    savedhash::UInt
