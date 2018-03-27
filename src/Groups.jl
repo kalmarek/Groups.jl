@@ -356,7 +356,7 @@ function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
     replace!(deepcopy(W), index, toreplace, replacement)
 end
 
-function replace_all!(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
+function replace_all!(W::T,subst_dict::Dict{T,T}) where {T<:GWord}
     modified = false
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
@@ -370,7 +370,7 @@ function replace_all!(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
     return modified
 end
 
-function replace_all(W::GWord{T},subst_dict::Dict{GWord{T},GWord{T}}) where {T}
+function replace_all(W::T, subst_dict::Dict{T,T}) where {T<:GWord}
    W = deepcopy(W)
    replace_all!(W, subst_dict)
    return W
