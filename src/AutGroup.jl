@@ -39,7 +39,6 @@ mutable struct Automorphism{N} <: GWord{AutSymbol}
     symbols::Vector{AutSymbol}
     modified::Bool
     savedhash::UInt
-    savedimage::NTuple{N, FreeGroupElem}
     parent::AutGroup{N}
 
     Automorphism{N}(f::Vector{AutSymbol}) where N = new(f, true, UInt(0))
