@@ -286,7 +286,7 @@ end
 #
 ###############################################################################
 
-is_subsymbol(s::GSymbol, t::GSymbol) =
+issubsymbol(s::GSymbol, t::GSymbol) =
     s.str == t.str && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
 function findfirst(W::GWord, Z::GWord)
@@ -336,7 +336,7 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=t
 
    elseif n == 1
       if check
-         @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+         @assert issubsymbol(toreplace.symbols[1], W.symbols[index])
       end
 
       first = change_pow(W.symbols[index],
@@ -345,9 +345,9 @@ function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=t
 
    else
       if check
-         @assert is_subsymbol(toreplace.symbols[1], W.symbols[index])
+         @assert issubsymbol(toreplace.symbols[1], W.symbols[index])
          @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
-         @assert is_subsymbol(toreplace.symbols[end], W.symbols[index+n-1])
+         @assert issubsymbol(toreplace.symbols[end], W.symbols[index+n-1])
       end
 
       first = change_pow(W.symbols[index],
