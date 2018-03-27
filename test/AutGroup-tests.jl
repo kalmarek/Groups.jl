@@ -81,14 +81,14 @@
       @test inv(l)(deepcopy(D)) == (a, d^-1*b,c, d)
    end
 
-   @testset "AutGroup/AutGroupElem constructors" begin
+   @testset "AutGroup/Automorphism constructors" begin
       f = Groups.AutSymbol("a", 1, Groups.FlipAut(1))
-      @test isa(AutGroupElem(f), Groups.GWord)
-      @test isa(AutGroupElem(f), AutGroupElem)
+      @test isa(Automorphism{3}(f), Groups.GWord)
+      @test isa(Automorphism{3}(f), Automorphism)
       @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
       A = AutGroup(FreeGroup(1))
-      @test isa(Nemo.gens(A), Vector{AutGroupElem})
+      @test isa(Nemo.gens(A), Vector{Automorphism{1}})
       @test length(Nemo.gens(A)) == 1
       A = AutGroup(FreeGroup(1), special=true)
       @test length(Nemo.gens(A)) == 0
@@ -96,25 +96,25 @@
       @test length(Nemo.gens(A)) == 7
       gens = Nemo.gens(A)
 
-      @test isa(A(Groups.rmul_autsymbol(1,2)), AutGroupElem)
+      @test isa(A(Groups.rmul_autsymbol(1,2)), Automorphism)
       @test A(Groups.rmul_autsymbol(1,2)) in gens
 
-      @test isa(A(Groups.rmul_autsymbol(2,1)), AutGroupElem)
+      @test isa(A(Groups.rmul_autsymbol(2,1)), Automorphism)
       @test A(Groups.rmul_autsymbol(2,1)) in gens
 
-      @test isa(A(Groups.lmul_autsymbol(1,2)), AutGroupElem)
+      @test isa(A(Groups.lmul_autsymbol(1,2)), Automorphism)
       @test A(Groups.lmul_autsymbol(1,2)) in gens
 
-      @test isa(A(Groups.lmul_autsymbol(2,1)), AutGroupElem)
+      @test isa(A(Groups.lmul_autsymbol(2,1)), Automorphism)
       @test A(Groups.lmul_autsymbol(2,1)) in gens
 
-      @test isa(A(Groups.flip_autsymbol(1)), AutGroupElem)
+      @test isa(A(Groups.flip_autsymbol(1)), Automorphism)
       @test A(Groups.flip_autsymbol(1)) in gens
 
-      @test isa(A(Groups.flip_autsymbol(2)), AutGroupElem)
+      @test isa(A(Groups.flip_autsymbol(2)), Automorphism)
       @test A(Groups.flip_autsymbol(2)) in gens
 
-      @test isa(A(Groups.perm_autsymbol([2,1])), AutGroupElem)
+      @test isa(A(Groups.perm_autsymbol([2,1])), Automorphism)
       @test A(Groups.perm_autsymbol([2,1])) in gens
    end
 
@@ -147,7 +147,7 @@
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == A()
-      g,h = Nemo.gens(A)[[1,8]]
+      g,h = Nemo.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
 
       @test Groups.domain(A) == NTuple{4, FreeGroupElem}(gens(A.objectGroup))
 
@@ -192,7 +192,7 @@
       S = G.gens
       @test isa(S, Vector{Groups.AutSymbol})
       S = [G(s) for s in unique(S)]
-      @test isa(S, Vector{AutGroupElem})
+      @test isa(S, Vector{Automorphism{N}})
       @test S == Nemo.gens(G)
       @test length(S) == 51
       S_inv = [S..., [inv(s) for s in S]...]
