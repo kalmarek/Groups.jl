@@ -58,7 +58,7 @@ FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 ###############################################################################
 
 function (G::FPGroup)()
-   id = FPGroupElem(FPSymbol("", 0))
+   id = FPGroupElem(FPSymbol[])
    id.parent = G
    return id
 end

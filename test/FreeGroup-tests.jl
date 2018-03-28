@@ -76,7 +76,7 @@ end
    end
 
    @testset "reductions" begin
-      @test length(G().symbols) == 1
+      @test length(G().symbols) == 0
       @test length((G()*G()).symbols) == 0
       @test G() == G()*G()
       w = deepcopy(s)

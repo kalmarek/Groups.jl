@@ -53,7 +53,7 @@ FreeGroup(a::Vector{String}) = FreeGroup([FreeSymbol(i) for i in a])
 ###############################################################################
 
 function (G::FreeGroup)()
-   id = FreeGroupElem(FreeSymbol("", 0))
+   id = FreeGroupElem(FreeSymbol[])
    id.parent = G
    return id
 end
