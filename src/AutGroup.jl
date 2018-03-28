@@ -19,7 +19,7 @@ struct FlipAut
 end
 
 struct PermAut
-    p::Nemo.Generic.perm{Int8}
+    perm::Nemo.Generic.perm{Int8}
 end
 
 struct Identity end
@@ -75,7 +75,7 @@ end
 
 function (σ::PermAut)(v, pow=1::Int)
    w = deepcopy(v)
-   s = (σ.p^pow).d
+   s = (σ.perm^pow).d
    @inbounds for k in eachindex(v)
        v[k].symbols = w[s[k]].symbols
    end
@@ -274,7 +274,7 @@ function change_pow(s::AutSymbol, n::Int)
     if isa(symbol, FlipAut)
         return flip_autsymbol(symbol.i, pow=n)
     elseif isa(symbol, PermAut)
-        return perm_autsymbol(symbol.p, pow=n)
+        return perm_autsymbol(symbol.perm, pow=n)
     elseif isa(symbol, RTransvect)
         return rmul_autsymbol(symbol.i, symbol.j, pow=n)
     elseif isa(symbol, LTransvect)
@@ -321,8 +321,12 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 ###############################################################################
 
 function getperm(s::AutSymbol)
-    isa(s.typ, PermAut) || throw("$s is not a permutation automorphism")
-    return s.typ.p
+    if s.pow != 1
+        warn("Power for perm_symbol should be never 0!")
+        return s.typ.perm^s.pow
+    else
+        return s.typ.perm
+    end
 end
 
 function simplify_perms!(W::Automorphism)
