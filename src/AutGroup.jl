@@ -329,42 +329,40 @@ function getperm(s::AutSymbol)
     end
 end
 
-function simplify_perms!(W::Automorphism)
+function simplify_perms!(W::Automorphism{N}) where N
     reduced = true
-    for i in 1:length(W.symbols) - 1
-        current = W.symbols[i]
-        if isa(current.typ, PermAut)
-            next_s = W.symbols[i+1]
-            if isa(next_s.typ, PermAut)
-                if current.pow != 1
-                    current = perm_autsymbol(perm(current), pow=current.pow)
-                end
-
-                reduced = false
-                if next_s.pow != 1
-                    next_s = perm_autsymbol(perm(next_s), pow=next_s.pow)
-                end
-                p1 = getperm(current)
-                p2 = getperm(next_s)
-                W.symbols[i] = id_autsymbol()
-                W.symbols[i+1] = perm_autsymbol(p1*p2)
+    to_delete = Int[]
+    for i in 1:length(W.symbols)-1
+        if isa(W.symbols[i].typ, PermAut) && isa(W.symbols[i+1].typ, PermAut)
+            reduced = false
+            c = W.symbols[i]
+            n = W.symbols[i+1]
+            p = (getperm(c)*getperm(n)).d
+            if p == PermutationGroup(N)()
+                push!(to_delete, i, i+1)
+            else
+                W.symbols[i+1].typ.perm.d = p
+                push!(to_delete, i)
             end
         end
     end
-    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+    deleteat!(W.symbols, to_delete)
     return reduced
 end
 
 function reduce!(W::Automorphism)
-    if length(W) < 2
-        deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+    if length(W.symbols) == 0
+        return W
+    elseif length(W.symbols) == 1 && W.symbols[1].pow == 0
+        deleteat!(W.symbols, 1)
+        W.modified = true
     else
         reduced = false
         while !reduced
             reduced = simplify_perms!(W) && free_reduce!(W)
-            deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
         end
     end
+    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
 
     W.modified = true
 
