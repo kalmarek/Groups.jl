@@ -94,9 +94,12 @@ convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 ###############################################################################
 
 function hash(W::GWord, h::UInt)
-    W.modified && reduce!(W)
-    res = xor(W.savedhash, h)
-    return res
+    if W.modified
+        reduce!(W)
+        W.savedhash = hash(W.symbols, hash(typeof(W), hash(parent(W), zero(UInt))))
+        W.modified = false
+    end
+    return xor(W.savedhash, h)
 end
 
 function deepcopy_internal(W::T, dict::ObjectIdDict) where {T<:GWord}
@@ -132,9 +135,9 @@ function reduce!(W::GWord)
             reduced = free_reduce!(W)
         end
     end
+    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+    W.modified = true
 
-    W.modified = false
-    W.savedhash = hash(W.symbols, hash(typeof(W)))
     return W
 end
 
@@ -193,9 +196,15 @@ end
 
 function (==)(W::GWord, Z::GWord)
     parent(W) == parent(Z) || return false
-    W.modified && reduce!(W) # reduce clears the flag and calculates savedhash
-    Z.modified && reduce!(Z)
-    return W.savedhash == Z.savedhash && W.symbols == Z.symbols
+
+    W.modified && hash(W)
+    Z.modified && hash(Z)
+
+    if W.savedhash != Z.savedhash
+        return false
+    end
+
+    return W.symbols == Z.symbols
 end
 
 ###############################################################################
