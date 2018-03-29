@@ -94,11 +94,7 @@ convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 ###############################################################################
 
 function hash(W::GWord, h::UInt)
-    if W.modified
-        reduce!(W)
-        W.savedhash = hash(W.symbols, hash(typeof(W), hash(parent(W), zero(UInt))))
-        W.modified = false
-    end
+    W.modified && reduce!(W)
     return xor(W.savedhash, h)
 end
 
@@ -148,8 +144,9 @@ function reduce!(W::GWord)
             reduced = free_reduce!(W)
         end
     end
-    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
-    W.modified = true
+
+    W.savedhash = hash(W.symbols, hash(typeof(W), hash(parent(W), zero(UInt))))
+    W.modified = false
 
     return W
 end
@@ -210,8 +207,8 @@ end
 function (==)(W::GWord, Z::GWord)
     parent(W) == parent(Z) || return false
 
-    W.modified && hash(W)
-    Z.modified && hash(Z)
+    W.modified && reduce!(W)
+    Z.modified && reduce!(Z)
 
     if W.savedhash != Z.savedhash
         return false
