@@ -111,24 +111,37 @@ isone(s::GSymbol) = s.pow == 0
 
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
+function delete_ids!(W::GWord)
+    to_delete = Int[]
+    for i in 1:length(W.symbols)
+        if W.symbols[i].pow == 0
+           push!(to_delete, i)
+        end
+    end
+    deleteat!(W.symbols, to_delete)
+end
+
 function free_reduce!(W::GWord)
     reduced = true
     for i in 1:length(W.symbols) - 1
-        if W.symbols[i].str == W.symbols[i+1].str
+        if W.symbols[i].pow == 0
+            continue
+        elseif W.symbols[i].str == W.symbols[i+1].str
             reduced = false
             p1 = W.symbols[i].pow
             p2 = W.symbols[i+1].pow
+
             W.symbols[i+1] = change_pow(W.symbols[i], p1 + p2)
             W.symbols[i] = change_pow(W.symbols[i], 0)
         end
     end
-    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+    delete_ids!(W)
     return reduced
 end
 
 function reduce!(W::GWord)
     if length(W) < 2
-        deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+        delete_ids!(W)
     else
         reduced = false
         while !reduced
