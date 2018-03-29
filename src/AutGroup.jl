@@ -331,30 +331,26 @@ end
 
 function simplify_perms!(W::Automorphism{N}) where N
     reduced = true
-    to_delete = Int[]
     for i in 1:length(W.symbols)-1
-        if isa(W.symbols[i].typ, PermAut) && isa(W.symbols[i+1].typ, PermAut)
+        if W.symbols[i].pow == 0
+            continue
+        elseif isa(W.symbols[i].typ, PermAut) && isa(W.symbols[i+1].typ, PermAut)
             reduced = false
             c = W.symbols[i]
             n = W.symbols[i+1]
             p = (getperm(c)*getperm(n)).d
-            if p == PermutationGroup(N)()
-                push!(to_delete, i, i+1)
-            else
-                W.symbols[i+1].typ.perm.d = p
-                push!(to_delete, i)
-            end
+            W.symbols[i+1].typ.perm.d = p
         end
     end
-    deleteat!(W.symbols, to_delete)
+    delete_ids!(W)
     return reduced
 end
 
 function reduce!(W::Automorphism)
-    if length(W.symbols) == 0
+    if length(W) == 0
         return W
-    elseif length(W.symbols) == 1 && W.symbols[1].pow == 0
-        deleteat!(W.symbols, 1)
+    elseif length(W)< 2
+        delete_ids!(W)
         W.modified = true
     else
         reduced = false
@@ -362,7 +358,6 @@ function reduce!(W::Automorphism)
             reduced = simplify_perms!(W) && free_reduce!(W)
         end
     end
-    deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
 
     W.modified = true
 
