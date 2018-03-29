@@ -103,8 +103,6 @@ function deepcopy_internal(W::T, dict::ObjectIdDict) where {T<:GWord}
     return G(T(deepcopy(W.symbols)))
 end
 
-isone(s::GSymbol) = s.pow == 0
-
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
 function delete_ids!(W::GWord)
@@ -189,9 +187,7 @@ function show(io::IO, W::GWord)
 end
 
 function show(io::IO, s::T) where {T<:GSymbol}
-   if isone(s)
-      print(io, "(id)")
-   elseif s.pow == 1
+   if s.pow == 1
       print(io, s.str)
    else
       print(io, (s.str)*"^$(s.pow)")
