@@ -150,7 +150,7 @@ function reduce!(W::FPGroupElem)
     else
         reduced = false
         while !reduced
-            reduced = free_reduce!(W) || replace_all!(W, parent(W).rels)
+            reduced = freereduce!(W) || replace_all!(W, parent(W).rels)
         end
     end
 

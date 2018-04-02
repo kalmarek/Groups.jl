@@ -356,7 +356,7 @@ function reduce!(W::Automorphism)
     else
         reduced = false
         while !reduced
-            reduced = simplifyperms!(W) && free_reduce!(W)
+            reduced = simplifyperms!(W) && freereduce!(W)
         end
     end
 

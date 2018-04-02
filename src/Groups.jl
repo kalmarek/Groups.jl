@@ -115,7 +115,7 @@ function deleteids!(W::GWord)
     deleteat!(W.symbols, to_delete)
 end
 
-function free_reduce!(W::GWord)
+function freereduce!(W::GWord)
     reduced = true
     for i in 1:length(W.symbols) - 1
         if W.symbols[i].pow == 0
@@ -139,7 +139,7 @@ function reduce!(W::GWord)
     else
         reduced = false
         while !reduced
-            reduced = free_reduce!(W)
+            reduced = freereduce!(W)
         end
     end
 
