@@ -329,8 +329,9 @@ function getperm(s::AutSymbol)
     end
 end
 
-function simplify_perms!(W::Automorphism{N}) where N
+function simplifyperms!(W::Automorphism{N}) where N
     reduced = true
+    to_delete = Int[]
     for i in 1:length(W.symbols)-1
         if W.symbols[i].pow == 0
             continue
@@ -338,10 +339,11 @@ function simplify_perms!(W::Automorphism{N}) where N
             reduced = false
             c = W.symbols[i]
             n = W.symbols[i+1]
-            p = (getperm(c)*getperm(n)).d
-            W.symbols[i+1].typ.perm.d = p
+            W.symbols[i+1] = perm_autsymbol(getperm(c)*getperm(n))
+            push!(to_delete, i)
         end
     end
+    deleteat!(W.symbols, to_delete)
     deleteids!(W)
     return reduced
 end
@@ -349,13 +351,12 @@ end
 function reduce!(W::Automorphism)
     if length(W) == 0
         return W
-    elseif length(W)< 2
-        W.modified = true
+    elseif length(W.symbols) == 1
         deleteids!(W)
     else
         reduced = false
         while !reduced
-            reduced = simplify_perms!(W) && free_reduce!(W)
+            reduced = simplifyperms!(W) && free_reduce!(W)
         end
     end
 
