@@ -105,7 +105,7 @@ end
 
 length(W::GWord) = sum([length(s) for s in W.symbols])
 
-function delete_ids!(W::GWord)
+function deleteids!(W::GWord)
     to_delete = Int[]
     for i in 1:length(W.symbols)
         if W.symbols[i].pow == 0
@@ -129,13 +129,13 @@ function free_reduce!(W::GWord)
             W.symbols[i] = change_pow(W.symbols[i], 0)
         end
     end
-    delete_ids!(W)
+    deleteids!(W)
     return reduced
 end
 
 function reduce!(W::GWord)
     if length(W) < 2
-        delete_ids!(W)
+        deleteids!(W)
     else
         reduced = false
         while !reduced

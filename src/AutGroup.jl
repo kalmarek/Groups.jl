@@ -342,7 +342,7 @@ function simplify_perms!(W::Automorphism{N}) where N
             W.symbols[i+1].typ.perm.d = p
         end
     end
-    delete_ids!(W)
+    deleteids!(W)
     return reduced
 end
 
@@ -350,8 +350,8 @@ function reduce!(W::Automorphism)
     if length(W) == 0
         return W
     elseif length(W)< 2
-        delete_ids!(W)
         W.modified = true
+        deleteids!(W)
     else
         reduced = false
         while !reduced
