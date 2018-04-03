@@ -140,7 +140,7 @@
       f = Groups.perm_autsymbol([2,3,4,1])
 
       f² = Groups.r_multiply(A(f), [f], reduced=false)
-      @test Groups.simplify_perms!(f²) == false
+      @test Groups.simplifyperms!(f²) == false
       @test f²^2 == A()
 
       a = A(Groups.rmul_autsymbol(1,2))*Groups.flip_autsymbol(2)
