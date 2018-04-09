@@ -8,7 +8,7 @@
       f = Groups.AutSymbol("a", 1, Groups.FlipAut(2))
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
-      @test isa(Groups.perm_autsymbol([1,2,3,4]), Groups.AutSymbol)
+      @test isa(Groups.perm_autsymbol(Int8.([1,2,3,4])), Groups.AutSymbol)
       @test isa(Groups.rmul_autsymbol(1,2), Groups.AutSymbol)
       @test isa(Groups.lmul_autsymbol(3,4), Groups.AutSymbol)
       @test isa(Groups.flip_autsymbol(3), Groups.AutSymbol)
