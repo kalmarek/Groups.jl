@@ -4,29 +4,29 @@
 #
 ###############################################################################
 
-struct RTransvect
-    i::Int
-    j::Int
+struct RTransvect{I<:Integer}
+    i::I
+    j::I
 end
 
-struct LTransvect
-    i::Int
-    j::Int
+struct LTransvect{I<:Integer}
+    i::I
+    j::I
 end
 
-struct FlipAut
-    i::Int
+struct FlipAut{I<:Integer}
+    i::I
 end
 
-struct PermAut
-    perm::Nemo.Generic.perm{Int8}
+struct PermAut{I<:Integer}
+    perm::Nemo.Generic.perm{I}
 end
 
 struct Identity end
 
 struct AutSymbol <: GSymbol
    str::String
-   pow::Int
+   pow::Int8
    typ::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
 
@@ -63,17 +63,17 @@ parent_type(::Automorphism{N}) where N = AutGroup{N}
 #
 ###############################################################################
 
-function (ϱ::RTransvect)(v, pow=1::Int)
+function (ϱ::RTransvect{I})(v, pow::Integer=one(I)) where I
     @inbounds Groups.r_multiply!(v[ϱ.i], (v[ϱ.j]^pow).symbols, reduced=false)
     return v
 end
 
-function (λ::LTransvect)(v, pow=1::Int)
+function (λ::LTransvect{I})(v, pow::Integer=one(I)) where I
     @inbounds Groups.l_multiply!(v[λ.i], (v[λ.j]^pow).symbols, reduced=false)
     return v
 end
 
-function (σ::PermAut)(v, pow=1::Int)
+function (σ::PermAut{I})(v, pow::Integer=one(I)) where I
    w = deepcopy(v)
    s = (σ.perm^pow).d
    @inbounds for k in eachindex(v)
@@ -82,14 +82,14 @@ function (σ::PermAut)(v, pow=1::Int)
    return v
 end
 
-function (ɛ::FlipAut)(v, pow=1::Int)
+function (ɛ::FlipAut{I})(v, pow::Integer=one(I)) where I
    @inbounds if isodd(pow)
        v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
    end
    return v
 end
 
-(::Identity)(v, pow=1::Int) = v
+(::Identity)(v, pow::Integer=zero(Int8)) = v
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
@@ -102,38 +102,39 @@ function id_autsymbol()
    return AutSymbol("(id)", 0, Identity())
 end
 
-function rmul_autsymbol(i, j; pow::Int=1)
+function rmul_autsymbol(i::I, j::I; pow::Integer=one(I)) where I<:Integer
     str = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, RTransvect(i, j))
+    return AutSymbol(str, I(pow), RTransvect(i, j))
 end
 
-function lmul_autsymbol(i, j; pow::Int=1)
+function lmul_autsymbol(i::I, j::I; pow::Integer=one(I)) where I<:Integer
     str = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, pow, LTransvect(i, j))
+    return AutSymbol(str, I(pow), LTransvect(i, j))
 end
 
-function flip_autsymbol(i; pow::Int=1)
-    pow = (2+pow%2)%2
-    if pow == 0
+function flip_autsymbol(i::I; pow::Integer=one(I)) where I<:Integer
+    pow = I((2+pow%2)%2)
+    if pow == zero(I)
        return id_autsymbol()
     else
         str = "ɛ"*subscriptify(i)
-        return AutSymbol(str, pow, FlipAut(i))
+        return AutSymbol(str, I(pow), FlipAut(i))
     end
 end
 
-function perm_autsymbol(p::Generic.perm{Int8}; pow::Int=1)
+function perm_autsymbol(p::Generic.perm{I}; pow::Integer=one(I)) where I<:Integer
     p = p^pow
-    if p == parent(p)()
-       return id_autsymbol()
-    else
-       str = "σ"*join([subscriptify(i) for i in p.d])
-       return AutSymbol(str, 1, PermAut(p))
+    for i in eachindex(p.d)
+        if p.d[i] != i
+            str = "σ"*join([subscriptify(i) for i in p.d])
+            return AutSymbol(str, one(I), PermAut(p))
+        end
     end
+    return id_autsymbol()
 end
 
 function perm_autsymbol(a::Vector{T}) where T<:Integer
-   G = PermutationGroup(Int8(length(a)))
+   G = PermutationGroup(T(length(a)))
    return perm_autsymbol(G(Vector{Int8}(a)))
 end
 
@@ -146,11 +147,13 @@ domain(G::AutGroup)= NTuple{length(G.objectGroup.gens), FreeGroupElem}(gens(G.ob
 ###############################################################################
 
 function AutGroup(G::FreeGroup; special=false)
-   n = length(gens(G))
-   n == 0 && return AutGroup{n}(G, AutSymbol[])
    S = AutSymbol[]
+   n = length(gens(G))
+   n == 0 && return AutGroup{n}(G, S)
 
-   indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
+   n = convert(Int8, n)
+
+   indexing = [[i,j] for i in Int8(1):n for j in Int8(1):n if i≠j]
 
    rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
    lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
@@ -159,12 +162,12 @@ function AutGroup(G::FreeGroup; special=false)
 
    if !special
       flips = [flip_autsymbol(i) for i in 1:n]
-      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(Int8(n)))][2:end]
+      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(n))][2:end]
 
       append!(S, [flips; syms])
 
    end
-   return AutGroup{n}(G, S)
+   return AutGroup{Int64(n)}(G, S)
 end
 
 ###############################################################################
@@ -266,8 +269,8 @@ end
 #
 ###############################################################################
 
-function change_pow(s::AutSymbol, n::Int)
-    if n == 0
+function change_pow(s::AutSymbol, n::Integer)
+    if n == zero(n)
         return id_autsymbol()
     end
     symbol = s.typ
