@@ -101,14 +101,6 @@ end
 #
 ###############################################################################
 
-function (==)(s::FreeSymbol, t::FreeSymbol)
-   s.pow == t.pow || return false
-   s.pow ==  0 && return true
-   s.str == t.str || return false
-
-   return true
-end
-
 ###############################################################################
 #
 #   Inversion

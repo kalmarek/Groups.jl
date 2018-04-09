@@ -213,6 +213,13 @@ function (==)(W::GWord, Z::GWord)
     return W.symbols == Z.symbols
 end
 
+function (==)(s::GSymbol, t::GSymbol)
+   s.pow == t.pow || return false
+   s.pow ==  0 && return true
+   s.str == t.str || return false
+   return true
+end
+
 ###############################################################################
 #
 #   Binary operators

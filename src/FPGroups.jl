@@ -119,13 +119,6 @@ end
 #
 ###############################################################################
 
-function (==)(s::FPSymbol, t::FPSymbol)
-   isone(s) && isone(t) && return true
-   s.str == t.str || return false
-   s.pow == t.pow || return false
-   return true
-end
-
 ###############################################################################
 #
 #   Inversion

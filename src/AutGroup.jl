@@ -238,8 +238,6 @@ function hash(g::Automorphism, h::UInt)
     return xor(g.savedhash, h)
 end
 
-(==)(s::AutSymbol, t::AutSymbol) = s.str == t.str && s.pow == t.pow
-
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
     parent(g) == parent(h) || return false
 
