@@ -42,9 +42,9 @@
    @testset "Types" begin
       B3 = Groups.WreathProduct(F, S_3)
 
-      @test elem_type(B3) == Groups.WreathProductElem{elem_type(F)}
+      @test elem_type(B3) == Groups.WreathProductElem{elem_type(F), Int}
 
-      @test parent_type(typeof(B3())) == Groups.WreathProduct{parent_type(typeof(B3.N.group()))}
+      @test parent_type(typeof(B3())) == Groups.WreathProduct{parent_type(typeof(B3.N.group())), Int}
 
       @test parent(B3()) == Groups.WreathProduct(F,S_3)
       @test parent(B3()) == B3
@@ -73,7 +73,7 @@
 
       Wr = WreathProduct(PermutationGroup(2),S_3)
 
-      @test isa([elements(Wr)...], Vector{Groups.WreathProductElem{Generic.perm{Int64}}})
+      @test isa([elements(Wr)...], Vector{Groups.WreathProductElem{Generic.perm{Int}, Int}})
 
       elts = [elements(Wr)...]
 

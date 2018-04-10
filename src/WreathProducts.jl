@@ -19,27 +19,27 @@ doc"""
 * `::Group` : the single factor of group $N$
 * `::Generic.PermGroup` : full `PermutationGroup`
 """
-struct WreathProduct{T<:Group} <: Group
+struct WreathProduct{T<:Group, I<:Integer} <: Group
    N::DirectProductGroup{T}
-   P::Generic.PermGroup
+   P::Generic.PermGroup{I}
 
-   function WreathProduct{T}(G::T, P::Generic.PermGroup) where {T}
-      N = DirectProductGroup(G, P.n)
+   function WreathProduct{T, I}(Gr::T, P::Generic.PermGroup{I}) where {T, I}
+      N = DirectProductGroup(Gr, Int(P.n))
       return new(N, P)
    end
 end
 
-struct WreathProductElem{T<:GroupElem} <: GroupElem
+struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
    n::DirectProductGroupElem{T}
-   p::Generic.perm
+   p::Generic.perm{I}
    # parent::WreathProduct
 
-   function WreathProductElem{T}(n::DirectProductGroupElem{T}, p::Generic.perm,
-      check::Bool=true) where {T}
+   function WreathProductElem{T, I}(n::DirectProductGroupElem{T}, p::Generic.perm{I},
+      check::Bool=true) where {T, I}
       if check
          length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
       end
-      return new{T}(n, p)
+      return new(n, p)
    end
 end
 
@@ -49,10 +49,10 @@ end
 #
 ###############################################################################
 
-elem_type(::WreathProduct{T}) where {T} = WreathProductElem{elem_type(T)}
+elem_type(::WreathProduct{T, I}) where {T, I} = WreathProductElem{elem_type(T), I}
 
-parent_type(::Type{WreathProductElem{T}}) where {T} =
-   WreathProduct{parent_type(T)}
+parent_type(::Type{WreathProductElem{T, I}}) where {T, I} =
+   WreathProduct{parent_type(T), I}
 
 parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
@@ -62,9 +62,9 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 #
 ###############################################################################
 
-WreathProduct(G::Gr, P::Generic.PermGroup) where {Gr} = WreathProduct{Gr}(G, P)
+WreathProduct(G::T, P::Generic.PermGroup{I}) where {T, I} = WreathProduct{T, I}(G, P)
 
-WreathProductElem(n::DirectProductGroupElem{T}, p, check=true) where {T} = WreathProductElem{T}(n, p, check)
+WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T, I} = WreathProductElem{T, I}(n, p, check)
 
 ###############################################################################
 #
