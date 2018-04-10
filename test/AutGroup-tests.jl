@@ -207,4 +207,48 @@
       @test length(unique(B_2)) == 1777
    end
 
+   @testset "linear_repr tests" begin
+      N = 3
+      G = AutGroup(FreeGroup(N))
+      S = unique([gens(G); inv.(gens(G))])
+      R = 3
+
+      @test Groups.linear_repr(G()) isa Matrix{Float64}
+      @test Groups.linear_repr(G()) == eye(N)
+
+      M = eye(N)
+      M[1,2] = 1
+      ϱ₁₂ = G(Groups.rmul_autsymbol(1,2))
+      λ₁₂ = G(Groups.rmul_autsymbol(1,2))
+
+      @test Groups.linear_repr(ϱ₁₂) == M
+      @test Groups.linear_repr(λ₁₂) == M
+
+      M[1,2] = -1
+
+      @test Groups.linear_repr(ϱ₁₂^-1) == M
+      @test Groups.linear_repr(λ₁₂^-1) == M
+
+      M = eye(N)
+      M[2,2] = -1
+      ε₂ = G(Groups.flip_autsymbol(2))
+
+      @test Groups.linear_repr(ε₂) == M
+      @test Groups.linear_repr(ε₂^2) == eye(N)
+
+      M = [0.0 0.0 1.0; 1.0 0.0 0.0; 0.0 1.0 0.0]
+      σ = G(Groups.perm_autsymbol([2,3,1]))
+      @test Groups.linear_repr(σ) == M
+      @test Groups.linear_repr(σ^3) == eye(3)
+      @test Groups.linear_repr(σ)^3 ≈ eye(3)
+
+      function test_homomorphism(S, r)
+         for elts in Iterators.product([[g for g in S] for _ in 1:r]...)
+            prod(Groups.linear_repr.(elts)) == Groups.linear_repr(prod(elts)) || error("linear representaton test failed at $elts")
+         end
+         return 0
+      end
+
+      @test test_homomorphism(S, R) == 0
+   end
 end

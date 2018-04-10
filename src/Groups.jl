@@ -4,7 +4,7 @@ module Groups
 using Nemo
 import Nemo: Group, GroupElem, Ring
 import Nemo: parent, parent_type, elem_type
-import Nemo: elements, order, gens
+import Nemo: elements, order, gens, matrix_repr
 
 import Base: length, ==, hash, show, convert
 import Base: inv, reduce, *, ^
