@@ -7,17 +7,17 @@ export WreathProduct, WreathProductElem
 ###############################################################################
 
 doc"""
-    WreathProduct{T<:Group} <: Group
-> Implements Wreath product of a group $N$ by permutation (sub)group $P < S_k$,
+    WreathProduct(N, P) <: Group
+> Implements Wreath product of a group `N` by permutation group $P = S_n$,
 > usually written as $N \wr P$.
 > The multiplication inside wreath product is defined as
->    $$(n, \sigma) * (m, \tau) = (n\psi(\sigma)(m), \sigma\tau),$$
-> where $\psi:P → Aut(N^k)$ is the permutation representation of $S_k$
-> restricted to $P$.
+>  >  `(n, σ) * (m, τ) = (n*σ(m), στ)`
+> where `σ(m)` denotes the action (from the right) of the permutation group on
+> `n-tuples` of elements from `N`
 
 # Arguments:
-* `::Group` : the single factor of group $N$
-* `::Generic.PermGroup` : full `PermutationGroup`
+* `N::Group` : the single factor of group $N$
+* `P::Generic.PermGroup` : full `PermutationGroup`
 """
 struct WreathProduct{T<:Group, I<:Integer} <: Group
    N::DirectProductGroup{T}
@@ -64,7 +64,11 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
 WreathProduct(G::T, P::Generic.PermGroup{I}) where {T, I} = WreathProduct{T, I}(G, P)
 
-WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T, I} = WreathProductElem{T, I}(n, p, check)
+WreathProduct(G::T, P::Generic.PermGroup{I}) where {T<:AbstractAlgebra.Ring, I} = WreathProduct(AddGrp(G), P)
+
+WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T,I} = WreathProductElem{T,I}(n, p, check)
+
+WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T<:AbstractAlgebra.RingElem, I} = WreathProductElem(DirectProductGroupElem(AddGrpElem.(n.elts)), p, check)
 
 ###############################################################################
 #
