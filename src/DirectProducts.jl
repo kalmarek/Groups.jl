@@ -126,6 +126,11 @@ function Base.setindex!(g::DirectProductGroupElem{T}, v::T, i::Int) where {T}
    return g
 end
 
+function Base.setindex!(g::DirectProductGroupElem{T}, v::S, i::Int) where {T, S}
+   g.elts[i] = parent(g.elts[i])(v)
+   return g
+end
+
 ###############################################################################
 #
 #   DirectProductGroup / DirectProductGroupElem constructors
