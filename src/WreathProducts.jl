@@ -37,7 +37,7 @@ struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
    function WreathProductElem{T, I}(n::DirectProductGroupElem{T}, p::Generic.perm{I},
       check::Bool=true) where {T, I}
       if check
-         length(n.elts) == parent(p).n || throw("Can't form WreathProductElem: lengths differ")
+         length(n.elts) == length(p) || throw("Can't form WreathProductElem: lengths differ")
       end
       return new(n, p)
    end
@@ -164,6 +164,8 @@ end
 #
 ###############################################################################
 
+(p::perm)(n::DirectProductGroupElem) = DirectProductGroupElem(n.elts[p.d])
+
 doc"""
     *(g::WreathProductElem, h::WreathProductElem)
 > Return the wreath product group operation of elements, i.e.
@@ -174,8 +176,7 @@ doc"""
 > `h.n::DirectProductGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
-   w = DirectProductGroupElem((h.n).elts[inv(g.p).d])
-   return WreathProductElem(g.n*w, g.p*h.p, false)
+   return WreathProductElem(g.n*g.p(h.n), g.p*h.p, false)
 end
 
 doc"""
@@ -184,8 +185,8 @@ doc"""
 >   `g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1)`.
 """
 function inv(g::WreathProductElem)
-   w = DirectProductGroupElem(inv(g.n).elts[g.p.d])
-   return WreathProductElem(w, inv(g.p), false)
+   pinv = inv(g.p)
+   return WreathProductElem(pinv(inv(g.n)), pinv, false)
 end
 
 ###############################################################################

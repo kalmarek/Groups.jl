@@ -384,6 +384,6 @@ function matrix_repr(a::FlipAut, n::Int, pow)
     return x
 end
 
-matrix_repr(a::PermAut, n::Int, pow) = eye(n)[:, (a.perm^pow).d]
+matrix_repr(a::PermAut, n::Int, pow) = eye(n)[(a.perm^pow).d, :]
 
 matrix_repr(a::Identity, n::Int, pow) = eye(n)
