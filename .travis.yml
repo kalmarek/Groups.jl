@@ -25,7 +25,6 @@ matrix:
 
 ## uncomment the following lines to override the default test script
 script:
-  - julia -e 'Pkg.clone("https://github.com/Nemocas/AbstractAlgebra.jl"); Pkg.build("AbstractAlgebra")'
   - julia -e 'Pkg.clone(pwd()); Pkg.build("Groups"); Pkg.test("Groups"; coverage=true)'
 
 after_success:
