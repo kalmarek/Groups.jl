@@ -1,10 +1,10 @@
 __precompile__()
 module Groups
 
-using Nemo
-import Nemo: Group, GroupElem, Ring
-import Nemo: parent, parent_type, elem_type
-import Nemo: elements, order, gens, matrix_repr
+using AbstractAlgebra
+import AbstractAlgebra: Group, GroupElem, Ring
+import AbstractAlgebra: parent, parent_type, elem_type
+import AbstractAlgebra: elements, order, gens, matrix_repr
 
 import Base: length, ==, hash, show, convert
 import Base: inv, reduce, *, ^

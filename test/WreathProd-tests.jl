@@ -4,13 +4,13 @@
    b = S_3([2,3,1])
 
    @testset "Constructors" begin
-      @test isa(Groups.WreathProduct(F, S_3), Nemo.Group)
+      @test isa(Groups.WreathProduct(F, S_3), AbstractAlgebra.Group)
       @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct)
-      @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct{Nemo.FqNmodFiniteField})
+      @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct{AbstractAlgebra.FqNmodFiniteField})
 
       aa = Groups.DirectProductGroupElem([a^0 ,a, a^2])
 
-      @test isa(Groups.WreathProductElem(aa, b), Nemo.GroupElem)
+      @test isa(Groups.WreathProductElem(aa, b), AbstractAlgebra.GroupElem)
       @test isa(Groups.WreathProductElem(aa, b), Groups.WreathProductElem)
       @test isa(Groups.WreathProductElem(aa, b), Groups.WreathProductElem{typeof(a)})
 

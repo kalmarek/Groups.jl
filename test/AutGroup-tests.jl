@@ -1,5 +1,4 @@
 @testset "Automorphisms" begin
-   using Nemo
    G = PermutationGroup(Int8(4))
 
    @testset "AutSymbol" begin
@@ -14,7 +13,7 @@
       @test isa(Groups.flip_autsymbol(3), Groups.AutSymbol)
    end
 
-   a,b,c,d = Nemo.gens(FreeGroup(4))
+   a,b,c,d = gens(FreeGroup(4))
    D = NTuple{4,FreeGroupElem}([a,b,c,d])
 
    @testset "flip_autsymbol correctness" begin
@@ -85,16 +84,16 @@
       f = Groups.AutSymbol("a", 1, Groups.FlipAut(1))
       @test isa(Automorphism{3}(f), Groups.GWord)
       @test isa(Automorphism{3}(f), Automorphism)
-      @test isa(AutGroup(FreeGroup(3)), Nemo.Group)
+      @test isa(AutGroup(FreeGroup(3)), Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
       A = AutGroup(FreeGroup(1))
-      @test isa(Nemo.gens(A), Vector{Automorphism{1}})
-      @test length(Nemo.gens(A)) == 1
+      @test isa(gens(A), Vector{Automorphism{1}})
+      @test length(gens(A)) == 1
       A = AutGroup(FreeGroup(1), special=true)
-      @test length(Nemo.gens(A)) == 0
+      @test length(gens(A)) == 0
       A = AutGroup(FreeGroup(2))
-      @test length(Nemo.gens(A)) == 7
-      gens = Nemo.gens(A)
+      @test length(gens(A)) == 7
+      gens = gens(A)
 
       @test isa(A(Groups.rmul_autsymbol(1,2)), Automorphism)
       @test A(Groups.rmul_autsymbol(1,2)) in gens
@@ -147,7 +146,7 @@
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == A()
-      g,h = Nemo.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
+      g,h = gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
 
       @test Groups.domain(A) == NTuple{4, FreeGroupElem}(gens(A.objectGroup))
 
@@ -193,13 +192,13 @@
       @test isa(S, Vector{Groups.AutSymbol})
       S = [G(s) for s in unique(S)]
       @test isa(S, Vector{Automorphism{N}})
-      @test S == Nemo.gens(G)
+      @test S == gens(G)
       @test length(S) == 51
       S_inv = [S..., [inv(s) for s in S]...]
       @test length(unique(S_inv)) == 75
 
       G = AutGroup(FreeGroup(N), special=true)
-      S = Nemo.gens(G)
+      S = gens(G)
       S_inv = [G(), S..., [inv(s) for s in S]...]
       S_inv = unique(S_inv)
       B_2 = [i*j for (i,j) in Base.product(S_inv, S_inv)]

@@ -1,13 +1,12 @@
 @testset "DirectProducts" begin
-   using Nemo
 
    G = PermutationGroup(3)
    g = G([2,3,1])
    F, a = FiniteField(2,3,"a")
 
    @testset "Constructors" begin
-      @test isa(Groups.DirectProductGroup(G,2), Nemo.Group)
-      @test isa(G×G, Nemo.Group)
+      @test isa(Groups.DirectProductGroup(G,2), AbstractArray.Group)
+      @test isa(G×G, AbstractAlgebra.Group)
       @test isa(Groups.DirectProductGroup(G,2), Groups.DirectProductGroup{Generic.PermGroup{Int64}})
 
       GG = Groups.DirectProductGroup(G,2)

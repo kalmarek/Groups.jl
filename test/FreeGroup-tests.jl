@@ -41,18 +41,18 @@ end
 end
 
 @testset "FreeGroup" begin
-   @test isa(FreeGroup(["s", "t"]), Nemo.Group)
+   @test isa(FreeGroup(["s", "t"]), Group)
    G = FreeGroup(["s", "t"])
 
    @testset "elements constructors" begin
       @test isa(G(), FreeGroupElem)
       @test eltype(G.gens) == Groups.FreeSymbol
       @test length(G.gens) == 2
-      @test eltype(Nemo.gens(G)) == FreeGroupElem
-      @test length(Nemo.gens(G)) == 2
+      @test eltype(gens(G)) == FreeGroupElem
+      @test length(gens(G)) == 2
    end
 
-   s, t = Nemo.gens(G)
+   s, t = gens(G)
 
    @testset "internal arithmetic" begin
 
@@ -130,7 +130,7 @@ end
       @test Groups.replace_all(s*c*s*c*s, subst) == s*t^4*s*t^4*s
 
       G = FreeGroup(["x", "y"])
-      x,y = Nemo.gens(G)
+      x,y = gens(G)
 
       @test Groups.replace(x*y^9, 2, y^2, y) == x*y^8
       @test Groups.replace(x^3, 1, x^2, y) == x*y

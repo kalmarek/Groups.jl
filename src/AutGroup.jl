@@ -19,7 +19,7 @@ struct FlipAut{I<:Integer}
 end
 
 struct PermAut{I<:Integer}
-    perm::Nemo.Generic.perm{I}
+    perm::Generic.perm{I}
 end
 
 struct Identity end

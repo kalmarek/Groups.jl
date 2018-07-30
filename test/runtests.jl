@@ -1,5 +1,6 @@
-using Groups
 using Base.Test
+using AbstractAlgebra
+using Groups
 
 @testset "Groups" begin
    include("FreeGroup-tests.jl")
