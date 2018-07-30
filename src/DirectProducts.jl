@@ -82,7 +82,7 @@ elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i
 ###############################################################################
 
 doc"""
-   DirectProductGroup(G::Group, n::Int) <: Group
+    DirectProductGroup(G::Group, n::Int) <: Group
 Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
@@ -197,11 +197,11 @@ end
 ###############################################################################
 
 function show(io::IO, G::DirectProductGroup)
-    println(io, "$(G.n)-fold direct product of $(G.group)")
+   print(io, "$(G.n)-fold direct product of $(G.group)")
 end
 
 function show(io::IO, g::DirectProductGroupElem)
-    print(io, "($(join(g.elts,",")))")
+   print(io, "[$(join(g.elts,","))]")
 end
 
 ###############################################################################
@@ -215,9 +215,9 @@ doc"""
 > Checks if two direct product groups are the same.
 """
 function (==)(G::DirectProductGroup, H::DirectProductGroup)
-    G.group == H.group || return false
-    G.n == G.n || return false
-    return true
+   G.group == H.group || return false
+   G.n == G.n || return false
+   return true
 end
 
 doc"""
@@ -225,8 +225,8 @@ doc"""
 > Checks if two direct product group elements are the same.
 """
 function (==)(g::DirectProductGroupElem, h::DirectProductGroupElem)
-    g.elts == h.elts || return false
-    return true
+   g.elts == h.elts || return false
+   return true
 end
 
 ###############################################################################
@@ -269,9 +269,9 @@ doc"""
 # TODO: can Base.product handle generators?
 #   now it returns nothing's so we have to collect ellements...
 function elements(G::DirectProductGroup)
-    elts = collect(elements(G.group))
-    cartesian_prod = Base.product([elts for _ in 1:G.n]...)
-    return (DirectProductGroupElem([elt...]) for elt in cartesian_prod)
+   elts = collect(elements(G.group))
+   cartesian_prod = Base.product([elts for _ in 1:G.n]...)
+   return (DirectProductGroupElem([elt...]) for elt in cartesian_prod)
 end
 
 doc"""
