@@ -45,7 +45,7 @@ mutable struct Automorphism{N} <: GWord{AutSymbol}
 
 end
 
-export Automorphism, AutGroup
+export Automorphism, AutGroup, Aut, SAut
 
 ###############################################################################
 #
@@ -169,6 +169,9 @@ function AutGroup(G::FreeGroup; special=false)
    end
    return AutGroup{Int64(n)}(G, S)
 end
+
+Aut(G::Group) = AutGroup(G)
+SAut(G::Group) = AutGroup(G, special=true)
 
 ###############################################################################
 #

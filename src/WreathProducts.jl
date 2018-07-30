@@ -113,6 +113,8 @@ doc"""
 """
 (G::WreathProduct)(n::DirectProductGroupElem) = G(n, G.P())
 
+(G::WreathProduct)(n,p) = G(G.N(n), G.P(p))
+
 ###############################################################################
 #
 #   Basic manipulation
