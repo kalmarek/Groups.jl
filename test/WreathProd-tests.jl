@@ -1,18 +1,19 @@
 @testset "WreathProducts" begin
    S_3 = PermutationGroup(3)
-   F, a = FiniteField(2,3,"a")
+   R, x = PolynomialRing(QQ, "x")
+   F, a = NumberField(x^2 + 1, "a")
    b = S_3([2,3,1])
 
    @testset "Constructors" begin
       @test isa(Groups.WreathProduct(F, S_3), AbstractAlgebra.Group)
       @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct)
-      @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct{AbstractAlgebra.FqNmodFiniteField})
+      @test isa(Groups.WreathProduct(F, S_3), Groups.WreathProduct{AddGrp{Generic.ResField{Generic.Poly{Rational{BigInt}}}}, Int64})
 
       aa = Groups.DirectProductGroupElem([a^0 ,a, a^2])
 
       @test isa(Groups.WreathProductElem(aa, b), AbstractAlgebra.GroupElem)
       @test isa(Groups.WreathProductElem(aa, b), Groups.WreathProductElem)
-      @test isa(Groups.WreathProductElem(aa, b), Groups.WreathProductElem{typeof(a)})
+      @test isa(Groups.WreathProductElem(aa, b), Groups.WreathProductElem{AddGrpElem{Generic.ResF{Generic.Poly{Rational{BigInt}}}}, Int64})
 
       B3 = Groups.WreathProduct(F, S_3)
 
@@ -23,26 +24,15 @@
       @test B3(b) == Groups.WreathProductElem(B3.N(), b)
       @test B3(aa) == Groups.WreathProductElem(aa, S_3())
 
-      g = B3(aa, b)
+      @test B3([a^0 ,a, a^2], perm"(1,2,3)") isa WreathProductElem
 
-      @test g.p == b
-      @test g.n == aa
-      h = deepcopy(g)
-
-      @test hash(g) == hash(h)
-
-      g.n[1] = a
-
-      @test g.n[1] == a
-      @test g != h
-
-      @test hash(g) != hash(h)
+      @test B3([a^0 ,a, a^2], perm"(1,2,3)") == B3(aa, b)
    end
 
    @testset "Types" begin
       B3 = Groups.WreathProduct(F, S_3)
 
-      @test elem_type(B3) == Groups.WreathProductElem{elem_type(F), Int}
+      @test elem_type(B3) == Groups.WreathProductElem{AddGrpElem{elem_type(F)}, Int}
 
       @test parent_type(typeof(B3())) == Groups.WreathProduct{parent_type(typeof(B3.N.group())), Int}
 
@@ -50,30 +40,64 @@
       @test parent(B3()) == B3
    end
 
-   @testset "Group arithmetic" begin
+   @testset "Basic operations on WreathProductElem" begin
+      aa = Groups.DirectProductGroupElem([a^0 ,a, a^2])
       B3 = Groups.WreathProduct(F, S_3)
+      g = B3(aa, b)
 
-      x = B3(B3.N([1,0,0]), B3.P([2,3,1]))
-      y = B3(B3.N([0,1,1]), B3.P([2,1,3]))
+      @test g.p == b
+      @test g.n == DirectProductGroupElem(AddGrpElem.(aa.elts))
 
-      @test x*y == B3(B3.N([0,0,1]), B3.P([3,2,1]))
-      @test y*x == B3(B3.N([0,0,1]), B3.P([1,3,2]))
+      h = deepcopy(g)
+      @test h == g
+      @test !(g === h)
 
-      @test inv(x) == B3(B3.N([0,0,1]), B3.P([3,1,2]))
-      @test inv(y) == B3(B3.N([1,0,1]), B3.P([2,1,3]))
+      g.n[1] = parent(g.n[1])(a)
 
-      @test inv(x)*y == B3(B3.N([1,1,1]), B3.P([1,3,2]))
-      @test y*inv(x) == B3(B3.N([0,1,0]), B3.P([3,2,1]))
+      @test g.n[1] == parent(g.n[1])(a)
+      @test g != h
+
+      @test hash(g) != hash(h)
+
+      g.n[1] = a
+      @test g.n[1] == parent(g.n[1])(a)
+      @test g != h
+
+      @test hash(g) != hash(h)
+   end
+
+
+   @testset "Group arithmetic" begin
+      B4 = Groups.WreathProduct(GF(3), PermutationGroup(4))
+
+      x = B4([0,1,2,0], perm"(1,2,3)(4)")
+      @test inv(x) == B4([1,0,2,0], perm"(1,3,2)(4)")
+
+      y = B4([1,0,1,2], perm"(1,4)(2,3)")
+      @test inv(y) == B4([1,2,0,2], perm"(1,4)(2,3)")
+
+      @test x*y == B4([0,2,0,2], perm"(1,3,4)(2)")
+
+      @test y*x == B4([1,2,2,2], perm"(1,4,2)(3)")
+
+
+      @test inv(x)*y == B4([2,1,2,2], perm"(1,2,4)(3)")
+
+      @test y*inv(x) == B4([1,2,1,0], perm"(1,4,3)(2)")
 
    end
 
    @testset "Misc" begin
-      B3 = Groups.WreathProduct(FiniteField(2,1,"a")[1], S_3)
-      @test order(B3) == 48
+      B3 = Groups.WreathProduct(GF(3), S_3)
+      @test order(B3) == 3^3*6
 
-      Wr = WreathProduct(PermutationGroup(2),S_3)
+      B3 = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
+      @test order(B3) == 2^3*6
+
+      Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
 
       @test isa([elements(Wr)...], Vector{Groups.WreathProductElem{Generic.perm{Int}, Int}})
+      @test order(Wr) == 2^4*factorial(4)
 
       elts = [elements(Wr)...]
 

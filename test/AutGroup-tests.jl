@@ -70,7 +70,6 @@
       @test      l(deepcopy(D)) == (a, b, c, c*d)
       @test inv(l)(deepcopy(D)) == (a, b, c, c^-1*d)
 
-
       i,j = 2,4
       r = Groups.rmul_autsymbol(i,j)
       l = Groups.lmul_autsymbol(i,j)
@@ -81,19 +80,20 @@
    end
 
    @testset "AutGroup/Automorphism constructors" begin
+
       f = Groups.AutSymbol("a", 1, Groups.FlipAut(1))
       @test isa(Automorphism{3}(f), Groups.GWord)
       @test isa(Automorphism{3}(f), Automorphism)
-      @test isa(AutGroup(FreeGroup(3)), Group)
+      @test isa(AutGroup(FreeGroup(3)), AbstractAlgebra.Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
       A = AutGroup(FreeGroup(1))
-      @test isa(gens(A), Vector{Automorphism{1}})
-      @test length(gens(A)) == 1
+      @test isa(Groups.gens(A), Vector{Automorphism{1}})
+      @test length(Groups.gens(A)) == 1
       A = AutGroup(FreeGroup(1), special=true)
-      @test length(gens(A)) == 0
+      @test length(Groups.gens(A)) == 0
       A = AutGroup(FreeGroup(2))
-      @test length(gens(A)) == 7
-      gens = gens(A)
+      @test length(Groups.gens(A)) == 7
+      gens = Groups.gens(A)
 
       @test isa(A(Groups.rmul_autsymbol(1,2)), Automorphism)
       @test A(Groups.rmul_autsymbol(1,2)) in gens
@@ -146,15 +146,17 @@
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == A()
-      g,h = gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
+      g,h = Groups.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
 
       @test Groups.domain(A) == NTuple{4, FreeGroupElem}(gens(A.objectGroup))
 
       @test (g*h)(Groups.domain(A)) == (h*g)(Groups.domain(A))
-      @test (g*h).savedhash != (h*g).savedhash
+      @test (g*h).savedhash == zero(UInt)
+      @test (h*g).savedhash == zero(UInt)
       a = g*h
       b = h*g
-      @test hash(a) == hash(b)
+      @test hash(a) != zero(UInt)
+      @test hash(b) == hash(a)
       @test a.savedhash == b.savedhash
       @test length(unique([a,b])) == 1
       @test length(unique([g*h, h*g])) == 1
@@ -228,6 +230,9 @@
       @test Groups.linear_repr(ϱ₁₂^-1) == M
       @test Groups.linear_repr(λ₁₂^-1) == M
 
+      @test Groups.linear_repr(ϱ₁₂*λ₁₂^-1) == eye(N)
+      @test Groups.linear_repr(λ₁₂^-1*ϱ₁₂) == eye(N)
+
       M = eye(N)
       M[2,2] = -1
       ε₂ = G(Groups.flip_autsymbol(2))
@@ -235,7 +240,8 @@
       @test Groups.linear_repr(ε₂) == M
       @test Groups.linear_repr(ε₂^2) == eye(N)
 
-      M = [0.0 0.0 1.0; 1.0 0.0 0.0; 0.0 1.0 0.0]
+      M = [0 1 0; 0 0 1; 1 0 0]
+
       σ = G(Groups.perm_autsymbol([2,3,1]))
       @test Groups.linear_repr(σ) == M
       @test Groups.linear_repr(σ^3) == eye(3)

@@ -41,7 +41,7 @@ end
 end
 
 @testset "FreeGroup" begin
-   @test isa(FreeGroup(["s", "t"]), Group)
+   @test isa(FreeGroup(["s", "t"]), AbstractAlgebra.Group)
    G = FreeGroup(["s", "t"])
 
    @testset "elements constructors" begin
