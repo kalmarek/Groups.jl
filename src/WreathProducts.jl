@@ -37,7 +37,8 @@ struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
    function WreathProductElem{T, I}(n::DirectProductGroupElem{T}, p::Generic.perm{I},
       check::Bool=true) where {T, I}
       if check
-         length(n.elts) == length(p) || throw("Can't form WreathProductElem: lengths differ")
+         length(n.elts) == length(p) || throw(DomainError(
+            "Can't form WreathProductElem: lengths differ"))
       end
       return new(n, p)
    end
@@ -80,12 +81,12 @@ function (G::WreathProduct)(g::WreathProductElem)
    n = try
       G.N(g.n)
    catch
-      throw("Can't coerce $(g.n) to $(G.N) factor of $G")
+      throw(DomainError("Can't coerce $(g.n) to $(G.N) factor of $G"))
    end
    p = try
       G.P(g.p)
    catch
-      throw("Can't coerce $(g.p) to $(G.P) factor of $G")
+      throw(DomainError("Can't coerce $(g.p) to $(G.P) factor of $G"))
    end
    return WreathProductElem(n, p)
 end

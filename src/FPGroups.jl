@@ -75,8 +75,10 @@ function (G::FPGroup)(w::GWord)
    if eltype(w.symbols) == FPSymbol
       for s in w.symbols
          i = findfirst(g -> g.str == s.str, G.gens)
-         i == 0 && throw("Symbol $s does not belong to $G.")
-         s.pow % G.gens[i].pow == 0 || throw("Symbol $s doesn't belong to $G.")
+         i == 0 && throw(DomainError(
+            "Symbol $s does not belong to $G."))
+         s.pow % G.gens[i].pow == 0 || throw(DomainError(
+         "Symbol $s doesn't belong to $G."))
       end
    end
    w.parent = G
@@ -168,7 +170,8 @@ end
 
 function /(G::FPGroup, newrels::Vector{FPGroupElem})
    for r in rels
-      parent(r) == G || throw("Can not form quotient group: $r is not an element of $G")
+      parent(r) == G || throw(DomainError(
+      "Can not form quotient group: $r is not an element of $G"))
    end
    H = deepcopy(G)
    newrels = Dict(H(r) => H() for r in newrels)
@@ -178,7 +181,8 @@ end
 
 function /(G::FreeGroup, rels::Vector{FreeGroupElem})
    for r in rels
-      parent(r) == G || throw("Can not form quotient group: $r is not an element of $G")
+      parent(r) == G || throw(DomainError(
+         "Can not form quotient group: $r is not an element of $G"))
    end
    H = FPGroup(G)
    H.rels = Dict(H(rel) => H() for rel in unique(rels))

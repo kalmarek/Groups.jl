@@ -61,8 +61,10 @@ function (G::FreeGroup)(w::GroupWord{FreeSymbol})
    if length(w) > 0
       for s in w.symbols
          i = findfirst(g -> g.str == s.str, G.gens)
-         i == 0 && throw("Symbol $s does not belong to $G.")
-         s.pow % G.gens[i].pow == 0 || throw("Symbol $s doesn't belong to $G.")
+         i == 0 && throw(DomainError(
+            "Symbol $s does not belong to $G."))
+         s.pow % G.gens[i].pow == 0 || throw(DomainError(
+            "Symbol $s doesn't belong to $G."))
       end
    end
    w.parent = G

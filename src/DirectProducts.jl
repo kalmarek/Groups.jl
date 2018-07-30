@@ -37,7 +37,8 @@ AdditiveGroup = AddGrp
 
 function (G::MltGrp)(g)
    r = (G.obj)(g)
-   isunit(r) || throw(ArgumentError("Cannot coerce to multplicative group: $r is not invertible!"))
+   isunit(r) || throw(DomainError(
+      "Cannot coerce to multplicative group: $r is not invertible!"))
    return MltGrpElem(r)
 end
 
@@ -55,7 +56,8 @@ for (Elem, op) in ([:MltGrpElem, :*], [:AddGrpElem, :+])
       ^(g::$Elem, n::Integer) = $Elem(op(g.elt, n))
 
       function *(g::$Elem, h::$Elem)
-         parent(g) == parent(h) || throw("Cannot multiply elements of different parents")
+         parent(g) == parent(h) || throw(DomainError(
+            "Cannot multiply elements of different parents"))
          return $Elem($op(g.elt,h.elt))
       end
    end
@@ -120,8 +122,10 @@ parent(g::DirectProductGroupElem) =
 Base.size(g::DirectProductGroupElem) = size(g.elts)
 Base.IndexStyle(::Type{DirectProductGroupElem}) = Base.LinearFast()
 Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
+
 function Base.setindex!(g::DirectProductGroupElem{T}, v::T, i::Int) where {T}
-   parent(v) == parent(first(g.elts)) || throw("$g is not an element of $i-th factor of $(parent(G))")
+   parent(v) == parent(g.elts[i]) || throw(DomainError(
+      "$g is not an element of $i-th factor of $(parent(G))"))
    g.elts[i] = v
    return g
 end
@@ -138,7 +142,8 @@ end
 ###############################################################################
 
 function ×(G::Group, H::Group)
-   G == H || throw("Direct products are defined only for the same groups")
+   G == H || throw(DomainError(
+      "Direct Powers are defined only for the same groups"))
    return DirectProductGroup(G,2)
 end
 
@@ -154,7 +159,8 @@ DirectProductGroup(R::T, n::Int) where {T<:AbstractAlgebra.Ring} =
 DirectProductGroup(AdditiveGroup(R), n)
 
 function ×(G::DirectProductGroup{T}, H::Group) where T <: Union{AdditiveGroup, MultiplicativeGroup}
-   G.group == T(H) || throw(ArgumentError("Direct products are defined only for the same groups"))
+   G.group == T(H) || throw(DomainError(
+      "Direct products are defined only for the same groups"))
    return DirectProductGroup(G.group,G.n+1)
 end
 
@@ -172,8 +178,9 @@ doc"""
 """
 function (G::DirectProductGroup)(a::Vector, check::Bool=true)
    if check
-      G.n == length(a) || throw("Can not coerce to DirectProductGroup: lengths differ")
-      a = G.group.(a)
+      G.n == length(a) || throw(DomainError(
+         "Can not coerce to DirectProductGroup: lengths differ"))
+      a = (G.group).(a)
    end
    return DirectProductGroupElem(a)
 end
@@ -250,7 +257,8 @@ doc"""
 """
 function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T}
    if check
-      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
+      parent(g) == parent(h) || throw(DomainError(
+         "Can not multiply elements of different groups!"))
    end
    return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
