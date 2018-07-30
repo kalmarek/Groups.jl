@@ -27,7 +27,7 @@ struct Identity end
 struct AutSymbol <: GSymbol
    str::String
    pow::Int8
-   typ::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
+   fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
 
 mutable struct AutGroup{N} <: AbstractFPGroup
@@ -204,10 +204,8 @@ end
 ###############################################################################
 
 function (f::AutSymbol)(v::NTuple{N, T}) where {N, T}
-   if f.pow == 0
-      nothing
-   else
-      v = f.typ(v, f.pow)::NTuple{N, T}
+   if f.pow != 0
+      v = f.fn(v, f.pow)::NTuple{N, T}
    end
    return v
 end
@@ -271,20 +269,20 @@ function change_pow(s::AutSymbol, n::Integer)
     if n == zero(n)
         return id_autsymbol()
     end
-    symbol = s.typ
-    if isa(symbol, FlipAut)
+    symbol = s.fn
+    if symbol isa FlipAut
         return flip_autsymbol(symbol.i, pow=n)
-    elseif isa(symbol, PermAut)
+    elseif symbol isa PermAut
         return perm_autsymbol(symbol.perm, pow=n)
-    elseif isa(symbol, RTransvect)
+    elseif symbol isa RTransvect
         return rmul_autsymbol(symbol.i, symbol.j, pow=n)
-    elseif isa(symbol, LTransvect)
+    elseif symbol isa LTransvect
         return lmul_autsymbol(symbol.i, symbol.j, pow=n)
-    elseif isa(symbol, Identity)
+    elseif symbol isa Identity
         return s
     else
         warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.str, n, s.typ)
+        return AutSymbol(s.str, n, s.fn)
     end
 end
 
@@ -324,9 +322,9 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 function getperm(s::AutSymbol)
     if s.pow != 1
         warn("Power for perm_symbol should be never 0!")
-        return s.typ.perm^s.pow
+        return s.fn.perm^s.pow
     else
-        return s.typ.perm
+        return s.fn.perm
     end
 end
 
@@ -336,7 +334,7 @@ function simplifyperms!(W::Automorphism{N}) where N
     for i in 1:length(W.symbols)-1
         if W.symbols[i].pow == 0
             continue
-        elseif isa(W.symbols[i].typ, PermAut) && isa(W.symbols[i+1].typ, PermAut)
+        elseif W.symbols[i].fn isa PermAut && W.symbols[i+1].fn isa PermAut
             reduced = false
             c = W.symbols[i]
             n = W.symbols[i+1]
@@ -370,7 +368,7 @@ function linear_repr(A::Automorphism{N}, hom=matrix_repr) where N
     return reduce(*, hom(Identity(), N, 1), linear_repr.(A.symbols, N, hom))
 end
 
-linear_repr(a::AutSymbol, n::Int, hom) = hom(a.typ, n, a.pow)
+linear_repr(a::AutSymbol, n::Int, hom) = hom(a.fn, n, a.pow)
 
 function matrix_repr(a::Union{RTransvect, LTransvect}, n::Int, pow)
     x = eye(n)
