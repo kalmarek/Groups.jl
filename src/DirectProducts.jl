@@ -177,11 +177,6 @@ end
 #
 ###############################################################################
 
-function deepcopy_internal(g::DirectProductGroupElem, dict::ObjectIdDict)
-   G = parent(g)
-   return G(deepcopy(g.elts))
-end
-
 function hash(G::DirectProductGroup, h::UInt)
    return hash(G.group, hash(G.n, hash(DirectProductGroup,h)))
 end

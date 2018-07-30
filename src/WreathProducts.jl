@@ -118,10 +118,6 @@ doc"""
 #
 ###############################################################################
 
-function deepcopy_internal(g::WreathProductElem, dict::ObjectIdDict)
-   return WreathProductElem(deepcopy(g.n), deepcopy(g.p), false)
-end
-
 function hash(G::WreathProduct, h::UInt)
    return hash(G.N, hash(G.P, hash(WreathProduct, h)))
 end
