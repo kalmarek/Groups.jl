@@ -98,6 +98,7 @@ function hash(W::GWord, h::UInt)
     return xor(W.savedhash, h)
 end
 
+# WARNING: Due to specialised (constant) hash function of GWords this one is actually necessary!
 function deepcopy_internal(W::T, dict::ObjectIdDict) where {T<:GWord}
     G = parent(W)
     return G(T(deepcopy(W.symbols)))
