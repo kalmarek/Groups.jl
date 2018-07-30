@@ -41,7 +41,7 @@ mutable struct Automorphism{N} <: GWord{AutSymbol}
     savedhash::UInt
     parent::AutGroup{N}
 
-    Automorphism{N}(f::Vector{AutSymbol}) where N = new(f, true)
+    Automorphism{N}(f::Vector{AutSymbol}) where N = new(f, true, zero(UInt))
 
 end
 
