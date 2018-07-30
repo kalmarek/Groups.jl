@@ -13,8 +13,7 @@ FreeGroupElem = GroupWord{FreeSymbol}
 
 mutable struct FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
-   #     order::Vector{T}
-   #     fastmult_table::Array{Int,2}
+
    function FreeGroup{T<:GSymbol}(gens::Vector{T})
       G = new(gens)
       G.gens = gens
@@ -30,9 +29,9 @@ export FreeGroupElem, FreeGroup
 #
 ###############################################################################
 
-parent_type(::Type{FreeGroupElem}) = FreeGroup
+elem_type(::Type{FreeGroup}) = FreeGroupElem
 
-elem_type(::FreeGroup) = FreeGroupElem
+parent_type(::Type{FreeGroupElem}) = FreeGroup
 
 ###############################################################################
 #

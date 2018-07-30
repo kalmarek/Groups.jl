@@ -102,8 +102,8 @@ end
 #
 ###############################################################################
 
-elem_type(G::DirectProductGroup{T}) where {T} =
-   DirectProductGroupElem{elem_type(G.group)}
+elem_type(::Type{DirectProductGroup{T}}) where {T} =
+   DirectProductGroupElem{elem_type(T)}
 
 parent_type(::Type{DirectProductGroupElem{T}}) where {T} =
    DirectProductGroup{parent_type(T)}

@@ -49,7 +49,7 @@ end
 #
 ###############################################################################
 
-elem_type(::WreathProduct{T, I}) where {T, I} = WreathProductElem{elem_type(T), I}
+elem_type(::Type{WreathProduct{T, I}}) where {T, I} = WreathProductElem{elem_type(T), I}
 
 parent_type(::Type{WreathProductElem{T, I}}) where {T, I} =
    WreathProduct{parent_type(T), I}
