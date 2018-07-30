@@ -1,6 +1,79 @@
 import Base: ×
 
 export DirectProductGroup, DirectProductGroupElem
+export MultiplicativeGroup, MltGrp, MltGrpElem
+export AdditiveGroup, AddGrp, AddGrpElem
+
+###############################################################################
+#
+#   MltGrp/MltGrpElem & AddGrp/AddGrpElem
+#   (a thin wrapper for multiplicative/additive group of a Ring)
+#
+###############################################################################
+
+for (Gr, Elem) in [(:MltGrp, :MltGrpElem), (:AddGrp, :AddGrpElem)]
+   @eval begin
+      struct $Gr{T<:AbstractAlgebra.Ring} <: AbstractAlgebra.Group
+         obj::T
+      end
+
+      struct $Elem{T<:AbstractAlgebra.RingElem} <: AbstractAlgebra.GroupElem
+         elt::T
+      end
+
+      ==(g::$Elem, h::$Elem) = g.elt == h.elt
+      ==(G::$Gr, H::$Gr) = G.obj == H.obj
+
+      elem_type(::Type{$Gr{T}}) where T = $Elem{elem_type(T)}
+      parent_type(::Type{$Elem{T}}) where T = $Gr{parent_type(T)}
+      parent(g::$Elem) = $Gr(parent(g.elt))
+   end
+end
+
+MultiplicativeGroup = MltGrp
+AdditiveGroup = AddGrp
+
+(G::MltGrp)(g::MltGrpElem) = MltGrpElem(G.obj(g.elt))
+
+function (G::MltGrp)(g)
+   r = (G.obj)(g)
+   isunit(r) || throw(ArgumentError("Cannot coerce to multplicative group: $r is not invertible!"))
+   return MltGrpElem(r)
+end
+
+(G::AddGrp)(g) = AddGrpElem((G.obj)(g))
+
+(G::MltGrp)() = MltGrpElem(G.obj(1))
+(G::AddGrp)() = AddGrpElem(G.obj())
+
+inv(g::MltGrpElem) = MltGrpElem(inv(g.elt))
+inv(g::AddGrpElem) = AddGrpElem(-g.elt)
+
+for (Elem, op) in ([:MltGrpElem, :*], [:AddGrpElem, :+])
+   @eval begin
+
+      ^(g::$Elem, n::Integer) = $Elem(op(g.elt, n))
+
+      function *(g::$Elem, h::$Elem)
+         parent(g) == parent(h) || throw("Cannot multiply elements of different parents")
+         return $Elem($op(g.elt,h.elt))
+      end
+   end
+end
+
+Base.show(io::IO, G::MltGrp) = print(io, "The multiplicative group of $(G.obj)")
+Base.show(io::IO, G::AddGrp) = print(io, "The additive group of $(G.obj)")
+
+Base.show(io::IO, g::Union{MltGrpElem, AddGrpElem}) = show(io, g.elt)
+
+gens(F::AbstractAlgebra.Field) = elem_type(F)[gen(F)]
+
+order(G::AddGrp{<:AbstractAlgebra.GFField}) = order(G.obj)
+elements(G::AddGrp{F}) where F <: AbstractAlgebra.GFField = (G((i-1)*G.obj(1)) for i in 1:order(G))
+
+order(G::MltGrp{<:AbstractAlgebra.GFField}) = order(G.obj) - 1
+elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i in 1:order(G))
+
 
 ###############################################################################
 #
@@ -62,6 +135,14 @@ end
 function ×(G::Group, H::Group)
    G == H || throw("Direct products are defined only for the same groups")
    return DirectProductGroup(G,2)
+end
+
+DirectProductGroup(R::T, n::Int) where {T<:AbstractAlgebra.Ring} =
+DirectProductGroup(AdditiveGroup(R), n)
+
+function ×(G::DirectProductGroup{T}, H::Group) where T <: Union{AdditiveGroup, MultiplicativeGroup}
+   G.group == T(H) || throw(ArgumentError("Direct products are defined only for the same groups"))
+   return DirectProductGroup(G.group,G.n+1)
 end
 
 ###############################################################################
@@ -159,7 +240,6 @@ doc"""
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
 """
-# TODO: dirty hack around `+/*` operations
 function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T}
    if check
       parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
@@ -167,24 +247,12 @@ function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bo
    return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
 
-function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T<:RingElem}
-   if check
-      parent(g) == parent(h) || throw("Can not multiply elements of different groups!")
-   end
-   return DirectProductGroupElem(g.elts + h.elts)
-end
-
 doc"""
     inv(g::DirectProductGroupElem)
 > Return the inverse of the given element in the direct product group.
 """
-# TODO: dirty hack around `+/*` operation
 function inv(g::DirectProductGroupElem{T}) where {T<:GroupElem}
    return DirectProductGroupElem([inv(a) for a in g.elts])
-end
-
-function inv(g::DirectProductGroupElem{T}) where {T<:RingElem}
-   return DirectProductGroupElem(-g.elts)
 end
 
 ###############################################################################
