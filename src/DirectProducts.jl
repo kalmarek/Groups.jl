@@ -142,6 +142,14 @@ function ×(G::Group, H::Group)
    return DirectProductGroup(G,2)
 end
 
+×(H::Group, G::DirectProductGroup) = G×H
+
+function ×(G::DirectProductGroup, H::Group)
+   G.group == H || throw(DomainError(
+      "Direct products are defined only for the same groups"))
+   return DirectProductGroup(G.group,G.n+1)
+end
+
 DirectProductGroup(R::T, n::Int) where {T<:AbstractAlgebra.Ring} =
 DirectProductGroup(AdditiveGroup(R), n)
 
@@ -174,7 +182,7 @@ end
 
 (G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
 
-(G::DirectProductGroup){T<:GroupElem, N}(a::Vararg{T, N}) = G([a...])
+(G::DirectProductGroup)(a::Vararg{T, N}) where {T, N} = G([a...])
 
 ###############################################################################
 #
