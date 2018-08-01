@@ -37,7 +37,7 @@ struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
    function WreathProductElem{T, I}(n::DirectProductGroupElem{T}, p::Generic.perm{I},
       check::Bool=true) where {T, I}
       if check
-         length(n.elts) == length(p) || throw(DomainError(
+         length(n.elts) == length(p.d) || throw(DomainError(
             "Can't form WreathProductElem: lengths differ"))
       end
       return new(n, p)
