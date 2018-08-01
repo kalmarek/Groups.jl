@@ -134,8 +134,7 @@ function perm_autsymbol(p::Generic.perm{I}; pow::Integer=one(I)) where I<:Intege
 end
 
 function perm_autsymbol(a::Vector{T}) where T<:Integer
-   G = PermutationGroup(T(length(a)))
-   return perm_autsymbol(G(Vector{Int8}(a)))
+   return perm_autsymbol(perm(Vector{Int8}(a), false))
 end
 
 domain(G::AutGroup)= NTuple{length(G.objectGroup.gens), FreeGroupElem}(gens(G.objectGroup))
