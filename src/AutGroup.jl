@@ -137,7 +137,11 @@ function perm_autsymbol(a::Vector{T}) where T<:Integer
    return perm_autsymbol(perm(Vector{Int8}(a), false))
 end
 
-domain(G::AutGroup)= NTuple{length(G.objectGroup.gens), FreeGroupElem}(gens(G.objectGroup))
+function domain(G::AutGroup{N}) where N
+    F = G.objectGroup
+    gg = gens(F)
+    return ntuple(i->gg[i], Val{N})
+end
 
 ###############################################################################
 #
