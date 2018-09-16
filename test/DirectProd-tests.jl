@@ -30,7 +30,7 @@
       @test GG(g, g^2) isa GroupElem
       @test GG(g, g^2) isa Groups.DirectProductGroupElem
 
-      @test_throws DomainError GG(g,g,g)
+      @test_throws MethodError GG(g,g,g)
       @test GG(g,g^2) == h
 
       @test size(h) == (2,)
@@ -108,9 +108,9 @@
       @test FF([a,1]) isa GroupElem
       @test FF([a,1]) isa DirectProductGroupElem
       @test FF([a,1]) isa DirectProductGroupElem{MltGrpElem{elem_type(F)}}
-      @test_throws DomainError FF(1,0)
-      @test_throws DomainError FF([0,1])
-      @test_throws DomainError FF([1,0])
+      @test_throws MethodError FF(1,0)
+      @test_throws MethodError FF([0,1])
+      @test_throws MethodError FF([1,0])
 
       @test MltGrp(F) isa AbstractAlgebra.Group
       @test MltGrp(F) isa MultiplicativeGroup
