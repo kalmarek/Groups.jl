@@ -65,11 +65,7 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
 WreathProduct(G::T, P::Generic.PermGroup{I}) where {T, I} = WreathProduct{T, I}(G, P)
 
-WreathProduct(G::T, P::Generic.PermGroup{I}) where {T<:AbstractAlgebra.Ring, I} = WreathProduct(AddGrp(G), P)
-
 WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T,I} = WreathProductElem{T,I}(n, p, check)
-
-WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T<:AbstractAlgebra.RingElem, I} = WreathProductElem(DirectProductGroupElem(AddGrpElem.(n.elts)), p, check)
 
 ###############################################################################
 #
