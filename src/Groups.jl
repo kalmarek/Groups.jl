@@ -4,9 +4,9 @@ module Groups
 using AbstractAlgebra
 import AbstractAlgebra: Group, GroupElem, Ring
 import AbstractAlgebra: parent, parent_type, elem_type
-import AbstractAlgebra: elements, order, gens, matrix_repr
+import AbstractAlgebra: order, gens, matrix_repr
 
-import Base: length, ==, hash, show, convert
+import Base: length, ==, hash, show, convert, eltype, iterate
 import Base: inv, reduce, *, ^, power_by_squaring
 import Base: findfirst, findnext
 import Base: deepcopy_internal

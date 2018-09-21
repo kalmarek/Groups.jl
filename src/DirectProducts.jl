@@ -118,7 +118,7 @@ parent(g::DirectProductGroupElem) =
 #
 ###############################################################################
 
-Base.size(g::DirectProductGroupElem) = size(g.elts)
+size(g::DirectProductGroupElem) = size(g.elts)
 Base.IndexStyle(::Type{DirectProductGroupElem}) = Base.LinearFast()
 Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
 
@@ -276,10 +276,7 @@ end
 #
 ###############################################################################
 
-import Base: size, length, start, next, done, eltype
-
-struct DirectPowerIter{Gr<:AbstractAlgebra.Group, GrEl<:AbstractAlgebra.GroupElem}
-   G::Gr
+struct DirectPowerIter{GrEl<:AbstractAlgebra.GroupElem}
    N::Int
    elts::Vector{GrEl}
    totalorder::Int
@@ -287,27 +284,20 @@ struct DirectPowerIter{Gr<:AbstractAlgebra.Group, GrEl<:AbstractAlgebra.GroupEle
 end
 
 function DirectPowerIter(G::Gr, N::Integer) where {Gr<:AbstractAlgebra.Group}
-   return DirectPowerIter{Gr, elem_type(G)}(
-      G,
-      N,
-      vec(collect(elements(G))),
-      Int(order(G))^N,
-      Int(order(G))
-      )
+   return DirectPowerIter{elem_type(G)}(N, collect(G), order(G)^N, order(G))
 end
 
-Base.size(DPIter::DirectPowerIter) = ntuple(i -> DPIter.orderG, DPIter.N)
-Base.length(DPIter::DirectPowerIter) = DPIter.totalorder
-Base.start(::DirectPowerIter) = 0
+length(DPIter::DirectPowerIter) = DPIter.totalorder
 
-function Base.next(DPIter::DirectPowerIter, state)
-    idx = ind2sub(size(DPIter), state+1)
-    return DirectProductGroupElem([DPIter.elts[i] for i in idx]), state+1
+function iterate(DPIter::DirectPowerIter, state=0)
+   if state >= DPIter.totalorder
+      return nothing
+   end
+   idx = Tuple(CartesianIndices(ntuple(i -> DPIter.orderG, DPIter.N))[state+1])
+   return DirectProductGroupElem([DPIter.elts[i] for i in idx]), state+1
 end
 
-Base.done(DPIter::DirectPowerIter, state) = DPIter.totalorder <= state
-
-Base.eltype(::Type{DirectPowerIter{Gr, GrEl}}) where {Gr, GrEl} = DirectProductGroupElem{GrEl}
+eltype(::Type{DirectPowerIter{GrEl}}) where {GrEl} = DirectProductGroupElem{GrEl}
 
 @doc doc"""
     elements(G::DirectProductGroup)
