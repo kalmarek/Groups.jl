@@ -182,9 +182,7 @@ SAut(G::Group) = AutGroup(G, special=true)
 #
 ###############################################################################
 
-function convert(::Type{Automorphism{N}}, s::AutSymbol) where N
-    return Automorphism{N}(AutSymbol[s])
-end
+Automorphism{N}(s::AutSymbol) where N = Automorphism{N}(AutSymbol[s])
 
 function (G::AutGroup{N})() where N
    id = Automorphism{N}(id_autsymbol())

@@ -88,6 +88,8 @@ parent(w::GWord{T}) where {T<:GSymbol} = w.parent
 ###############################################################################
 
 GroupWord(s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
+GroupWord{T}(s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
+GroupWord(w::GroupWord{T}) where {T<:GSymbol} = w
 convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 
 ###############################################################################
