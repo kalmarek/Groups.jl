@@ -1,5 +1,3 @@
-import Base: ×
-
 export DirectProductGroup, DirectProductGroupElem
 export MultiplicativeGroup, MltGrp, MltGrpElem
 export AdditiveGroup, AddGrp, AddGrpElem
@@ -163,27 +161,23 @@ end
 #
 ###############################################################################
 
-function ×(G::Group, H::Group)
+function pow(G::Group, H::Group)
    G == H || throw(DomainError(
       "Direct Powers are defined only for the same groups"))
    return DirectProductGroup(G,2)
 end
 
-×(H::Group, G::DirectProductGroup) = G×H
+pow(H::Group, G::DirectProductGroup) = pow(G,H)
 
-function ×(G::DirectProductGroup, H::Group)
+function pow(G::DirectProductGroup, H::Group)
    G.group == H || throw(DomainError(
       "Direct products are defined only for the same groups"))
    return DirectProductGroup(G.group,G.n+1)
 end
 
-DirectProductGroup(R::T, n::Int) where {T<:AbstractAlgebra.Ring} =
-DirectProductGroup(AdditiveGroup(R), n)
-
-function ×(G::DirectProductGroup{T}, H::Group) where T <: Union{AdditiveGroup, MultiplicativeGroup}
-   G.group == T(H) || throw(DomainError(
-      "Direct products are defined only for the same groups"))
-   return DirectProductGroup(G.group,G.n+1)
+function pow(R::T, n::Int) where {T<:AbstractAlgebra.Ring}
+   @warn "Creating DirectProduct of the multilplicative group!"
+   return DirectProductGroup(R, n)
 end
 
 ###############################################################################
