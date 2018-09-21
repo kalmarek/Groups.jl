@@ -25,6 +25,7 @@ for (Gr, Elem) in [(:MltGrp, :MltGrpElem), (:AddGrp, :AddGrpElem)]
       ==(G::$Gr, H::$Gr) = G.obj == H.obj
 
       elem_type(::Type{$Gr{T}}) where T = $Elem{elem_type(T)}
+      eltype(::Type{$Gr{T}}) where T = $Elem{elem_type(T)}
       parent_type(::Type{$Elem{T}}) where T = $Gr{parent_type(T)}
       parent(g::$Elem) = $Gr(parent(g.elt))
    end
@@ -76,6 +77,28 @@ elements(G::AddGrp{F}) where F <: AbstractAlgebra.GFField = (G((i-1)*G.obj(1)) f
 order(G::MltGrp{<:AbstractAlgebra.GFField}) = order(G.obj) - 1
 elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i in 1:order(G))
 
+length(G::Union{AddGrp, MltGrp}) = order(G)
+
+function iterate(G::AddGrp, s=0)
+   if s >= order(G)
+      return nothing
+   else
+      g, s = iterate(G.obj,s)
+      return G(g), s
+   end
+end
+
+function iterate(G::MltGrp, s=0)
+   if s > order(G)
+      return nothing
+   else
+      g, s = iterate(G.obj, s)
+      if g == G.obj()
+         g, s = iterate(G.obj, s)
+      end
+      return G(g), s
+   end
+end
 
 ###############################################################################
 #
