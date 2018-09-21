@@ -434,4 +434,19 @@ function generate_balls(S::Vector{T}, Id::T=one(parent(first(S))); radius=2, op=
     return B, sizes
 end
 
+########### iteration for GFField
+
+
+length(F::AbstractAlgebra.GFField) = order(F)
+
+function iterate(F::AbstractAlgebra.GFField, s=0)
+   if s >= order(F)
+      return nothing
+   else
+      return F(s), s+1
+   end
+end
+
+eltype(::Type{AbstractAlgebra.GFField{I}}) where I = AbstractAlgebra.gfelem{I}
+
 end # of module Groups
