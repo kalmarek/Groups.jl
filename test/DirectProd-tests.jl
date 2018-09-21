@@ -1,5 +1,7 @@
 @testset "DirectProducts" begin
 
+   ×(a,b) = Groups.pow(a,b)
+
    @testset "Constructors" begin
       G = PermutationGroup(3)
       g = G([2,3,1])
@@ -33,7 +35,6 @@
       @test_throws DomainError GG(g,g,g)
       @test GG(g,g^2) == h
 
-      @test size(h) == (2,)
       @test h[1] == g
       @test h[2] == g^2
       h[2] = G()
@@ -62,10 +63,10 @@
       @test parent_type(typeof((G×G)(g,g^2))) == Groups.DirectProductGroup{typeof(G)}
       @test parent((G×G)(g,g^2)) == DirectProductGroup(G,2)
 
-      F = GF(13)
+      F = AdditiveGroup(GF(13))
 
-      @test elem_type(F×F) == DirectProductGroupElem{Groups.AddGrpElem{elem_type(F)}}
-      @test parent_type(typeof((F×F)(1,5))) == Groups.DirectProductGroup{AddGrp{typeof(F)}}
+      @test elem_type(F×F) == DirectProductGroupElem{Groups.AddGrpElem{AbstractAlgebra.gfelem{Int}}}
+      @test parent_type(typeof((F×F)(1,5))) == Groups.DirectProductGroup{Groups.AddGrp{AbstractAlgebra.GFField{Int}}}
       parent((F×F)(1,5)) == DirectProductGroup(F,2)
    end
 
@@ -160,22 +161,20 @@
    @testset "Misc" begin
       F = GF(5)
 
-
-      FF = DirectProductGroup(F,2)
+      FF = DirectProductGroup(AdditiveGroup(F),2)
       @test order(FF) == 25
 
       elts = vec(collect(elements(FF)))
       @test length(elts) == 25
-      @test all([g*inv(g) for g in elts] .== FF())
+      @test all([g*inv(g) == FF() for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
-
 
       FF = DirectProductGroup(MultiplicativeGroup(F), 3)
       @test order(FF) == 64
 
       elts = vec(collect(elements(FF)))
       @test length(elts) == 64
-      @test all([g*inv(g) for g in elts] .== FF())
+      @test all([g*inv(g) == FF() for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
 
 
@@ -187,7 +186,7 @@
       elts = vec(collect(elements(GG)))
 
       @test length(elts) == 36
-      @test all([g*inv(g) for g in elts] .== GG())
+      @test all([g*inv(g) == GG() for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
    end
 end

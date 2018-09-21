@@ -130,7 +130,6 @@
       f = Groups.perm_autsymbol([2,1,4,3])
       @test isa(inv(f), Groups.AutSymbol)
 
-      @test_throws MethodError f^-1
       @test_throws MethodError f*f
 
       @test A(f)^-1 == A(inv(f))
