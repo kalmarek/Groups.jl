@@ -83,12 +83,11 @@ elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     DirectProductGroup(G::Group, n::Int) <: Group
 Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
-
 struct DirectProductGroup{T<:Group} <: Group
    group::T
    n::Int
@@ -170,7 +169,7 @@ end
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     (G::DirectProductGroup)(a::Vector, check::Bool=true)
 > Constructs element of the $n$-fold direct product group `G` by coercing each
 > element of vector `a` to `G.group`. If `check` flag is set to `false` neither
@@ -225,7 +224,7 @@ end
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     ==(g::DirectProductGroup, h::DirectProductGroup)
 > Checks if two direct product groups are the same.
 """
@@ -235,7 +234,7 @@ function (==)(G::DirectProductGroup, H::DirectProductGroup)
    return true
 end
 
-doc"""
+@doc doc"""
     ==(g::DirectProductGroupElem, h::DirectProductGroupElem)
 > Checks if two direct product group elements are the same.
 """
@@ -250,7 +249,7 @@ end
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     *(g::DirectProductGroupElem, h::DirectProductGroupElem)
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
@@ -263,7 +262,7 @@ function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bo
    return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
 
-doc"""
+@doc doc"""
     inv(g::DirectProductGroupElem)
 > Return the inverse of the given element in the direct product group.
 """
@@ -310,16 +309,15 @@ Base.done(DPIter::DirectPowerIter, state) = DPIter.totalorder <= state
 
 Base.eltype(::Type{DirectPowerIter{Gr, GrEl}}) where {Gr, GrEl} = DirectProductGroupElem{GrEl}
 
-doc"""
+@doc doc"""
     elements(G::DirectProductGroup)
 > Returns `generator` that produces all elements of group `G` (provided that
 > `G.group` implements the `elements` method).
 """
 elements(G::DirectProductGroup) = DirectPowerIter(G.group, G.n)
 
-doc"""
+@doc doc"""
     order(G::DirectProductGroup)
 > Returns the order (number of elements) in the group.
-
 """
 order(G::DirectProductGroup) = order(G.group)^G.n

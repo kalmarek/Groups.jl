@@ -7,9 +7,12 @@ import AbstractAlgebra: parent, parent_type, elem_type
 import AbstractAlgebra: elements, order, gens, matrix_repr
 
 import Base: length, ==, hash, show, convert
-import Base: inv, reduce, *, ^
+import Base: inv, reduce, *, ^, power_by_squaring
 import Base: findfirst, findnext
 import Base: deepcopy_internal
+
+using LinearAlgebra
+using Markdown
 
 ###############################################################################
 #
@@ -17,7 +20,7 @@ import Base: deepcopy_internal
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     ::GSymbol
 > Abstract type which all group symbols of AbstractFPGroups should subtype. Each
 > concrete subtype should implement fields:
@@ -29,7 +32,7 @@ abstract type GSymbol end
 
 abstract type GWord{T<:GSymbol} <:GroupElem end
 
-doc"""
+@doc doc"""
     W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
 > Basic representation of element of a finitely presented group. `W.symbols`
 > fieldname contains particular group symbols which multiplied constitute a
@@ -76,7 +79,7 @@ include("WreathProducts.jl")
 #
 ###############################################################################
 
-parent{T<:GSymbol}(w::GWord{T}) = w.parent
+parent(w::GWord{T}) where {T<:GSymbol} = w.parent
 
 ###############################################################################
 #
@@ -99,7 +102,7 @@ function hash(W::GWord, h::UInt)
 end
 
 # WARNING: Due to specialised (constant) hash function of GWords this one is actually necessary!
-function deepcopy_internal(W::T, dict::ObjectIdDict) where {T<:GWord}
+function deepcopy_internal(W::T, dict::IdDict) where {T<:GWord}
     G = parent(W)
     return G(T(deepcopy(W.symbols)))
 end
@@ -150,7 +153,7 @@ function reduce!(W::GWord)
     return W
 end
 
-doc"""
+@doc doc"""
     reduce(W::GWord)
 > performs reduction/simplification of a group element (word in generators).
 > The default reduction is the free group reduction, i.e. consists of
@@ -161,7 +164,7 @@ doc"""
 """
 reduce(W::GWord) = reduce!(deepcopy(W))
 
-doc"""
+@doc doc"""
     gens(G::AbstractFPGroups)
 > returns vector of generators of `G`, as its elements.
 
@@ -174,7 +177,7 @@ gens(G::AbstractFPGroup) = [G(g) for g in G.gens]
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     show(io::IO, W::GWord)
 > The actual string produced by show depends on the eltype of `W.symbols`.
 
@@ -320,14 +323,14 @@ function findnext(W::GWord, Z::GWord, i::Int)
    if n == 0
       return 0
    elseif n == 1
-      for idx in i:endof(W.symbols)
+      for idx in i:lastindex(W.symbols)
          if issubsymbol(Z.symbols[1], W.symbols[idx])
             return idx
          end
       end
       return 0
    else
-      for idx in i:endof(W.symbols) - n + 1
+      for idx in i:lastindex(W.symbols) - n + 1
          foundfirst = issubsymbol(Z.symbols[1], W.symbols[idx])
          lastmatch = issubsymbol(Z.symbols[end], W.symbols[idx+n-1])
          if foundfirst && lastmatch
@@ -416,7 +419,7 @@ function generate_balls(S::Vector{T}, Id::T=parent(first(S))(); radius=2, op=*) 
     return B, sizes
 end
 
-function generate_balls{T<:RingElem}(S::Vector{T}, Id::T=one(parent(first(S))); radius=2, op=*)
+function generate_balls(S::Vector{T}, Id::T=one(parent(first(S))); radius=2, op=*) where {T<:RingElem}
     sizes = Int[]
     B = [Id]
     for i in 1:radius

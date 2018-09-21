@@ -1,4 +1,5 @@
 @testset "Automorphisms" begin
+
    G = PermutationGroup(Int8(4))
 
    @testset "AutSymbol" begin
@@ -129,7 +130,7 @@
       f = Groups.perm_autsymbol([2,1,4,3])
       @test isa(inv(f), Groups.AutSymbol)
 
-      @test_throws DomainError f^-1
+      @test_throws MethodError f^-1
       @test_throws MethodError f*f
 
       @test A(f)^-1 == A(inv(f))
@@ -214,10 +215,10 @@
       S = unique([gens(G); inv.(gens(G))])
       R = 3
 
-      @test Groups.linear_repr(G()) isa Matrix{Float64}
-      @test Groups.linear_repr(G()) == eye(N)
+      @test Groups.linear_repr(G()) isa Matrix{Int}
+      @test Groups.linear_repr(G()) == Matrix{Int}(I, N, N)
 
-      M = eye(N)
+      M = Matrix{Int}(I, N, N)
       M[1,2] = 1
       ϱ₁₂ = G(Groups.rmul_autsymbol(1,2))
       λ₁₂ = G(Groups.rmul_autsymbol(1,2))
@@ -230,22 +231,22 @@
       @test Groups.linear_repr(ϱ₁₂^-1) == M
       @test Groups.linear_repr(λ₁₂^-1) == M
 
-      @test Groups.linear_repr(ϱ₁₂*λ₁₂^-1) == eye(N)
-      @test Groups.linear_repr(λ₁₂^-1*ϱ₁₂) == eye(N)
+      @test Groups.linear_repr(ϱ₁₂*λ₁₂^-1) == Matrix{Int}(I, N, N)
+      @test Groups.linear_repr(λ₁₂^-1*ϱ₁₂) == Matrix{Int}(I, N, N)
 
-      M = eye(N)
+      M = Matrix{Int}(I, N, N)
       M[2,2] = -1
       ε₂ = G(Groups.flip_autsymbol(2))
 
       @test Groups.linear_repr(ε₂) == M
-      @test Groups.linear_repr(ε₂^2) == eye(N)
+      @test Groups.linear_repr(ε₂^2) == Matrix{Int}(I, N, N)
 
       M = [0 1 0; 0 0 1; 1 0 0]
 
       σ = G(Groups.perm_autsymbol([2,3,1]))
       @test Groups.linear_repr(σ) == M
-      @test Groups.linear_repr(σ^3) == eye(3)
-      @test Groups.linear_repr(σ)^3 ≈ eye(3)
+      @test Groups.linear_repr(σ^3) == Matrix{Int}(I, 3, 3)
+      @test Groups.linear_repr(σ)^3 == Matrix{Int}(I, 3, 3)
 
       function test_homomorphism(S, r)
          for elts in Iterators.product([[g for g in S] for _ in 1:r]...)

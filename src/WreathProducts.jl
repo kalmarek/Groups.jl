@@ -6,7 +6,7 @@ export WreathProduct, WreathProductElem
 #
 ###############################################################################
 
-doc"""
+@doc doc"""
     WreathProduct(N, P) <: Group
 > Implements Wreath product of a group `N` by permutation group $P = S_n$,
 > usually written as $N \wr P$.
@@ -91,7 +91,7 @@ function (G::WreathProduct)(g::WreathProductElem)
    return WreathProductElem(n, p)
 end
 
-doc"""
+@doc doc"""
     (G::WreathProduct)(n::DirectProductGroupElem, p::Generic.perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
@@ -100,13 +100,13 @@ doc"""
 
 (G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
-doc"""
+@doc doc"""
     (G::WreathProduct)(p::Generic.perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
 """
 (G::WreathProduct)(p::Generic.perm) = G(G.N(), p)
 
-doc"""
+@doc doc"""
     (G::WreathProduct)(n::DirectProductGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
 > embedding that makes sequence `1 -> N -> G -> P -> 1` exact.
@@ -169,7 +169,7 @@ end
 
 (p::perm)(n::DirectProductGroupElem) = DirectProductGroupElem(n.elts[p.d])
 
-doc"""
+@doc doc"""
     *(g::WreathProductElem, h::WreathProductElem)
 > Return the wreath product group operation of elements, i.e.
 >
@@ -182,7 +182,7 @@ function *(g::WreathProductElem, h::WreathProductElem)
    return WreathProductElem(g.n*g.p(h.n), g.p*h.p, false)
 end
 
-doc"""
+@doc doc"""
     inv(g::WreathProductElem)
 > Returns the inverse of element of a wreath product, according to the formula
 >   `g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1)`.

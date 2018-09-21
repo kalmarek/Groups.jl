@@ -15,7 +15,7 @@ mutable struct FPGroup <: AbstractFPGroup
    gens::Vector{FPSymbol}
    rels::Dict{FPGroupElem, FPGroupElem}
 
-   function FPGroup{T<:GSymbol}(gens::Vector{T}, rels::Dict{FPGroupElem, FPGroupElem})
+   function FPGroup(gens::Vector{T}, rels::Dict{FPGroupElem, FPGroupElem}) where {T<:GSymbol}
       G = new(gens)
       G.rels = Dict(G(k) => G(v) for (k,v) in rels)
       return G

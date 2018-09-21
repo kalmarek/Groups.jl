@@ -14,7 +14,7 @@ FreeGroupElem = GroupWord{FreeSymbol}
 mutable struct FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
 
-   function FreeGroup{T<:GSymbol}(gens::Vector{T})
+   function FreeGroup(gens::Vector{T}) where {T<:GSymbol}
       G = new(gens)
       G.gens = gens
       return G
