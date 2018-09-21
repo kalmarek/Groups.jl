@@ -271,13 +271,15 @@ end
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
 """
-function *(g::DirectProductGroupElem{T}, h::DirectProductGroupElem{T}, check::Bool=true) where {T}
+function *(g::DirectProductGroupElem, h::DirectProductGroupElem, check::Bool=true)
    if check
       parent(g) == parent(h) || throw(DomainError(
          "Can not multiply elements of different groups!"))
    end
    return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
+
+^(g::DirectProductGroupElem, n::Integer) = Base.power_by_squaring(g, n)
 
 @doc doc"""
     inv(g::DirectProductGroupElem)

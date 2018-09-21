@@ -182,6 +182,8 @@ function *(g::WreathProductElem, h::WreathProductElem)
    return WreathProductElem(g.n*g.p(h.n), g.p*h.p, false)
 end
 
+^(g::WreathProductElem, n::Integer) = Base.power_by_squaring(g, n)
+
 @doc doc"""
     inv(g::WreathProductElem)
 > Returns the inverse of element of a wreath product, according to the formula
