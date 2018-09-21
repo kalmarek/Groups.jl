@@ -202,7 +202,7 @@ matrix_repr(g::WreathProductElem) = Any[matrix_repr(g.p) g.n]
 
 function elements(G::WreathProduct)
    Nelts = collect(elements(G.N))
-   Pelts = collect(elements(G.P))
+   Pelts = collect(G.P)
    return (WreathProductElem(n, p, false) for n in Nelts, p in Pelts)
 end
 

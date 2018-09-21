@@ -11,6 +11,8 @@ import Base: inv, reduce, *, ^, power_by_squaring
 import Base: findfirst, findnext
 import Base: deepcopy_internal
 
+export elements
+
 using LinearAlgebra
 using Markdown
 

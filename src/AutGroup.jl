@@ -165,7 +165,7 @@ function AutGroup(G::FreeGroup; special=false)
 
    if !special
       flips = [flip_autsymbol(i) for i in 1:n]
-      syms = [perm_autsymbol(p) for p in elements(PermutationGroup(n))][2:end]
+      syms = [perm_autsymbol(p) for p in PermutationGroup(n)][2:end]
 
       append!(S, [flips; syms])
 
