@@ -62,10 +62,10 @@ for (Elem, op) in ([:MltGrpElem, :*], [:AddGrpElem, :+])
    end
 end
 
-Base.show(io::IO, G::MltGrp) = print(io, "The multiplicative group of $(G.obj)")
-Base.show(io::IO, G::AddGrp) = print(io, "The additive group of $(G.obj)")
+show(io::IO, G::MltGrp) = print(io, "The multiplicative group of $(G.obj)")
+show(io::IO, G::AddGrp) = print(io, "The additive group of $(G.obj)")
 
-Base.show(io::IO, g::Union{MltGrpElem, AddGrpElem}) = show(io, g.elt)
+show(io::IO, g::Union{MltGrpElem, AddGrpElem}) = show(io, g.elt)
 
 gens(F::AbstractAlgebra.Field) = elem_type(F)[gen(F)]
 
