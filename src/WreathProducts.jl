@@ -63,17 +63,9 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 #
 ###############################################################################
 
-function (G::WreathProduct)(g::WreathProductElem)
-   n = try
-      G.N(g.n)
-   catch
-      throw(DomainError("Can't coerce $(g.n) to $(G.N) factor of $G"))
-   end
-   p = try
-      G.P(g.p)
-   catch
-      throw(DomainError("Can't coerce $(g.p) to $(G.P) factor of $G"))
-   end
+function (G::WreathProduct{N})(g::WreathProductElem{N}) where {N}
+   n = G.N(g.n)
+   p = G.P(g.p)
    return WreathProductElem(n, p)
 end
 
