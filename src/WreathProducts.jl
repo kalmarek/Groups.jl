@@ -16,31 +16,31 @@ export WreathProduct, WreathProductElem
 > `n-tuples` of elements from `N`
 
 # Arguments:
-* `N::Group` : the single factor of group $N$
+* `N::Group` : the single factor of the group $N$
 * `P::Generic.PermGroup` : full `PermutationGroup`
 """
-struct WreathProduct{T<:Group, I<:Integer} <: Group
-   N::DirectPowerGroup{T}
+struct WreathProduct{N, T<:Group, I<:Integer} <: Group
+   N::DirectPowerGroup{N, T}
    P::Generic.PermGroup{I}
 
-   function WreathProduct{T, I}(Gr::T, P::Generic.PermGroup{I}) where {T, I}
+   function WreathProduct(Gr::T, P::Generic.PermGroup{I}) where {T, I}
       N = DirectPowerGroup(Gr, Int(P.n))
-      return new(N, P)
+      return new{Int(P.n), T, I}(N, P)
    end
 end
 
-struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
-   n::DirectPowerGroupElem{T}
+struct WreathProductElem{N, T<:GroupElem, I<:Integer} <: GroupElem
+   n::DirectPowerGroupElem{N, T}
    p::Generic.perm{I}
    # parent::WreathProduct
 
-   function WreathProductElem{T, I}(n::DirectPowerGroupElem{T}, p::Generic.perm{I},
-      check::Bool=true) where {T, I}
+   function WreathProductElem(n::DirectPowerGroupElem{N,T}, p::Generic.perm{I},
+      check::Bool=true) where {N, T, I}
       if check
          length(n.elts) == length(p.d) || throw(DomainError(
             "Can't form WreathProductElem: lengths differ"))
       end
-      return new(n, p)
+      return new{N, T, I}(n, p)
    end
 end
 
@@ -50,22 +50,12 @@ end
 #
 ###############################################################################
 
-elem_type(::Type{WreathProduct{T, I}}) where {T, I} = WreathProductElem{elem_type(T), I}
+elem_type(::Type{WreathProduct{N, T, I}}) where {N, T, I} = WreathProductElem{N, elem_type(T), I}
 
-parent_type(::Type{WreathProductElem{T, I}}) where {T, I} =
-   WreathProduct{parent_type(T), I}
+parent_type(::Type{WreathProductElem{N, T, I}}) where {N, T, I} =
+   WreathProduct{N, parent_type(T), I}
 
 parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
-
-###############################################################################
-#
-#   WreathProduct / WreathProductElem constructors
-#
-###############################################################################
-
-WreathProduct(G::T, P::Generic.PermGroup{I}) where {T, I} = WreathProduct{T, I}(G, P)
-
-WreathProductElem(n::DirectPowerGroupElem{T}, p::Generic.perm{I}, check=true) where {T,I} = WreathProductElem{T,I}(n, p, check)
 
 ###############################################################################
 #
