@@ -98,7 +98,7 @@ end
 
 ###############################################################################
 #
-#   DirectPowerGroup / DirectPowerGroupElem
+#   DirectPowerGroup / DirectPowerGroupElem Constructors
 #
 ###############################################################################
 
@@ -107,57 +107,11 @@ end
 Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
-struct DirectPowerGroup{T<:Group} <: Group
+struct DirectPowerGroup{N, T<:Group} <: Group
    group::T
-   n::Int
 end
 
-struct DirectPowerGroupElem{T<:GroupElem} <: GroupElem
-   elts::Vector{T}
-end
-
-###############################################################################
-#
-#   Type and parent object methods
-#
-###############################################################################
-
-elem_type(::Type{DirectPowerGroup{T}}) where {T} =
-   DirectPowerGroupElem{elem_type(T)}
-
-parent_type(::Type{DirectPowerGroupElem{T}}) where {T} =
-   DirectPowerGroup{parent_type(T)}
-
-parent(g::DirectPowerGroupElem) =
-   DirectPowerGroup(parent(first(g.elts)), length(g.elts))
-
-###############################################################################
-#
-#   AbstractVector interface
-#
-###############################################################################
-
-size(g::DirectPowerGroupElem) = size(g.elts)
-Base.IndexStyle(::Type{DirectPowerGroupElem}) = Base.LinearFast()
-Base.getindex(g::DirectPowerGroupElem, i::Int) = g.elts[i]
-
-function Base.setindex!(g::DirectPowerGroupElem{T}, v::T, i::Int) where {T}
-   parent(v) == parent(g.elts[i]) || throw(DomainError(
-      "$g is not an element of $i-th factor of $(parent(G))"))
-   g.elts[i] = v
-   return g
-end
-
-function Base.setindex!(g::DirectPowerGroupElem{T}, v::S, i::Int) where {T, S}
-   g.elts[i] = parent(g.elts[i])(v)
-   return g
-end
-
-###############################################################################
-#
-#   DirectPowerGroup / DirectPowerGroupElem constructors
-#
-###############################################################################
+DirectPowerGroup(G::Gr, N::Int) where Gr<:Group = DirectPowerGroup{N,Gr}(G)
 
 function DirectPower(G::Group, H::Group)
    G == H || throw(DomainError(
@@ -167,16 +121,49 @@ end
 
 DirectPower(H::Group, G::DirectPowerGroup) = DirectPower(G,H)
 
-function DirectPower(G::DirectPowerGroup, H::Group)
+function DirectPower(G::DirectPowerGroup{N}, H::Group) where N
    G.group == H || throw(DomainError(
-      "Direct products are defined only for the same groups"))
-   return DirectPowerGroup(G.group,G.n+1)
+      "Direct Powers are defined only for the same groups"))
+   return DirectPowerGroup(G.group, N+1)
 end
 
 function DirectPower(R::AbstractAlgebra.Ring, n::Int)
    @warn "Creating DirectPower of the multilplicative group!"
-   return DirectPowerGroup(R, n)
+   return DirectPowerGroup(MultiplicativeGroup(R), n)
 end
+
+struct DirectPowerGroupElem{N, T<:GroupElem} <: GroupElem
+   elts::NTuple{N,T}
+end
+
+function DirectPowerGroupElem(v::Vector{GrEl}) where GrEl<:GroupElem
+   return DirectPowerGroupElem(tuple(v...))
+end
+
+###############################################################################
+#
+#   Type and parent object methods
+#
+###############################################################################
+
+elem_type(::Type{DirectPowerGroup{N,T}}) where {N,T} =
+   DirectPowerGroupElem{N, elem_type(T)}
+
+parent_type(::Type{DirectPowerGroupElem{N,T}}) where {N,T} =
+   DirectPowerGroup{N, parent_type(T)}
+
+parent(g::DirectPowerGroupElem{N, T}) where {N,T} =
+   DirectPowerGroup(parent(first(g.elts)), N)
+
+###############################################################################
+#
+#   AbstractVector interface
+#
+###############################################################################
+
+size(g::DirectPowerGroupElem{N}) where N = (N,)
+Base.IndexStyle(::Type{DirectPowerGroupElem}) = Base.LinearFast()
+Base.getindex(g::DirectPowerGroupElem, i::Int) = g.elts[i]
 
 ###############################################################################
 #
@@ -190,20 +177,26 @@ end
 > element of vector `a` to `G.group`. If `check` flag is set to `false` neither
 > check on the correctness nor coercion is performed.
 """
-function (G::DirectPowerGroup)(a::Vector, check::Bool=true)
+function (G::DirectPowerGroup{N})(a::Vector, check::Bool=true) where N
    if check
-      G.n == length(a) || throw(DomainError(
+      N == length(a) || throw(DomainError(
          "Can not coerce to DirectPowerGroup: lengths differ"))
       a = (G.group).(a)
    end
    return DirectPowerGroupElem(a)
 end
 
-(G::DirectPowerGroup)() = DirectPowerGroupElem([G.group() for _ in 1:G.n])
+function (G::DirectPowerGroup{N})(a::NTuple{N, GrEl}) where {N, GrEl}
+   return DirectPowerGroupElem(G.group.(a))
+end
+
+(G::DirectPowerGroup{N})(a::Vararg{GrEl, N}) where {N, GrEl} = DirectPowerGroupElem(G.group.(a))
+
+function (G::DirectPowerGroup{N})() where N
+   return DirectPowerGroupElem(ntuple(i->G.group(),N))
+end
 
 (G::DirectPowerGroup)(g::DirectPowerGroupElem) = G(g.elts)
-
-(G::DirectPowerGroup)(a::Vararg{T, N}) where {T, N} = G([a...])
 
 ###############################################################################
 #
@@ -211,12 +204,12 @@ end
 #
 ###############################################################################
 
-function hash(G::DirectPowerGroup, h::UInt)
-   return hash(G.group, hash(G.n, hash(DirectPowerGroup,h)))
+function hash(G::DirectPowerGroup{N}, h::UInt) where N
+   return hash(G.group, hash(N, hash(DirectPowerGroup,h)))
 end
 
 function hash(g::DirectPowerGroupElem, h::UInt)
-   return hash(g.elts, hash(parent(g), hash(DirectPowerGroupElem, h)))
+   return hash(g.elts, hash(DirectPowerGroupElem, h))
 end
 
 ###############################################################################
@@ -225,8 +218,8 @@ end
 #
 ###############################################################################
 
-function show(io::IO, G::DirectPowerGroup)
-   print(io, "$(G.n)-fold direct product of $(G.group)")
+function show(io::IO, G::DirectPowerGroup{N}) where N
+   print(io, "$(N)-fold direct product of $(G.group)")
 end
 
 function show(io::IO, g::DirectPowerGroupElem)
@@ -243,9 +236,9 @@ end
     ==(g::DirectPowerGroup, h::DirectPowerGroup)
 > Checks if two direct product groups are the same.
 """
-function (==)(G::DirectPowerGroup, H::DirectPowerGroup)
+function (==)(G::DirectPowerGroup{N}, H::DirectPowerGroup{M}) where {N,M}
+   N == M || return false
    G.group == H.group || return false
-   G.n == G.n || return false
    return true
 end
 
@@ -253,10 +246,7 @@ end
     ==(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
 > Checks if two direct product group elements are the same.
 """
-function (==)(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
-   g.elts == h.elts || return false
-   return true
-end
+(==)(g::DirectPowerGroupElem, h::DirectPowerGroupElem) = g.elts == h.elts
 
 ###############################################################################
 #
@@ -269,12 +259,12 @@ end
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
 """
-function *(g::DirectPowerGroupElem, h::DirectPowerGroupElem, check::Bool=true)
+function *(g::DirectPowerGroupElem{N}, h::DirectPowerGroupElem{N}, check::Bool=true) where N
    if check
       parent(g) == parent(h) || throw(DomainError(
          "Can not multiply elements of different groups!"))
    end
-   return DirectPowerGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
+   return DirectPowerGroupElem(ntuple(i-> g.elts[i]*h.elts[i], N))
 end
 
 ^(g::DirectPowerGroupElem, n::Integer) = Base.power_by_squaring(g, n)
@@ -283,8 +273,8 @@ end
     inv(g::DirectPowerGroupElem)
 > Return the inverse of the given element in the direct product group.
 """
-function inv(g::DirectPowerGroupElem{T}) where {T<:GroupElem}
-   return DirectPowerGroupElem([inv(a) for a in g.elts])
+function inv(g::DirectPowerGroupElem{N}) where {N}
+   return DirectPowerGroupElem(ntuple(i-> inv(g.elts[i]), N))
 end
 
 ###############################################################################
