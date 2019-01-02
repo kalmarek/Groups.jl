@@ -7,6 +7,6 @@ using LinearAlgebra
 @testset "Groups" begin
    include("FreeGroup-tests.jl")
    include("AutGroup-tests.jl")
-   include("DirectProd-tests.jl")
+   include("DirectPower-tests.jl")
    include("WreathProd-tests.jl")
 end
