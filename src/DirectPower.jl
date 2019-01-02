@@ -26,6 +26,7 @@ for (Gr, Elem) in [(:MltGrp, :MltGrpElem), (:AddGrp, :AddGrpElem)]
       eltype(::Type{$Gr{T}}) where T = $Elem{elem_type(T)}
       parent_type(::Type{$Elem{T}}) where T = $Gr{parent_type(T)}
       parent(g::$Elem) = $Gr(parent(g.elt))
+      length(G::$Gr{<:AbstractAlgebra.Ring}) = order(G.obj)
    end
 end
 
@@ -70,10 +71,9 @@ show(io::IO, g::Union{MltGrpElem, AddGrpElem}) = show(io, g.elt)
 gens(F::AbstractAlgebra.Field) = elem_type(F)[gen(F)]
 
 order(G::AddGrp{<:AbstractAlgebra.GFField}) = order(G.obj)
-elements(G::AddGrp{F}) where F <: AbstractAlgebra.GFField = (G((i-1)*G.obj(1)) for i in 1:order(G))
 
 order(G::MltGrp{<:AbstractAlgebra.GFField}) = order(G.obj) - 1
-elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i in 1:order(G))
+
 
 function iterate(G::AddGrp, s=0)
    if s >= order(G)
@@ -283,38 +283,28 @@ end
 #
 ###############################################################################
 
-struct DirectPowerIter{GrEl<:AbstractAlgebra.GroupElem}
-   N::Int
-   elts::Vector{GrEl}
-   totalorder::Int
-   orderG::Int
+order(G::DirectPowerGroup{N}) where N = order(G.group)^N
+length(G::DirectPowerGroup) = order(G)
+
+function iterate(G::DirectPowerGroup{N}) where N
+   elts = collect(G.group)
+   
+   indices = CartesianIndices(ntuple(i -> order(G.group), N))
+   idx, s = iterate(indices)
+   g = DirectPowerGroupElem(ntuple(i -> elts[idx[i]], N))
+   return g, (elts, indices, s)
 end
 
-function DirectPowerIter(G::Gr, N::Integer) where {Gr<:AbstractAlgebra.Group}
-   return DirectPowerIter{elem_type(G)}(N, collect(G), order(G)^N, order(G))
-end
-
-length(DPIter::DirectPowerIter) = DPIter.totalorder
-
-function iterate(DPIter::DirectPowerIter, state=0)
-   if state >= DPIter.totalorder
+function iterate(G::DirectPowerGroup{N}, state) where N
+   elts, indices, s = state
+   res = iterate(indices, s)
+   if res == nothing
       return nothing
+   else
+      idx, s = res
    end
-   idx = Tuple(CartesianIndices(ntuple(i -> DPIter.orderG, DPIter.N))[state+1])
-   return DirectPowerGroupElem([DPIter.elts[i] for i in idx]), state+1
+   g = DirectPowerGroupElem(ntuple(i -> elts[idx[i]], N))
+   return g, (elts, indices, s)
 end
 
-eltype(::Type{DirectPowerIter{GrEl}}) where {GrEl} = DirectPowerGroupElem{GrEl}
-
-@doc doc"""
-    elements(G::DirectPowerGroup)
-> Returns `generator` that produces all elements of group `G` (provided that
-> `G.group` implements the `elements` method).
-"""
-elements(G::DirectPowerGroup) = DirectPowerIter(G.group, G.n)
-
-@doc doc"""
-    order(G::DirectPowerGroup)
-> Returns the order (number of elements) in the group.
-"""
-order(G::DirectPowerGroup) = order(G.group)^G.n
+eltype(::Type{DirectPowerGroup{N, G}}) where {N, G} = DirectPowerGroupElem{N, elem_type(G)}

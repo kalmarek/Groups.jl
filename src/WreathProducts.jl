@@ -87,7 +87,7 @@ end
 @doc doc"""
     (G::WreathProduct)(n::DirectPowerGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
-> embedding that makes sequence `1 -> N -> G -> P -> 1` exact.
+> embedding that makes the sequence `1 -> N -> G -> P -> 1` exact.
 """
 (G::WreathProduct)(n::DirectPowerGroupElem) = G(n, G.P())
 
@@ -180,10 +180,32 @@ end
 
 matrix_repr(g::WreathProductElem) = Any[matrix_repr(g.p) g.n]
 
-function elements(G::WreathProduct)
-   Nelts = collect(elements(G.N))
-   Pelts = collect(G.P)
-   return (WreathProductElem(n, p, false) for n in Nelts, p in Pelts)
+function iterate(G::WreathProduct)
+   n, state_N = iterate(G.N)
+   p, state_P = iterate(G.P)
+   return G(n,p), (state_N, p, state_P)
 end
 
+function iterate(G::WreathProduct, state)
+   state_N, p, state_P = state
+   res = iterate(G.N, state_N)
+   
+   if res == nothing
+      resP = iterate(G.P, state_P)
+      if resP == nothing
+         return nothing
+      else
+         n, state_N = iterate(G.N)
+         p, state_P = resP
+      end
+   else
+      n, state_N = res
+   end
+   
+   return G(n,p), (state_N, p, state_P)
+end
+
+eltype(::Type{WreathProduct{N,G,I}}) where {N,G,I} = WreathProductElem{N, elem_type(G), I}
+
 order(G::WreathProduct) = order(G.P)*order(G.N)
+length(G::WreathProduct) = order(G)
