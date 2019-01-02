@@ -72,7 +72,7 @@ include("FreeGroup.jl")
 include("FPGroups.jl")
 include("AutGroup.jl")
 
-include("DirectProducts.jl")
+include("DirectPower.jl")
 include("WreathProducts.jl")
 
 ###############################################################################

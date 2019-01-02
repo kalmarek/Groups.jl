@@ -1,4 +1,4 @@
-export DirectProductGroup, DirectProductGroupElem
+export DirectPowerGroup, DirectPowerGroupElem
 export MultiplicativeGroup, MltGrp, MltGrpElem
 export AdditiveGroup, AddGrp, AddGrpElem
 
@@ -75,8 +75,6 @@ elements(G::AddGrp{F}) where F <: AbstractAlgebra.GFField = (G((i-1)*G.obj(1)) f
 order(G::MltGrp{<:AbstractAlgebra.GFField}) = order(G.obj) - 1
 elements(G::MltGrp{F}) where F <: AbstractAlgebra.GFField = (G(i*G.obj(1)) for i in 1:order(G))
 
-length(G::Union{AddGrp, MltGrp}) = order(G)
-
 function iterate(G::AddGrp, s=0)
    if s >= order(G)
       return nothing
@@ -100,21 +98,21 @@ end
 
 ###############################################################################
 #
-#   DirectProductGroup / DirectProductGroupElem
+#   DirectPowerGroup / DirectPowerGroupElem
 #
 ###############################################################################
 
 @doc doc"""
-    DirectProductGroup(G::Group, n::Int) <: Group
+    DirectPowerGroup(G::Group, n::Int) <: Group
 Implements `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
-struct DirectProductGroup{T<:Group} <: Group
+struct DirectPowerGroup{T<:Group} <: Group
    group::T
    n::Int
 end
 
-struct DirectProductGroupElem{T<:GroupElem} <: GroupElem
+struct DirectPowerGroupElem{T<:GroupElem} <: GroupElem
    elts::Vector{T}
 end
 
@@ -124,14 +122,14 @@ end
 #
 ###############################################################################
 
-elem_type(::Type{DirectProductGroup{T}}) where {T} =
-   DirectProductGroupElem{elem_type(T)}
+elem_type(::Type{DirectPowerGroup{T}}) where {T} =
+   DirectPowerGroupElem{elem_type(T)}
 
-parent_type(::Type{DirectProductGroupElem{T}}) where {T} =
-   DirectProductGroup{parent_type(T)}
+parent_type(::Type{DirectPowerGroupElem{T}}) where {T} =
+   DirectPowerGroup{parent_type(T)}
 
-parent(g::DirectProductGroupElem) =
-   DirectProductGroup(parent(first(g.elts)), length(g.elts))
+parent(g::DirectPowerGroupElem) =
+   DirectPowerGroup(parent(first(g.elts)), length(g.elts))
 
 ###############################################################################
 #
@@ -139,45 +137,45 @@ parent(g::DirectProductGroupElem) =
 #
 ###############################################################################
 
-size(g::DirectProductGroupElem) = size(g.elts)
-Base.IndexStyle(::Type{DirectProductGroupElem}) = Base.LinearFast()
-Base.getindex(g::DirectProductGroupElem, i::Int) = g.elts[i]
+size(g::DirectPowerGroupElem) = size(g.elts)
+Base.IndexStyle(::Type{DirectPowerGroupElem}) = Base.LinearFast()
+Base.getindex(g::DirectPowerGroupElem, i::Int) = g.elts[i]
 
-function Base.setindex!(g::DirectProductGroupElem{T}, v::T, i::Int) where {T}
+function Base.setindex!(g::DirectPowerGroupElem{T}, v::T, i::Int) where {T}
    parent(v) == parent(g.elts[i]) || throw(DomainError(
       "$g is not an element of $i-th factor of $(parent(G))"))
    g.elts[i] = v
    return g
 end
 
-function Base.setindex!(g::DirectProductGroupElem{T}, v::S, i::Int) where {T, S}
+function Base.setindex!(g::DirectPowerGroupElem{T}, v::S, i::Int) where {T, S}
    g.elts[i] = parent(g.elts[i])(v)
    return g
 end
 
 ###############################################################################
 #
-#   DirectProductGroup / DirectProductGroupElem constructors
+#   DirectPowerGroup / DirectPowerGroupElem constructors
 #
 ###############################################################################
 
-function pow(G::Group, H::Group)
+function DirectPower(G::Group, H::Group)
    G == H || throw(DomainError(
       "Direct Powers are defined only for the same groups"))
-   return DirectProductGroup(G,2)
+   return DirectPowerGroup(G,2)
 end
 
-pow(H::Group, G::DirectProductGroup) = pow(G,H)
+DirectPower(H::Group, G::DirectPowerGroup) = DirectPower(G,H)
 
-function pow(G::DirectProductGroup, H::Group)
+function DirectPower(G::DirectPowerGroup, H::Group)
    G.group == H || throw(DomainError(
       "Direct products are defined only for the same groups"))
-   return DirectProductGroup(G.group,G.n+1)
+   return DirectPowerGroup(G.group,G.n+1)
 end
 
-function pow(R::T, n::Int) where {T<:AbstractAlgebra.Ring}
-   @warn "Creating DirectProduct of the multilplicative group!"
-   return DirectProductGroup(R, n)
+function DirectPower(R::AbstractAlgebra.Ring, n::Int)
+   @warn "Creating DirectPower of the multilplicative group!"
+   return DirectPowerGroup(R, n)
 end
 
 ###############################################################################
@@ -187,25 +185,25 @@ end
 ###############################################################################
 
 @doc doc"""
-    (G::DirectProductGroup)(a::Vector, check::Bool=true)
+    (G::DirectPowerGroup)(a::Vector, check::Bool=true)
 > Constructs element of the $n$-fold direct product group `G` by coercing each
 > element of vector `a` to `G.group`. If `check` flag is set to `false` neither
 > check on the correctness nor coercion is performed.
 """
-function (G::DirectProductGroup)(a::Vector, check::Bool=true)
+function (G::DirectPowerGroup)(a::Vector, check::Bool=true)
    if check
       G.n == length(a) || throw(DomainError(
-         "Can not coerce to DirectProductGroup: lengths differ"))
+         "Can not coerce to DirectPowerGroup: lengths differ"))
       a = (G.group).(a)
    end
-   return DirectProductGroupElem(a)
+   return DirectPowerGroupElem(a)
 end
 
-(G::DirectProductGroup)() = DirectProductGroupElem([G.group() for _ in 1:G.n])
+(G::DirectPowerGroup)() = DirectPowerGroupElem([G.group() for _ in 1:G.n])
 
-(G::DirectProductGroup)(g::DirectProductGroupElem) = G(g.elts)
+(G::DirectPowerGroup)(g::DirectPowerGroupElem) = G(g.elts)
 
-(G::DirectProductGroup)(a::Vararg{T, N}) where {T, N} = G([a...])
+(G::DirectPowerGroup)(a::Vararg{T, N}) where {T, N} = G([a...])
 
 ###############################################################################
 #
@@ -213,12 +211,12 @@ end
 #
 ###############################################################################
 
-function hash(G::DirectProductGroup, h::UInt)
-   return hash(G.group, hash(G.n, hash(DirectProductGroup,h)))
+function hash(G::DirectPowerGroup, h::UInt)
+   return hash(G.group, hash(G.n, hash(DirectPowerGroup,h)))
 end
 
-function hash(g::DirectProductGroupElem, h::UInt)
-   return hash(g.elts, hash(parent(g), hash(DirectProductGroupElem, h)))
+function hash(g::DirectPowerGroupElem, h::UInt)
+   return hash(g.elts, hash(parent(g), hash(DirectPowerGroupElem, h)))
 end
 
 ###############################################################################
@@ -227,11 +225,11 @@ end
 #
 ###############################################################################
 
-function show(io::IO, G::DirectProductGroup)
+function show(io::IO, G::DirectPowerGroup)
    print(io, "$(G.n)-fold direct product of $(G.group)")
 end
 
-function show(io::IO, g::DirectProductGroupElem)
+function show(io::IO, g::DirectPowerGroupElem)
    print(io, "[$(join(g.elts,","))]")
 end
 
@@ -242,20 +240,20 @@ end
 ###############################################################################
 
 @doc doc"""
-    ==(g::DirectProductGroup, h::DirectProductGroup)
+    ==(g::DirectPowerGroup, h::DirectPowerGroup)
 > Checks if two direct product groups are the same.
 """
-function (==)(G::DirectProductGroup, H::DirectProductGroup)
+function (==)(G::DirectPowerGroup, H::DirectPowerGroup)
    G.group == H.group || return false
    G.n == G.n || return false
    return true
 end
 
 @doc doc"""
-    ==(g::DirectProductGroupElem, h::DirectProductGroupElem)
+    ==(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
 > Checks if two direct product group elements are the same.
 """
-function (==)(g::DirectProductGroupElem, h::DirectProductGroupElem)
+function (==)(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
    g.elts == h.elts || return false
    return true
 end
@@ -267,26 +265,26 @@ end
 ###############################################################################
 
 @doc doc"""
-    *(g::DirectProductGroupElem, h::DirectProductGroupElem)
+    *(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
 > Return the direct-product group operation of elements, i.e. component-wise
 > operation as defined by `operations` field of the parent object.
 """
-function *(g::DirectProductGroupElem, h::DirectProductGroupElem, check::Bool=true)
+function *(g::DirectPowerGroupElem, h::DirectPowerGroupElem, check::Bool=true)
    if check
       parent(g) == parent(h) || throw(DomainError(
          "Can not multiply elements of different groups!"))
    end
-   return DirectProductGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
+   return DirectPowerGroupElem([a*b for (a,b) in zip(g.elts,h.elts)])
 end
 
-^(g::DirectProductGroupElem, n::Integer) = Base.power_by_squaring(g, n)
+^(g::DirectPowerGroupElem, n::Integer) = Base.power_by_squaring(g, n)
 
 @doc doc"""
-    inv(g::DirectProductGroupElem)
+    inv(g::DirectPowerGroupElem)
 > Return the inverse of the given element in the direct product group.
 """
-function inv(g::DirectProductGroupElem{T}) where {T<:GroupElem}
-   return DirectProductGroupElem([inv(a) for a in g.elts])
+function inv(g::DirectPowerGroupElem{T}) where {T<:GroupElem}
+   return DirectPowerGroupElem([inv(a) for a in g.elts])
 end
 
 ###############################################################################
@@ -313,20 +311,20 @@ function iterate(DPIter::DirectPowerIter, state=0)
       return nothing
    end
    idx = Tuple(CartesianIndices(ntuple(i -> DPIter.orderG, DPIter.N))[state+1])
-   return DirectProductGroupElem([DPIter.elts[i] for i in idx]), state+1
+   return DirectPowerGroupElem([DPIter.elts[i] for i in idx]), state+1
 end
 
-eltype(::Type{DirectPowerIter{GrEl}}) where {GrEl} = DirectProductGroupElem{GrEl}
+eltype(::Type{DirectPowerIter{GrEl}}) where {GrEl} = DirectPowerGroupElem{GrEl}
 
 @doc doc"""
-    elements(G::DirectProductGroup)
+    elements(G::DirectPowerGroup)
 > Returns `generator` that produces all elements of group `G` (provided that
 > `G.group` implements the `elements` method).
 """
-elements(G::DirectProductGroup) = DirectPowerIter(G.group, G.n)
+elements(G::DirectPowerGroup) = DirectPowerIter(G.group, G.n)
 
 @doc doc"""
-    order(G::DirectProductGroup)
+    order(G::DirectPowerGroup)
 > Returns the order (number of elements) in the group.
 """
-order(G::DirectProductGroup) = order(G.group)^G.n
+order(G::DirectPowerGroup) = order(G.group)^G.n

@@ -20,21 +20,21 @@ export WreathProduct, WreathProductElem
 * `P::Generic.PermGroup` : full `PermutationGroup`
 """
 struct WreathProduct{T<:Group, I<:Integer} <: Group
-   N::DirectProductGroup{T}
+   N::DirectPowerGroup{T}
    P::Generic.PermGroup{I}
 
    function WreathProduct{T, I}(Gr::T, P::Generic.PermGroup{I}) where {T, I}
-      N = DirectProductGroup(Gr, Int(P.n))
+      N = DirectPowerGroup(Gr, Int(P.n))
       return new(N, P)
    end
 end
 
 struct WreathProductElem{T<:GroupElem, I<:Integer} <: GroupElem
-   n::DirectProductGroupElem{T}
+   n::DirectPowerGroupElem{T}
    p::Generic.perm{I}
    # parent::WreathProduct
 
-   function WreathProductElem{T, I}(n::DirectProductGroupElem{T}, p::Generic.perm{I},
+   function WreathProductElem{T, I}(n::DirectPowerGroupElem{T}, p::Generic.perm{I},
       check::Bool=true) where {T, I}
       if check
          length(n.elts) == length(p.d) || throw(DomainError(
@@ -65,7 +65,7 @@ parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
 WreathProduct(G::T, P::Generic.PermGroup{I}) where {T, I} = WreathProduct{T, I}(G, P)
 
-WreathProductElem(n::DirectProductGroupElem{T}, p::Generic.perm{I}, check=true) where {T,I} = WreathProductElem{T,I}(n, p, check)
+WreathProductElem(n::DirectPowerGroupElem{T}, p::Generic.perm{I}, check=true) where {T,I} = WreathProductElem{T,I}(n, p, check)
 
 ###############################################################################
 #
@@ -88,11 +88,11 @@ function (G::WreathProduct)(g::WreathProductElem)
 end
 
 @doc doc"""
-    (G::WreathProduct)(n::DirectProductGroupElem, p::Generic.perm)
+    (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
 """
-(G::WreathProduct)(n::DirectProductGroupElem, p::Generic.perm) = WreathProductElem(n,p)
+(G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.perm) = WreathProductElem(n,p)
 
 (G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
@@ -103,11 +103,11 @@ end
 (G::WreathProduct)(p::Generic.perm) = G(G.N(), p)
 
 @doc doc"""
-    (G::WreathProduct)(n::DirectProductGroupElem)
+    (G::WreathProduct)(n::DirectPowerGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
 > embedding that makes sequence `1 -> N -> G -> P -> 1` exact.
 """
-(G::WreathProduct)(n::DirectProductGroupElem) = G(n, G.P())
+(G::WreathProduct)(n::DirectPowerGroupElem) = G(n, G.P())
 
 (G::WreathProduct)(n,p) = G(G.N(n), G.P(p))
 
@@ -163,7 +163,7 @@ end
 #
 ###############################################################################
 
-(p::perm)(n::DirectProductGroupElem) = DirectProductGroupElem(n.elts[p.d])
+(p::perm)(n::DirectPowerGroupElem) = DirectPowerGroupElem(n.elts[p.d])
 
 @doc doc"""
     *(g::WreathProductElem, h::WreathProductElem)
@@ -172,7 +172,7 @@ end
 > `g*h = (g.n*g.p(h.n), g.p*h.p)`,
 >
 > where `g.p(h.n)` denotes the action of `g.p::Generic.perm` on
-> `h.n::DirectProductGroupElem` via standard permutation of coordinates.
+> `h.n::DirectPowerGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
    return WreathProductElem(g.n*g.p(h.n), g.p*h.p, false)
