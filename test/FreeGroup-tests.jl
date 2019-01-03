@@ -1,11 +1,11 @@
 
 @testset "Groups.FreeSymbols" begin
-   s = Groups.FreeSymbol("s")
-   t = Groups.FreeSymbol("t")
+   s = Groups.FreeSymbol(:s)
+   t = Groups.FreeSymbol(:t)
 
    @testset "constructors" begin
-      @test isa(Groups.FreeSymbol("aaaaaaaaaaaaaaaa"), Groups.GSymbol)
-      @test Groups.FreeSymbol("abc").pow == 1
+      @test isa(Groups.FreeSymbol(:aaaaaaaaaaaaaaaa), Groups.GSymbol)
+      @test Groups.FreeSymbol(:abc).pow == 1
       @test isa(s, Groups.FreeSymbol)
       @test isa(t, Groups.FreeSymbol)
    end
@@ -14,20 +14,20 @@
       @test Groups.change_pow(s, 0) == Groups.change_pow(t, 0)
       @test length(Groups.change_pow(s, 0)) == 0
       @test inv(s).pow == -1
-      @test Groups.FreeSymbol("s", 3) == Groups.change_pow(s, 3)
-      @test Groups.FreeSymbol("s", 3) != Groups.FreeSymbol("t", 3)
+      @test Groups.FreeSymbol(:s, 3) == Groups.change_pow(s, 3)
+      @test Groups.FreeSymbol(:s, 3) != Groups.FreeSymbol(:t, 3)
       @test Groups.change_pow(inv(s), -3) == inv(Groups.change_pow(s, 3))
    end
    @testset "powers" begin
       s⁴ = Groups.change_pow(s,4)
       @test s⁴.pow == 4
-      @test Groups.change_pow(s, 4) == Groups.FreeSymbol("s", 4)
+      @test Groups.change_pow(s, 4) == Groups.FreeSymbol(:s, 4)
    end
 end
 
 @testset "FreeGroupSymbols manipulation" begin
    s = Groups.FreeSymbol("s")
-   t = Groups.FreeSymbol("t", -2)
+   t = Groups.FreeSymbol(:t, -2)
 
    @test isa(Groups.GroupWord(s), Groups.GWord{Groups.FreeSymbol})
    @test isa(Groups.GroupWord(s), FreeGroupElem)
@@ -60,7 +60,7 @@ end
       @test (s*s).symbols == (s^2).symbols
       @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
 
-      t_symb = Groups.FreeSymbol("t")
+      t_symb = Groups.FreeSymbol(:t)
       tt = deepcopy(t)
       @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
          "(id)"
@@ -109,8 +109,8 @@ end
    end
 
    @testset "replacements" begin
-      a = Groups.FreeSymbol("a")
-      b = Groups.FreeSymbol("b")
+      a = Groups.FreeSymbol(:a)
+      b = Groups.FreeSymbol(:b)
       @test Groups.issubsymbol(a, Groups.change_pow(a,2)) == true
       @test Groups.issubsymbol(a, Groups.change_pow(a,-2)) == false
       @test Groups.issubsymbol(b, Groups.change_pow(a,-2)) == false

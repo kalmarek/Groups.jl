@@ -5,7 +5,7 @@
 ###############################################################################
 
 struct FreeSymbol <: GSymbol
-   str::String
+   id::Symbol
    pow::Int
 end
 
@@ -39,11 +39,12 @@ parent_type(::Type{FreeGroupElem}) = FreeGroup
 #
 ###############################################################################
 
-FreeSymbol(s::String) = FreeSymbol(s,1)
+FreeSymbol(s::Symbol) = FreeSymbol(s,1)
+FreeSymbol(s::String) = FreeSymbol(Symbol(s))
 
-FreeGroup(n::Int, symbol::String="f") = FreeGroup(["$symbol$i" for i in 1:n])
+FreeGroup(n::Int, symbol::String="f") = FreeGroup([Symbol(symbol,i) for i in 1:n])
 
-FreeGroup(a::Vector{String}) = FreeGroup([FreeSymbol(i) for i in a])
+FreeGroup(a::Vector) = FreeGroup(FreeSymbol.(a))
 
 ###############################################################################
 #
@@ -60,7 +61,7 @@ end
 function (G::FreeGroup)(w::GroupWord{FreeSymbol})
    if length(w) > 0
       for s in w.symbols
-         i = findfirst(g -> g.str == s.str, G.gens)
+         i = findfirst(g -> g.id == s.id, G.gens)
          i == 0 && throw(DomainError(
             "Symbol $s does not belong to $G."))
          s.pow % G.gens[i].pow == 0 || throw(DomainError(
@@ -79,9 +80,9 @@ end
 #
 ###############################################################################
 
-hash(s::FreeSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FreeSymbol, h)))
+hash(s::FreeSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(FreeSymbol, h)))
 
-change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.str, n)
+change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.id, n)
 
 length(s::FreeSymbol) = abs(s.pow)
 

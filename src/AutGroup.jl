@@ -25,7 +25,7 @@ end
 struct Identity end
 
 struct AutSymbol <: GSymbol
-   str::String
+   id::Symbol
    pow::Int8
    fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
@@ -108,26 +108,25 @@ function subscriptify(n::Integer)
 end
 
 function id_autsymbol()
-   return AutSymbol("(id)", 0, Identity())
+   return AutSymbol(Symbol("(id)"), 0, Identity())
 end
 
-function rmul_autsymbol(i::I, j::I; pow::Integer=one(I)) where I<:Integer
-    str = "ϱ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, I(pow), RTransvect(i, j))
+function rmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+    id = Symbol("ϱ", subscriptify(i), subscriptify(j))
+    return AutSymbol(id, pow, RTransvect(i, j))
 end
 
-function lmul_autsymbol(i::I, j::I; pow::Integer=one(I)) where I<:Integer
-    str = "λ"*subscriptify(i)*subscriptify(j)
-    return AutSymbol(str, I(pow), LTransvect(i, j))
+function lmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+    id = Symbol("λ", subscriptify(i), subscriptify(j))
+    return AutSymbol(id, pow, LTransvect(i, j))
 end
 
-function flip_autsymbol(i::I; pow::Integer=one(I)) where I<:Integer
-    pow = I((2+pow%2)%2)
-    if pow == zero(I)
+function flip_autsymbol(i::Integer; pow::Integer=1)
+    if iseven(pow)
        return id_autsymbol()
     else
-        str = "ɛ"*subscriptify(i)
-        return AutSymbol(str, I(pow), FlipAut(i))
+        id = Symbol("ɛ", subscriptify(i))
+        return AutSymbol(id, 1, FlipAut(i))
     end
 end
 
@@ -137,8 +136,8 @@ function perm_autsymbol(p::Generic.perm{I}; pow::Integer=one(I)) where I<:Intege
     end
     for i in eachindex(p.d)
         if p.d[i] != i
-            str = "σ"*join([subscriptify(i) for i in p.d])
-            return AutSymbol(str, one(I), PermAut(p))
+            id = Symbol("σ", [subscriptify(i) for i in p.d]...)
+            return AutSymbol(id, 1, PermAut(p))
         end
     end
     return id_autsymbol()
@@ -238,7 +237,7 @@ end
 
 const HASHINGCONST = 0x7d28276b01874b19 # hash(Automorphism)
 
-hash(s::AutSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(:AutSymbol, h)))
+hash(s::AutSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(:AutSymbol, h)))
 
 function hash(g::Automorphism, h::UInt)
     if g.modified
@@ -293,7 +292,7 @@ function change_pow(s::AutSymbol, n::Integer)
         return s
     else
         warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.str, n, s.fn)
+        return AutSymbol(s.id, n, s.fn)
     end
 end
 

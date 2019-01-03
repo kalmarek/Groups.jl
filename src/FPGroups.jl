@@ -5,7 +5,7 @@
 ###############################################################################
 
 struct FPSymbol <: GSymbol
-   str::String
+   id::Symbol
    pow::Int
 end
 
@@ -40,9 +40,10 @@ elem_type(::FPGroup) = FPGroupElem
 #
 ###############################################################################
 
-FPSymbol(s::String) = FPSymbol(s,1)
+FPSymbol(s::Symbol) = FPSymbol(s, 1)
+FPSymbol(s::String) = FPSymbol(Symbol(s))
 
-convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.str, s.pow)
+convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.id, s.pow)
 
 FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FPGroupElem, FPGroupElem}())
 
@@ -74,7 +75,7 @@ function (G::FPGroup)(w::GWord)
 
    if eltype(w.symbols) == FPSymbol
       for s in w.symbols
-         i = findfirst(g -> g.str == s.str, G.gens)
+         i = findfirst(g -> g.id == s.id, G.gens)
          i == 0 && throw(DomainError(
             "Symbol $s does not belong to $G."))
          s.pow % G.gens[i].pow == 0 || throw(DomainError(
@@ -93,9 +94,9 @@ end
 #
 ###############################################################################
 
-hash(s::FPSymbol, h::UInt) = hash(s.str, hash(s.pow, hash(FPSymbol, h)))
+hash(s::FPSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(FPSymbol, h)))
 
-change_pow(s::FPSymbol, n::Int) = FPSymbol(s.str, n)
+change_pow(s::FPSymbol, n::Int) = FPSymbol(s.id, n)
 
 length(s::FPSymbol) = abs(s.pow)
 

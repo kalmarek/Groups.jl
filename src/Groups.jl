@@ -26,7 +26,7 @@ using Markdown
     ::GSymbol
 > Abstract type which all group symbols of AbstractFPGroups should subtype. Each
 > concrete subtype should implement fields:
-> * `str` which is the string representation/identification of a symbol
+> * `id` which is the `Symbol` representation/identification of a symbol
 > * `pow` which is the (multiplicative) exponent of a symbol.
 
 """
@@ -128,7 +128,7 @@ function freereduce!(W::GWord)
     for i in 1:length(W.symbols) - 1
         if W.symbols[i].pow == 0
             continue
-        elseif W.symbols[i].str == W.symbols[i+1].str
+        elseif W.symbols[i].id == W.symbols[i+1].id
             reduced = false
             p1 = W.symbols[i].pow
             p2 = W.symbols[i+1].pow
@@ -161,7 +161,7 @@ end
     reduce(W::GWord)
 > performs reduction/simplification of a group element (word in generators).
 > The default reduction is the free group reduction, i.e. consists of
-> multiplying adjacent symbols with the same `str` identifier and deleting the
+> multiplying adjacent symbols with the same `id` identifier and deleting the
 > identity elements from `W.symbols`.
 > More specific procedures should be dispatched on `GWord`s type parameter.
 
@@ -196,9 +196,9 @@ end
 
 function show(io::IO, s::T) where {T<:GSymbol}
    if s.pow == 1
-      print(io, s.str)
+      print(io, string(s.id))
    else
-      print(io, (s.str)*"^$(s.pow)")
+      print(io, string((s.id))*"^$(s.pow)")
    end
 end
 
@@ -224,7 +224,7 @@ end
 function (==)(s::GSymbol, t::GSymbol)
    s.pow == t.pow || return false
    s.pow ==  0 && return true
-   s.str == t.str || return false
+   s.id == t.id || return false
    return true
 end
 
@@ -317,7 +317,7 @@ end
 ###############################################################################
 
 issubsymbol(s::GSymbol, t::GSymbol) =
-    s.str == t.str && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
+    s.id == t.id && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
 
 """doc
 Find the first linear index k>=i such that Z < W.symbols[k:k+length(Z)-1]
