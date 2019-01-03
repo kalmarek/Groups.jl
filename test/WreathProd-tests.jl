@@ -22,6 +22,8 @@
       @test B3.P == S_3
 
       @test B3(aa, b) == Groups.WreathProductElem(aa, b)
+      w = B3(aa, b)
+      @test B3(w) == w
       @test B3(b) == Groups.WreathProductElem(B3.N(), b)
       @test B3(aa) == Groups.WreathProductElem(aa, S_3())
 
@@ -78,19 +80,23 @@
       @test inv(x)*y == B4((2,1,2,2), perm"(1,2,4)(3)")
 
       @test y*inv(x) == B4((1,2,1,0), perm"(1,4,3)(2)")
+      
+      @test (x*y)^6 == ((x*y)^2)^3
 
    end
 
-   @testset "Misc" begin
-      B3 = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
-      @test order(B3) == 3^3*6
-      @test collect(B3) isa Vector{
+   @testset "Iteration" begin
+      B3_a = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
+      @test order(B3_a) == 3^3*6
+      @test collect(B3_a) isa Vector{
       WreathProductElem{3, AddGrpElem{AbstractAlgebra.gfelem{Int}}, Int}}
 
-      B3 = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
-      @test order(B3) == 2^3*6
-      @test collect(B3) isa Vector{
+      B3_m = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
+      @test order(B3_m) == 2^3*6
+      @test collect(B3_m) isa Vector{
       WreathProductElem{3, MltGrpElem{AbstractAlgebra.gfelem{Int}}, Int}}
+      
+      @test length(Set([B3_a, B3_m, B3_a])) == 2
 
       Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
 
@@ -101,6 +107,19 @@
       @test length(elts) == order(Wr)
       @test all([g*inv(g) == Wr() for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
+   end
+   
+   @testset "Misc" begin
+      B3_a = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
+      @test string(B3_a) == "Wreath Product of The additive group of Finite field F_3 by Permutation group over 3 elements"
+      
+      @test string(B3_a(perm"(1,3)")) == "([0,0,0]≀(1,3))"
+      
+      B3_m = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
+      @test string(B3_m) == "Wreath Product of The multiplicative group of Finite field F_3 by Permutation group over 3 elements"
+      
+      @test string(B3_m(perm"(1,3)")) == "([1,1,1]≀(1,3))"
+      
    end
 
 end
