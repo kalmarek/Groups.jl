@@ -8,7 +8,7 @@
       @test Groups.WreathProduct(S_2, S_3) isa AbstractAlgebra.Group
       B3 = Groups.WreathProduct(S_2, S_3)
       @test B3 isa Groups.WreathProduct
-      @test B3 isa WreathProduct{3, AbstractAlgebra.Generic.PermGroup{Int}, Int}
+      @test B3 isa WreathProduct{3, Generic.PermGroup{Int}, Generic.PermGroup{Int}}
 
       aa = Groups.DirectPowerGroupElem((a^0 ,a, a^2))
 
@@ -16,7 +16,7 @@
       x = Groups.WreathProductElem(aa, b)
       @test x isa Groups.WreathProductElem
       @test x isa 
-         Groups.WreathProductElem{3, AbstractAlgebra.Generic.perm{Int}, Int}
+         Groups.WreathProductElem{3, perm{Int}, perm{Int}}
 
       @test B3.N == Groups.DirectPowerGroup(S_2, 3)
       @test B3.P == S_3
@@ -35,9 +35,9 @@
    @testset "Types" begin
       B3 = Groups.WreathProduct(S_2, S_3)
 
-      @test elem_type(B3) == Groups.WreathProductElem{3, perm{Int}, Int}
+      @test elem_type(B3) == Groups.WreathProductElem{3, perm{Int}, perm{Int}}
 
-      @test parent_type(typeof(B3())) == Groups.WreathProduct{3, parent_type(typeof(B3.N.group())), Int}
+      @test parent_type(typeof(B3())) == Groups.WreathProduct{3, parent_type(typeof(B3.N.group())), Generic.PermGroup{Int}}
 
       @test parent(B3()) == Groups.WreathProduct(S_2,S_3)
       @test parent(B3()) == B3
@@ -89,19 +89,19 @@
       B3_a = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
       @test order(B3_a) == 3^3*6
       @test collect(B3_a) isa Vector{
-      WreathProductElem{3, AddGrpElem{AbstractAlgebra.gfelem{Int}}, Int}}
+      WreathProductElem{3, AddGrpElem{AbstractAlgebra.gfelem{Int}}, perm{Int}}}
 
       B3_m = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
       @test order(B3_m) == 2^3*6
       @test collect(B3_m) isa Vector{
-      WreathProductElem{3, MltGrpElem{AbstractAlgebra.gfelem{Int}}, Int}}
+      WreathProductElem{3, MltGrpElem{AbstractAlgebra.gfelem{Int}}, perm{Int}}}
       
       @test length(Set([B3_a, B3_m, B3_a])) == 2
 
       Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
 
       elts = collect(Wr)
-      @test elts isa Vector{Groups.WreathProductElem{4, Generic.perm{Int}, Int}}
+      @test elts isa Vector{Groups.WreathProductElem{4, perm{Int}, perm{Int}}}
       @test order(Wr) == 2^4*factorial(4)      
 
       @test length(elts) == order(Wr)

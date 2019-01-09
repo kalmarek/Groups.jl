@@ -19,28 +19,27 @@ export WreathProduct, WreathProductElem
 * `N::Group` : the single factor of the group $N$
 * `P::Generic.PermGroup` : full `PermutationGroup`
 """
-struct WreathProduct{N, T<:Group, I<:Integer} <: Group
+struct WreathProduct{N, T<:Group, PG<:Generic.PermGroup} <: Group
    N::DirectPowerGroup{N, T}
-   P::Generic.PermGroup{I}
+   P::PG
 
-   function WreathProduct(Gr::T, P::Generic.PermGroup{I}) where {T, I}
+   function WreathProduct(Gr::T, P::PG) where {T, PG<:Generic.PermGroup}
       N = DirectPowerGroup(Gr, Int(P.n))
-      return new{Int(P.n), T, I}(N, P)
+      return new{Int(P.n), T, PG}(N, P)
    end
 end
 
-struct WreathProductElem{N, T<:GroupElem, I<:Integer} <: GroupElem
+struct WreathProductElem{N, T<:GroupElem, P<:Generic.perm} <: GroupElem
    n::DirectPowerGroupElem{N, T}
-   p::Generic.perm{I}
-   # parent::WreathProduct
+   p::P
 
-   function WreathProductElem(n::DirectPowerGroupElem{N,T}, p::Generic.perm{I},
-      check::Bool=true) where {N, T, I}
+   function WreathProductElem(n::DirectPowerGroupElem{N,T}, p::P,
+      check::Bool=true) where {N, T, P<:Generic.perm}
       if check
-         length(n.elts) == length(p.d) || throw(DomainError(
+         N == length(p.d) || throw(DomainError(
             "Can't form WreathProductElem: lengths differ"))
       end
-      return new{N, T, I}(n, p)
+      return new{N, T, P}(n, p)
    end
 end
 
@@ -50,10 +49,10 @@ end
 #
 ###############################################################################
 
-elem_type(::Type{WreathProduct{N, T, I}}) where {N, T, I} = WreathProductElem{N, elem_type(T), I}
+elem_type(::Type{WreathProduct{N, T, PG}}) where {N, T, PG} = WreathProductElem{N, elem_type(T), elem_type(PG)}
 
-parent_type(::Type{WreathProductElem{N, T, I}}) where {N, T, I} =
-   WreathProduct{N, parent_type(T), I}
+parent_type(::Type{WreathProductElem{N, T, P}}) where {N, T, P} =
+   WreathProduct{N, parent_type(T), parent_type(P)}
 
 parent(g::WreathProductElem) = WreathProduct(parent(g.n[1]), parent(g.p))
 
@@ -205,7 +204,7 @@ function iterate(G::WreathProduct, state)
    return G(n,p), (state_N, p, state_P)
 end
 
-eltype(::Type{WreathProduct{N,G,I}}) where {N,G,I} = WreathProductElem{N, elem_type(G), I}
+eltype(::Type{WreathProduct{N,G,PG}}) where {N,G,PG} = WreathProductElem{N, elem_type(G), elem_type(PG)}
 
 order(G::WreathProduct) = order(G.P)*order(G.N)
 length(G::WreathProduct) = order(G)
