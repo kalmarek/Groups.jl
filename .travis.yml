@@ -17,6 +17,8 @@ matrix:
 # script:
   # - julia -e 'Pkg.clone(pwd()); Pkg.build("Groups"); Pkg.test("Groups"; coverage=true)'
 
-after_success:
+codecov: true
+
+# after_success:
   # push coverage results to Coveralls
-   - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())' 
+   #- julia -e 'using Pkg; Pkg.build(); Pkg.test(coverage=true);' 
