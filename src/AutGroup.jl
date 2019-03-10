@@ -331,7 +331,7 @@ inv(f::AutSymbol) = change_pow(f, -f.pow)
 
 function getperm(s::AutSymbol)
     if s.pow != 1
-        warn("Power for perm_symbol should be never 0!")
+        @warn("Power for perm_symbol should be never 0!")
         return s.fn.perm^s.pow
     else
         return s.fn.perm
