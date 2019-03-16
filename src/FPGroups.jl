@@ -142,7 +142,7 @@ inv(s::FPSymbol) = change_pow(s, -s.pow)
 
 function reduce!(W::FPGroupElem)
     if length(W) < 2
-        deleteat!(W.symbols, find(x -> x.pow == 0, W.symbols))
+        deleteat!(W.symbols, findall(x -> x.pow == 0, W.symbols))
     else
         reduced = false
         while !reduced
