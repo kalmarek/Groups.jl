@@ -233,6 +233,20 @@ end
 #
 ###############################################################################
 
+function AbstractAlgebra.mul!(out::GWord, x::GWord, y::GWord; reduced::Bool=true)
+    resize!(out.symbols, length(x.symbols)+length(y.symbols))
+    for i in eachindex(x.symbols)
+        out.symbols[i] = x.symbols[i]
+    end
+    for i in eachindex(y.symbols)
+        out.symbols[length(x.symbols)+i] = y.symbols[i]
+    end
+    if reduced
+        reduce!(out)
+    end
+    return out
+end
+
 function r_multiply!(W::GWord, x; reduced::Bool=true)
     if length(x) > 0
         append!(W.symbols, x)
