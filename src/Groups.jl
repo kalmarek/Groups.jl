@@ -425,7 +425,8 @@ end
 #
 ###############################################################################
 
-function generate_balls(S::Vector{T}, Id::T=parent(first(S))(); radius=2, op=*) where T<:GroupElem
+function generate_balls(S::AbstractVector{T}, Id::T=parent(first(S))();
+        radius=2, op=*) where T<:GroupElem
     sizes = Int[]
     B = [Id]
     for i in 1:radius
@@ -436,7 +437,8 @@ function generate_balls(S::Vector{T}, Id::T=parent(first(S))(); radius=2, op=*) 
     return B, sizes
 end
 
-function generate_balls(S::Vector{T}, Id::T=one(parent(first(S))); radius=2, op=*) where {T<:RingElem}
+function generate_balls(S::AbstractVector{T}, Id::T=one(parent(first(S)));
+        radius=2, op=*) where {T<:NCRingElem}
     sizes = Int[]
     B = [Id]
     for i in 1:radius
