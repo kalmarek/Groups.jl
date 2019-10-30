@@ -29,12 +29,12 @@ struct WreathProduct{N, T<:Group, PG<:Generic.PermGroup} <: Group
    end
 end
 
-struct WreathProductElem{N, T<:GroupElem, P<:Generic.perm} <: GroupElem
+struct WreathProductElem{N, T<:GroupElem, P<:Generic.Perm} <: GroupElem
    n::DirectPowerGroupElem{N, T}
    p::P
 
    function WreathProductElem(n::DirectPowerGroupElem{N,T}, p::P,
-      check::Bool=true) where {N, T, P<:Generic.perm}
+      check::Bool=true) where {N, T, P<:Generic.Perm}
       if check
          N == length(p.d) || throw(DomainError(
             "Can't form WreathProductElem: lengths differ"))
@@ -69,19 +69,19 @@ function (G::WreathProduct{N})(g::WreathProductElem{N}) where {N}
 end
 
 @doc doc"""
-    (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.perm)
+    (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.Perm)
 > Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
 > `G.P`, respectively.
 """
-(G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.perm) = WreathProductElem(n,p)
+(G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.Perm) = WreathProductElem(n,p)
 
 (G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
 
 @doc doc"""
-    (G::WreathProduct)(p::Generic.perm)
+    (G::WreathProduct)(p::Generic.Perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
 """
-(G::WreathProduct)(p::Generic.perm) = G(G.N(), p)
+(G::WreathProduct)(p::Generic.Perm) = G(G.N(), p)
 
 @doc doc"""
     (G::WreathProduct)(n::DirectPowerGroupElem)
@@ -144,7 +144,7 @@ end
 #
 ###############################################################################
 
-(p::perm)(n::DirectPowerGroupElem) = DirectPowerGroupElem(n.elts[p.d])
+(p::Generic.Perm)(n::DirectPowerGroupElem) = DirectPowerGroupElem(n.elts[p.d])
 
 @doc doc"""
     *(g::WreathProductElem, h::WreathProductElem)
@@ -152,7 +152,7 @@ end
 >
 > `g*h = (g.n*g.p(h.n), g.p*h.p)`,
 >
-> where `g.p(h.n)` denotes the action of `g.p::Generic.perm` on
+> where `g.p(h.n)` denotes the action of `g.p::Generic.Perm` on
 > `h.n::DirectPowerGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
@@ -188,7 +188,7 @@ end
 function iterate(G::WreathProduct, state)
    state_N, p, state_P = state
    res = iterate(G.N, state_N)
-   
+
    if res == nothing
       resP = iterate(G.P, state_P)
       if resP == nothing
@@ -200,7 +200,7 @@ function iterate(G::WreathProduct, state)
    else
       n, state_N = res
    end
-   
+
    return G(n,p), (state_N, p, state_P)
 end
 
