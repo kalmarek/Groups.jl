@@ -64,40 +64,26 @@
    end
 
    @testset "Group arithmetic" begin
-      B4 = Groups.WreathProduct(AdditiveGroup(GF(3)), PermutationGroup(4))
+      B4 = Groups.WreathProduct(PermutationGroup(3), PermutationGroup(4))
 
-      x = B4((0,1,2,0), perm"(1,2,3)(4)")
-      @test inv(x) == B4((1,0,2,0), perm"(1,3,2)(4)")
+      id, a, b = perm"(3)", perm"(1,2)(3)", perm"(1,2,3)"
 
-      y = B4((1,0,1,2), perm"(1,4)(2,3)")
-      @test inv(y) == B4((1,2,0,2), perm"(1,4)(2,3)")
+      x = B4((id,a,b,id), perm"(1,2,3)(4)")
+      @test inv(x) == B4((inv(b),id, a,id), perm"(1,3,2)(4)")
 
-      @test x*y == B4((0,2,0,2), perm"(1,3,4)(2)")
+      y = B4((a,id,a,b), perm"(1,4)(2,3)")
+      @test inv(y) == B4((inv(b), a,id, a), perm"(1,4)(2,3)")
 
-      @test y*x == B4((1,2,2,2), perm"(1,4,2)(3)")
+      @test x*y == B4((id,id,b*a,b), perm"(1,3,4)(2)")
+      @test y*x == B4(( a, b, id,b), perm"(1,4,2)(3)")
 
+      @test inv(x)*y == B4((inv(b)*a,a,a,b), perm"(1,2,4)(3)")
+      @test y*inv(x) == B4((a,a,a,id), perm"(1,4,3)(2)")
 
-      @test inv(x)*y == B4((2,1,2,2), perm"(1,2,4)(3)")
-
-      @test y*inv(x) == B4((1,2,1,0), perm"(1,4,3)(2)")
-      
       @test (x*y)^6 == ((x*y)^2)^3
-
    end
 
    @testset "Iteration" begin
-      B3_a = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
-      @test order(B3_a) == 3^3*6
-      @test collect(B3_a) isa Vector{
-      WreathProductElem{3, AddGrpElem{AbstractAlgebra.gfelem{Int}}, perm{Int}}}
-
-      B3_m = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
-      @test order(B3_m) == 2^3*6
-      @test collect(B3_m) isa Vector{
-      WreathProductElem{3, MltGrpElem{AbstractAlgebra.gfelem{Int}}, perm{Int}}}
-      
-      @test length(Set([B3_a, B3_m, B3_a])) == 2
-
       Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
 
       elts = collect(Wr)
@@ -107,19 +93,6 @@
       @test length(elts) == order(Wr)
       @test all([g*inv(g) == Wr() for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
-   end
-   
-   @testset "Misc" begin
-      B3_a = Groups.WreathProduct(AdditiveGroup(GF(3)), S_3)
-      @test string(B3_a) == "Wreath Product of The additive group of Finite field F_3 by Permutation group over 3 elements"
-      
-      @test string(B3_a(perm"(1,3)")) == "([0,0,0]≀(1,3))"
-      
-      B3_m = Groups.WreathProduct(MultiplicativeGroup(GF(3)), S_3)
-      @test string(B3_m) == "Wreath Product of The multiplicative group of Finite field F_3 by Permutation group over 3 elements"
-      
-      @test string(B3_m(perm"(1,3)")) == "([1,1,1]≀(1,3))"
-      
    end
 
 end
