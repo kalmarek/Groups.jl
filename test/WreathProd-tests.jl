@@ -15,8 +15,8 @@
       @test Groups.WreathProductElem(aa, b) isa AbstractAlgebra.GroupElem
       x = Groups.WreathProductElem(aa, b)
       @test x isa Groups.WreathProductElem
-      @test x isa 
-         Groups.WreathProductElem{3, perm{Int}, perm{Int}}
+      @test x isa
+         Groups.WreathProductElem{3, Generic.Perm{Int}, Generic.Perm{Int}}
 
       @test B3.N == Groups.DirectPowerGroup(S_2, 3)
       @test B3.P == S_3
@@ -35,7 +35,7 @@
    @testset "Types" begin
       B3 = Groups.WreathProduct(S_2, S_3)
 
-      @test elem_type(B3) == Groups.WreathProductElem{3, perm{Int}, perm{Int}}
+      @test elem_type(B3) == Groups.WreathProductElem{3, Generic.Perm{Int}, Generic.Perm{Int}}
 
       @test parent_type(typeof(B3())) == Groups.WreathProduct{3, parent_type(typeof(B3.N.group())), Generic.PermGroup{Int}}
 
@@ -87,8 +87,8 @@
       Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
 
       elts = collect(Wr)
-      @test elts isa Vector{Groups.WreathProductElem{4, perm{Int}, perm{Int}}}
-      @test order(Wr) == 2^4*factorial(4)      
+      @test elts isa Vector{Groups.WreathProductElem{4, Generic.Perm{Int}, Generic.Perm{Int}}}
+      @test order(Wr) == 2^4*factorial(4)
 
       @test length(elts) == order(Wr)
       @test all([g*inv(g) == Wr() for g in elts])

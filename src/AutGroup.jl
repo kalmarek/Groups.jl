@@ -19,7 +19,7 @@ struct FlipAut
 end
 
 struct PermAut
-    perm::Generic.perm{Int8}
+    perm::Generic.Perm{Int8}
 end
 
 struct Identity end
@@ -130,7 +130,7 @@ function flip_autsymbol(i::Integer; pow::Integer=1)
     end
 end
 
-function perm_autsymbol(p::Generic.perm{I}; pow::Integer=one(I)) where I<:Integer
+function perm_autsymbol(p::Generic.Perm{I}; pow::Integer=one(I)) where I<:Integer
     if pow != 1
         p = p^pow
     end
@@ -143,8 +143,8 @@ function perm_autsymbol(p::Generic.perm{I}; pow::Integer=one(I)) where I<:Intege
     return id_autsymbol()
 end
 
-function perm_autsymbol(a::Vector{T}) where T<:Integer
-   return perm_autsymbol(perm(Vector{Int8}(a), false))
+function perm_autsymbol(a::Vector{<:Integer})
+   return perm_autsymbol(Generic.Perm(Vector{Int8}(a), false))
 end
 
 function domain(G::AutGroup{N}) where N

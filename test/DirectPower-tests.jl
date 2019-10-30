@@ -23,7 +23,7 @@
       g = perm"(1,2,3)"
 
       @test GG(g, g^2) isa GroupElem
-      @test GG(g, g^2) isa Groups.DirectPowerGroupElem{2, Generic.perm{Int64}}
+      @test GG(g, g^2) isa Groups.DirectPowerGroupElem{2, Generic.Perm{Int64}}
 
       h = GG(g,g^2)
 
@@ -46,7 +46,7 @@
       GG = G×G
       i = perm"(1,3)"
       g = perm"(1,2,3)"
-      
+
       h = GG(g,g^2)
       k = GG(g^3, g^2)
 
@@ -57,7 +57,7 @@
       @test h*k == GG(g,g)
 
       @test h*inv(h) == (G×G)()
-      
+
       w = GG(g,i)*GG(i,g)
       @test w == GG(perm"(1,2)(3)", perm"(2,3)")
       @test w == inv(w)
