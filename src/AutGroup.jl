@@ -239,10 +239,14 @@ const HASHINGCONST = 0x7d28276b01874b19 # hash(Automorphism)
 
 hash(s::AutSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(:AutSymbol, h)))
 
+function hash(g::Automorphism{N}, images, h::UInt=HASHINGCONST) where N
+    return hash(images, hash(parent(g), hash(Automorphism{N}, h)))
+end
+
 function hash(g::Automorphism, h::UInt)
     if g.modified
         g_im = reduce!.(g(domain(parent(g))))
-        g.savedhash = hash(g_im, hash(typeof(g), hash(parent(g), HASHINGCONST)))
+        g.savedhash = hash(g, g_im)
         g.modified = false
         end
     return xor(g.savedhash, h)
@@ -261,9 +265,9 @@ function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
     g_im = reduce!.(g(domain(parent(g))))
     h_im = reduce!.(h(domain(parent(h))))
     # cheap:
-    g.savedhash = hash(g_im, hash(typeof(g), hash(parent(g), HASHINGCONST)))
+    g.savedhash = hash(g, g_im)
     g.modified = false
-    h.savedhash = hash(h_im, hash(typeof(h), hash(parent(h), HASHINGCONST)))
+    h.savedhash = hash(h, h_im)
     h.modified = false
 
     return g_im == h_im
