@@ -75,20 +75,20 @@ end
 """
 (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.Perm) = WreathProductElem(n,p)
 
-(G::WreathProduct)() = WreathProductElem(G.N(), G.P(), false)
+Base.one(G::WreathProduct) = WreathProductElem(one(G.N), one(G.P), false)
 
 @doc doc"""
     (G::WreathProduct)(p::Generic.Perm)
 > Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
 """
-(G::WreathProduct)(p::Generic.Perm) = G(G.N(), p)
+(G::WreathProduct)(p::Generic.Perm) = G(one(G.N), p)
 
 @doc doc"""
     (G::WreathProduct)(n::DirectPowerGroupElem)
 > Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
 > embedding that makes the sequence `1 -> N -> G -> P -> 1` exact.
 """
-(G::WreathProduct)(n::DirectPowerGroupElem) = G(n, G.P())
+(G::WreathProduct)(n::DirectPowerGroupElem) = G(n, one(G.P))
 
 (G::WreathProduct)(n,p) = G(G.N(n), G.P(p))
 

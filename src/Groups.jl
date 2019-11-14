@@ -15,6 +15,8 @@ export elements
 using LinearAlgebra
 using Markdown
 
+Base.one(G::Generic.PermGroup) = G(collect(1:G.n), false)
+
 ###############################################################################
 #
 #   ParentType / ObjectType definition
@@ -280,7 +282,7 @@ function power_by_squaring(W::GWord, p::Integer)
     if p < 0
         return power_by_squaring(inv(W), -p)
     elseif p == 0
-        return parent(W)()
+        return one(parent(W))
     elseif p == 1
         return W
     elseif p == 2
@@ -425,7 +427,7 @@ end
 #
 ###############################################################################
 
-function generate_balls(S::AbstractVector{T}, Id::T=parent(first(S))();
+function generate_balls(S::AbstractVector{T}, Id::T=one(parent(first(S)));
         radius=2, op=*) where T<:GroupElem
     sizes = Int[]
     B = [Id]

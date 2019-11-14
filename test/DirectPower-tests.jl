@@ -13,12 +13,12 @@
       @test (G×G)×G == (G×G)×G
 
       GG = DirectPowerGroup(G,2)
-      @test (G×G)() isa GroupElem
-      @test (G×G)((G(), G())) isa GroupElem
-      @test (G×G)([G(), G()]) isa GroupElem
+      @test one(G×G) isa GroupElem
+      @test (G×G)((one(G), one(G))) isa GroupElem
+      @test (G×G)([one(G), one(G)]) isa GroupElem
 
-      @test Groups.DirectPowerGroupElem((G(), G())) == (G×G)()
-      @test GG(G(), G()) == (G×G)()
+      @test Groups.DirectPowerGroupElem((one(G), one(G))) == one(G×G)
+      @test GG(one(G), one(G)) == one(G×G)
 
       g = perm"(1,2,3)"
 
@@ -37,8 +37,8 @@
 
       @test h[1] == g
       @test h[2] == g^2
-      h = GG(g, G())
-      @test h == GG(g, G())
+      h = GG(g, one(G))
+      @test h == GG(g, one(G))
    end
 
    @testset "Basic arithmetic" begin
@@ -51,17 +51,17 @@
       k = GG(g^3, g^2)
 
       @test h^2 == GG(g^2,g)
-      @test h^6 == GG()
+      @test h^6 == one(GG)
 
       @test h*h == h^2
       @test h*k == GG(g,g)
 
-      @test h*inv(h) == (G×G)()
+      @test h*inv(h) == one(G×G)
 
       w = GG(g,i)*GG(i,g)
       @test w == GG(perm"(1,2)(3)", perm"(2,3)")
       @test w == inv(w)
-      @test w^2 == w*w == GG()
+      @test w^2 == w*w == one(GG)
    end
 
    @testset "elem/parent_types" begin
@@ -83,7 +83,7 @@
       elts = vec(collect(GG))
 
       @test length(elts) == 216
-      @test all([g*inv(g) == GG() for g in elts])
+      @test all([g*inv(g) == one(GG) for g in elts])
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
    end
 end

@@ -1,4 +1,3 @@
-
 @testset "Groups.FreeSymbols" begin
    s = Groups.FreeSymbol(:s)
    t = Groups.FreeSymbol(:t)
@@ -45,7 +44,7 @@ end
    G = FreeGroup(["s", "t"])
 
    @testset "elements constructors" begin
-      @test isa(G(), FreeGroupElem)
+      @test isa(one(G), FreeGroupElem)
       @test eltype(G.gens) == Groups.FreeSymbol
       @test length(G.gens) == 2
       @test eltype(gens(G)) == FreeGroupElem
@@ -76,17 +75,17 @@ end
    end
 
    @testset "reductions" begin
-      @test length(G().symbols) == 0
-      @test length((G()*G()).symbols) == 0
-      @test G() == G()*G()
+      @test length(one(G).symbols) == 0
+      @test length((one(G)*one(G)).symbols) == 0
+      @test one(G) == one(G)*one(G)
       w = deepcopy(s)
       push!(w.symbols, (s^-1).symbols[1])
-      @test Groups.reduce!(w) == parent(w)()
+      @test Groups.reduce!(w) == one(parent(w))
       o = (t*s)^3
       @test o == t*s*t*s*t*s
       p = (t*s)^-3
       @test p == s^-1*t^-1*s^-1*t^-1*s^-1*t^-1
-      @test o*p == parent(o*p)()
+      @test o*p == one(parent(o*p))
       w = FreeGroupElem([o.symbols..., p.symbols...])
       w.parent = G
       @test Groups.reduce!(w).symbols ==Vector{Groups.FreeSymbol}([])
@@ -123,7 +122,7 @@ end
       @test findfirst(c*t, c) == 0
       w = s*t*s^-1
       subst = Dict{FreeGroupElem, FreeGroupElem}(w => s^1, s*t^-1 => t^4)
-      @test Groups.replace(c, 1, s*t, G()) == s^-1*t^-1
+      @test Groups.replace(c, 1, s*t, one(G)) == s^-1*t^-1
       @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
       @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
       @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s

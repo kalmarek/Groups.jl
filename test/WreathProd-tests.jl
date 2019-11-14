@@ -24,8 +24,8 @@
       @test B3(aa, b) == Groups.WreathProductElem(aa, b)
       w = B3(aa, b)
       @test B3(w) == w
-      @test B3(b) == Groups.WreathProductElem(B3.N(), b)
-      @test B3(aa) == Groups.WreathProductElem(aa, S_3())
+      @test B3(b) == Groups.WreathProductElem(one(B3.N), b)
+      @test B3(aa) == Groups.WreathProductElem(aa, one(S_3))
 
       @test B3((a^0 ,a, a^2), b) isa WreathProductElem
 
@@ -37,10 +37,10 @@
 
       @test elem_type(B3) == Groups.WreathProductElem{3, Generic.Perm{Int}, Generic.Perm{Int}}
 
-      @test parent_type(typeof(B3())) == Groups.WreathProduct{3, parent_type(typeof(B3.N.group())), Generic.PermGroup{Int}}
+      @test parent_type(typeof(one(B3))) == Groups.WreathProduct{3, parent_type(typeof(one(B3.N.group))), Generic.PermGroup{Int}}
 
-      @test parent(B3()) == Groups.WreathProduct(S_2,S_3)
-      @test parent(B3()) == B3
+      @test parent(one(B3)) == Groups.WreathProduct(S_2,S_3)
+      @test parent(one(B3)) == B3
    end
 
    @testset "Basic operations on WreathProductElem" begin
@@ -91,7 +91,7 @@
       @test order(Wr) == 2^4*factorial(4)
 
       @test length(elts) == order(Wr)
-      @test all([g*inv(g) == Wr() for g in elts])
+      @test all((g*inv(g) == one(Wr) for g in elts))
       @test all(inv(g*h) == inv(h)*inv(g) for g in elts for h in elts)
    end
 

@@ -52,7 +52,7 @@ FreeGroup(a::Vector) = FreeGroup(FreeSymbol.(a))
 #
 ###############################################################################
 
-function (G::FreeGroup)()
+function Base.one(G::FreeGroup)
    id = FreeGroupElem(FreeSymbol[])
    id.parent = G
    return id

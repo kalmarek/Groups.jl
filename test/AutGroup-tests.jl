@@ -140,12 +140,12 @@
 
       f² = Groups.r_multiply(A(f), [f], reduced=false)
       @test Groups.simplifyperms!(f²) == false
-      @test f²^2 == A()
+      @test f²^2 == one(A)
 
       a = A(Groups.rmul_autsymbol(1,2))*Groups.flip_autsymbol(2)
       b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
       @test a*b == b*a
-      @test a^3 * b^3 == A()
+      @test a^3 * b^3 == one(A)
       g,h = Groups.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
 
       @test Groups.domain(A) == NTuple{4, FreeGroupElem}(gens(A.objectGroup))
@@ -201,7 +201,7 @@
 
       G = AutGroup(FreeGroup(N), special=true)
       S = gens(G)
-      S_inv = [G(), S..., [inv(s) for s in S]...]
+      S_inv = [one(G), S..., [inv(s) for s in S]...]
       S_inv = unique(S_inv)
       B_2 = [i*j for (i,j) in Base.product(S_inv, S_inv)]
       @test length(B_2) == 2401
@@ -214,8 +214,8 @@
       S = unique([gens(G); inv.(gens(G))])
       R = 3
 
-      @test Groups.linear_repr(G()) isa Matrix{Int}
-      @test Groups.linear_repr(G()) == Matrix{Int}(I, N, N)
+      @test Groups.linear_repr(one(G)) isa Matrix{Int}
+      @test Groups.linear_repr(one(G)) == Matrix{Int}(I, N, N)
 
       M = Matrix{Int}(I, N, N)
       M[1,2] = 1

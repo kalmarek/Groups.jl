@@ -192,7 +192,7 @@ SAut(G::Group) = AutGroup(G, special=true)
 
 Automorphism{N}(s::AutSymbol) where N = Automorphism{N}(AutSymbol[s])
 
-function (G::AutGroup{N})() where N
+function Base.one(G::AutGroup{N}) where N
    id = Automorphism{N}(id_autsymbol())
    id.parent = G
    return id

@@ -58,7 +58,7 @@ FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 #
 ###############################################################################
 
-function (G::FPGroup)()
+function Base.one(G::FPGroup)
    id = FPGroupElem(FPSymbol[])
    id.parent = G
    return id
@@ -66,7 +66,7 @@ end
 
 function (G::FPGroup)(w::GWord)
    if length(w) == 0
-      return G()
+      return one(G)
    end
 
    if eltype(w.symbols) == FreeSymbol
@@ -175,7 +175,7 @@ function /(G::FPGroup, newrels::Vector{FPGroupElem})
       "Can not form quotient group: $r is not an element of $G"))
    end
    H = deepcopy(G)
-   newrels = Dict(H(r) => H() for r in newrels)
+   newrels = Dict(H(r) => one(H) for r in newrels)
    add_rels!(H, newrels)
    return H
 end
@@ -186,6 +186,6 @@ function /(G::FreeGroup, rels::Vector{FreeGroupElem})
          "Can not form quotient group: $r is not an element of $G"))
    end
    H = FPGroup(G)
-   H.rels = Dict(H(rel) => H() for rel in unique(rels))
+   H.rels = Dict(H(rel) => one(H) for rel in unique(rels))
    return H
 end

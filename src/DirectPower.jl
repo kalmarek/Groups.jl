@@ -96,8 +96,8 @@ end
 
 (G::DirectPowerGroup{N})(a::Vararg{GrEl, N}) where {N, GrEl} = DirectPowerGroupElem(G.group.(a))
 
-function (G::DirectPowerGroup{N})() where N
-   return DirectPowerGroupElem(ntuple(i->G.group(),N))
+function Base.one(G::DirectPowerGroup{N}) where N
+   return DirectPowerGroupElem(ntuple(i->one(G.group),N))
 end
 
 (G::DirectPowerGroup)(g::DirectPowerGroupElem) = G(g.elts)
@@ -192,7 +192,7 @@ length(G::DirectPowerGroup) = order(G)
 
 function iterate(G::DirectPowerGroup{N}) where N
    elts = collect(G.group)
-   
+
    indices = CartesianIndices(ntuple(i -> order(G.group), N))
    idx, s = iterate(indices)
    g = DirectPowerGroupElem(ntuple(i -> elts[idx[i]], N))
