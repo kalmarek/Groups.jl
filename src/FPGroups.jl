@@ -42,6 +42,7 @@ elem_type(::FPGroup) = FPGroupElem
 
 FPSymbol(s::Symbol) = FPSymbol(s, 1)
 FPSymbol(s::String) = FPSymbol(Symbol(s))
+FPSymbol(s::GSymbol) = FPSymbol(s.id, s.pow)
 
 convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.id, s.pow)
 
@@ -70,7 +71,7 @@ function (G::FPGroup)(w::GWord)
    end
 
    if eltype(w.symbols) == FreeSymbol
-      w = FPGroupElem(w.symbols)
+      w = FPGroupElem(FPSymbol.(w.symbols))
    end
 
    if eltype(w.symbols) == FPSymbol
@@ -169,8 +170,8 @@ function add_rels!(G::FPGroup, newrels::Dict{FPGroupElem,FPGroupElem})
    end
 end
 
-function /(G::FPGroup, newrels::Vector{FPGroupElem})
-   for r in rels
+function Base.:/(G::FPGroup, newrels::Vector{FPGroupElem})
+   for r in newrels
       parent(r) == G || throw(DomainError(
       "Can not form quotient group: $r is not an element of $G"))
    end
@@ -180,12 +181,12 @@ function /(G::FPGroup, newrels::Vector{FPGroupElem})
    return H
 end
 
-function /(G::FreeGroup, rels::Vector{FreeGroupElem})
+function Base.:/(G::FreeGroup, rels::Vector{FreeGroupElem})
    for r in rels
       parent(r) == G || throw(DomainError(
          "Can not form quotient group: $r is not an element of $G"))
    end
-   H = FPGroup(G)
+   H = FPGroup(deepcopy(G))
    H.rels = Dict(H(rel) => one(H) for rel in unique(rels))
    return H
 end
