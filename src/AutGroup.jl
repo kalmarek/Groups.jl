@@ -225,7 +225,9 @@ end
 function (F::Automorphism{N})(v::NTuple{N, T}) where {N, T}
     for (i, f) in enumerate(F.symbols)
         v = f(v)::NTuple{N, T}
-        i % 5 == 0 && reduce!.(v)
+        if i % 2 == 0
+            freereduce!.(v)
+        end
     end
     return v
 end
