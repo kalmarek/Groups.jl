@@ -232,6 +232,8 @@ function (F::Automorphism{N})(v::NTuple{N, T}) where {N, T}
     return v
 end
 
+evaluate(F::Automorphism{N}) = f(domain(parent(f)))
+
 ###############################################################################
 #
 #   Comparison
@@ -248,7 +250,7 @@ end
 
 function hash(g::Automorphism, h::UInt)
     if g.modified
-        g_im = reduce!.(g(domain(parent(g))))
+        g_im = reduce!.(evaluate(g))
         g.savedhash = hash(g, g_im)
         g.modified = false
     end
@@ -265,8 +267,8 @@ function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
     end
 
     # expensive:
-    g_im = reduce!.(g(domain(parent(g))))
-    h_im = reduce!.(h(domain(parent(h))))
+    g_im = reduce!.(evaluate(g))
+    h_im = reduce!.(evaluate(h))
     # cheap:
     g.savedhash = hash(g, g_im)
     g.modified = false
