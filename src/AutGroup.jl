@@ -150,7 +150,7 @@ end
 function domain(G::AutGroup{N}) where N
     F = G.objectGroup
     gg = gens(F)
-    return ntuple(i->gg[i], Val(N))
+    return ntuple(i->gg[i], N)
 end
 
 ###############################################################################
@@ -223,8 +223,9 @@ function (f::AutSymbol)(v::NTuple{N, T}) where {N, T}
 end
 
 function (F::Automorphism{N})(v::NTuple{N, T}) where {N, T}
-    for f in F.symbols
+    for (i, f) in enumerate(F.symbols)
         v = f(v)::NTuple{N, T}
+        i % 5 == 0 && reduce!.(v)
     end
     return v
 end
@@ -248,7 +249,7 @@ function hash(g::Automorphism, h::UInt)
         g_im = reduce!.(g(domain(parent(g))))
         g.savedhash = hash(g, g_im)
         g.modified = false
-        end
+    end
     return xor(g.savedhash, h)
 end
 
