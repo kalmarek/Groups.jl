@@ -215,24 +215,24 @@ end
 #
 ###############################################################################
 
-function (f::AutSymbol)(v::NTuple{N, T}) where {N, T}
-   if f.pow != 0
-      v = f.fn(v, f.pow)::NTuple{N, T}
+function (s::AutSymbol)(v::NTuple{N, T}) where {N, T}
+   if s.pow != 0
+      v = s.fn(v, s.pow)::NTuple{N, T}
    end
    return v
 end
 
-function (F::Automorphism{N})(v::NTuple{N, T}) where {N, T}
-    for (i, f) in enumerate(F.symbols)
-        v = f(v)::NTuple{N, T}
-        if i % 2 == 0
+function (f::Automorphism{N})(v::NTuple{N, T}) where {N, T}
+    for (i, s) in enumerate(f.symbols)
+        v = s(v)::NTuple{N, T}
+        if i % 5 == 0
             freereduce!.(v)
         end
     end
     return v
 end
 
-evaluate(F::Automorphism{N}) = f(domain(parent(f)))
+evaluate(f::Automorphism) = f(domain(parent(f)))
 
 ###############################################################################
 #
