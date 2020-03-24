@@ -77,25 +77,19 @@ function (λ::LTransvect)(v, pow::Integer=1)
 end
 
 function (σ::PermAut)(v, pow::Integer=1)
-   w = deepcopy(v)
-   if pow == 1
-       @inbounds for k in eachindex(v)
-           v[k].symbols = w[σ.perm.d[k]].symbols
-       end
-   else
-       s = (σ.perm^pow).d
-       @inbounds for k in eachindex(v)
-           v[k].symbols = w[s[k]].symbols
-       end
-   end
-   return v
+    w = deepcopy(v)
+    s = (σ.perm^pow).d
+    @inbounds for k in eachindex(v)
+        v[k].symbols = w[s[k]].symbols
+    end
+    return v
 end
 
 function (ɛ::FlipAut)(v, pow::Integer=1)
-   @inbounds if isodd(pow)
-       v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
-   end
-   return v
+    @inbounds if isodd(pow)
+        v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
+    end
+    return v
 end
 
 (::Identity)(v, pow::Integer=1) = v
