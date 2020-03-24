@@ -33,7 +33,18 @@ Base.one(G::Generic.PermGroup) = G(collect(1:G.n), false)
 """
 abstract type GSymbol end
 
-abstract type GWord{T<:GSymbol} <:GroupElem end
+Base.iterate(s::GS, i=1) where GS<:GSymbol = i <= abs(s.pow) ? (GS(s.id, sign(s.pow)), i+1) : nothing
+Base.length(s::GSymbol) = abs(s.pow)
+Base.size(s::GSymbol) = (length(s), )
+Base.eltype(s::GS) where GS<:GSymbol = GS
+Base.isone(s::GSymbol) = iszero(s.pow)
+
+change_pow(s::S, n::Integer) where S<:GSymbol = S(s.id, n)
+Base.inv(s::GSymbol) = change_pow(s, -s.pow)
+
+hash(s::S, h::UInt) where S<:GSymbol = hash(s.id, hash(s.pow, hash(S, h)))
+
+abstract type GWord{T<:GSymbol} <: GroupElem end
 
 @doc doc"""
     W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
