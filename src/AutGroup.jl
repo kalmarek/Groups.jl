@@ -65,12 +65,14 @@ parent_type(::Automorphism{N}) where N = AutGroup{N}
 ###############################################################################
 
 function (ϱ::RTransvect)(v, pow::Integer=1)
-    @inbounds Groups.r_multiply!(v[ϱ.i], (v[ϱ.j]^pow).symbols, reduced=false)
+    append!(v[ϱ.i], v[ϱ.j]^pow)
+    freereduce!(v[ϱ.i])
     return v
 end
 
 function (λ::LTransvect)(v, pow::Integer=1)
-    @inbounds Groups.l_multiply!(v[λ.i], (v[λ.j]^pow).symbols, reduced=false)
+    prepend!(v[λ.i], v[λ.j]^pow)
+    freereduce!(v[λ.i])
     return v
 end
 

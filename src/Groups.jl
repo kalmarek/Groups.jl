@@ -234,44 +234,32 @@ end
 #
 ###############################################################################
 
-function AbstractAlgebra.mul!(out::GWord, x::GWord, y::GWord; reduced::Bool=true)
-    resize!(out.symbols, length(x.symbols)+length(y.symbols))
-    for i in eachindex(x.symbols)
-        out.symbols[i] = x.symbols[i]
-    end
-    for i in eachindex(y.symbols)
-        out.symbols[length(x.symbols)+i] = y.symbols[i]
-    end
-    if reduced
-        reduce!(out)
-    end
-    return out
+function Base.append!(w::GWord{T}, v::AbstractVector{T}) where T
+    append!(syllables(w), v)
+    return w
 end
 
-function r_multiply!(W::GWord, x; reduced::Bool=true)
-    if length(x) > 0
-        append!(W.symbols, x)
-    end
-    if reduced
-        reduce!(W)
-    end
-    return W
+function Base.prepend!(w::GWord{T}, v::AbstractVector{T}) where T
+    prepend!(syllables(w), v)
+    return w
 end
 
-function l_multiply!(W::GWord, x; reduced::Bool=true)
-    if length(x) > 0
-        prepend!(W.symbols, x)
+Base.append!(w::T, v::T) where T <: GWord = append!(w, syllables(v))
+Base.prepend!(w::T, v::T) where T <: GWord = prepend!(w, syllables(v))
+
+for (mul, f) in ((:rmul!, :push!), (:lmul!, :pushfirst!))
+    @eval begin
+        function $mul(out::T, w::T, s::GSymbol) where T <:GWord
+            $f(syllables(out), s)
+            return freereduce!(out)
+        end
     end
-    if reduced
-        reduce!(W)
-    end
-    return W
 end
 
-r_multiply(W::GWord, x; reduced=true) =
-    r_multiply!(deepcopy(W),x, reduced=reduced)
-l_multiply(W::GWord, x; reduced=true) =
-    l_multiply!(deepcopy(W),x, reduced=reduced)
+    end
+    end
+end
+
 
 (*)(W::GWord, Z::GWord) = r_multiply(W, Z.symbols)
 (*)(W::GWord, s::GSymbol) = r_multiply(W, [s])
