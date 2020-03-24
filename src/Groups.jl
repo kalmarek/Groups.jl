@@ -137,38 +137,32 @@ function deepcopy_internal(W::T, dict::IdDict) where {T<:GWord}
     return G(T(deepcopy(syllables(W))))
 end
 
-function freereduce!(W::GWord)
+function freereduce!(::Type{Bool}, w::GWord)
     reduced = true
-    for i in 1:length(W.symbols) - 1
-        if W.symbols[i].pow == 0
+    for i in 1:syllablelength(w)-1
+        s, ns = syllables(w)[i], syllables(w)[i+1]
+        if isone(s)
             continue
-        elseif W.symbols[i].id == W.symbols[i+1].id
+        elseif s.id == ns.id
             reduced = false
-            p1 = W.symbols[i].pow
-            p2 = W.symbols[i+1].pow
+            setmodified!(w)
+            p1 = s.pow
+            p2 = ns.pow
 
-            W.symbols[i+1] = change_pow(W.symbols[i], p1 + p2)
-            W.symbols[i] = change_pow(W.symbols[i], 0)
+            syllables(w)[i+1] = change_pow(s, p1 + p2)
+            syllables(w)[i] = change_pow(s, 0)
         end
     end
     filter!(!isone, syllables(w))
     return reduced
 end
 
-function reduce!(W::GWord)
-    if length(W) < 2
-        deleteids!(W)
-    else
-        reduced = false
-        while !reduced
-            reduced = freereduce!(W)
-        end
+function freereduce!(w::GWord)
+    reduced = false
+    while !reduced
+        reduced = freereduce!(Bool, w)
     end
-
-    W.savedhash = hash(W.symbols, hash(typeof(W), hash(parent(W), zero(UInt))))
-    W.modified = false
-
-    return W
+    return w
 end
 
 @doc doc"""
