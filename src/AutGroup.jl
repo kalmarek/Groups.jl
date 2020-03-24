@@ -25,14 +25,14 @@ end
 struct Identity end
 
 struct AutSymbol <: GSymbol
-   id::Symbol
-   pow::Int8
-   fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
+    id::Symbol
+    pow::Int8
+    fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
 
 mutable struct AutGroup{N} <: AbstractFPGroup
-   objectGroup::FreeGroup
-   gens::Vector{AutSymbol}
+    objectGroup::FreeGroup
+    gens::Vector{AutSymbol}
 end
 
 mutable struct Automorphism{N} <: GWord{AutSymbol}
@@ -113,41 +113,42 @@ function id_autsymbol()
    return AutSymbol(Symbol("(id)"), 0, Identity())
 end
 
-function rmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+function transvection_R(i::Integer, j::Integer, pow::Integer=1)
     id = Symbol("ϱ", subscriptify(i), subscriptify(j))
     return AutSymbol(id, pow, RTransvect(i, j))
 end
 
-function lmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+function transvection_L(i::Integer, j::Integer, pow::Integer=1)
     id = Symbol("λ", subscriptify(i), subscriptify(j))
     return AutSymbol(id, pow, LTransvect(i, j))
 end
 
-function flip_autsymbol(i::Integer; pow::Integer=1)
-    if iseven(pow)
-       return id_autsymbol()
-    else
-        id = Symbol("ɛ", subscriptify(i))
-        return AutSymbol(id, 1, FlipAut(i))
-    end
+function flip(i::Integer, pow::Integer=1)
+    iseven(pow) && return id_autsymbol()
+    id = Symbol("ɛ", subscriptify(i))
+    return AutSymbol(id, 1, FlipAut(i))
 end
 
-function perm_autsymbol(p::Generic.Perm{I}; pow::Integer=one(I)) where I<:Integer
+function AutSymbol(p::Generic.Perm, pow::Integer=1)
     if pow != 1
         p = p^pow
     end
-    for i in eachindex(p.d)
-        if p.d[i] != i
-            id = Symbol("σ", [subscriptify(i) for i in p.d]...)
-            return AutSymbol(id, 1, PermAut(p))
-        end
+
+    if any(p.d[i] != i for i in eachindex(p.d))
+        id = Symbol("σ", "₍", [subscriptify(i) for i in p.d]..., "₎")
+        return AutSymbol(id, 1, PermAut(p))
     end
     return id_autsymbol()
 end
 
-function perm_autsymbol(a::Vector{<:Integer})
-   return perm_autsymbol(Generic.Perm(Vector{Int8}(a), false))
+function AutSymbol(a::Vector{<:Integer}, pow=1)
+   return AutSymbol(Generic.Perm(convert(Vector{Int8}, a)), pow)
 end
+
+ϱ(i::Integer, j::Integer, pow::Integer=1) = transvection_R(i, j, pow=pow)
+λ(i::Integer, j::Integer, pow::Integer=1) = transvection_L(i, j, pow=pow)
+ε(i::Integer, pow::Integer=1) = flip(i, pow=pow)
+σ(v, pow=1) = AutSymbol(v, pow=pow)
 
 function domain(G::AutGroup{N}) where N
     F = G.objectGroup
@@ -168,17 +169,16 @@ function AutGroup(G::FreeGroup; special=false)
 
    indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
 
-   rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
-   lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
+   rmuls = [transvection_R(i,j) for (i,j) in indexing]
+   lmuls = [transvection_L(i,j) for (i,j) in indexing]
 
    append!(S, [rmuls; lmuls])
 
    if !special
-      flips = [flip_autsymbol(i) for i in 1:n]
-      syms = [perm_autsymbol(p) for p in PermutationGroup(n)][2:end]
+      flips = [flip(i) for i in 1:n]
+      syms = [AutSymbol(p) for p in PermutationGroup(Int8(n))][2:end]
 
       append!(S, [flips; syms])
-
    end
    return AutGroup{n}(G, S)
 end
@@ -291,18 +291,17 @@ function change_pow(s::AutSymbol, n::Integer)
     end
     symbol = s.fn
     if symbol isa FlipAut
-        return flip_autsymbol(symbol.i, pow=n)
+        return flip(symbol.i, n)
     elseif symbol isa PermAut
-        return perm_autsymbol(symbol.perm, pow=n)
+        return AutSymbol(symbol.perm, n)
     elseif symbol isa RTransvect
-        return rmul_autsymbol(symbol.i, symbol.j, pow=n)
+        return transvection_R(symbol.i, symbol.j, n)
     elseif symbol isa LTransvect
-        return lmul_autsymbol(symbol.i, symbol.j, pow=n)
+        return transvection_L(symbol.i, symbol.j, n)
     elseif symbol isa Identity
         return s
     else
-        warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.id, n, s.fn)
+        throw(DomainError("Unknown type of AutSymbol: $s"))
     end
 end
 
