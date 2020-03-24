@@ -165,16 +165,16 @@ function freereduce!(w::GWord)
     return w
 end
 
+reduce!(w::GWord) = freereduce!(w)
+
 @doc doc"""
-    reduce(W::GWord)
+    reduce(w::GWord)
 > performs reduction/simplification of a group element (word in generators).
-> The default reduction is the free group reduction, i.e. consists of
-> multiplying adjacent symbols with the same `id` identifier and deleting the
-> identity elements from `W.symbols`.
+> The default reduction is the free group reduction
 > More specific procedures should be dispatched on `GWord`s type parameter.
 
 """
-reduce(W::GWord) = reduce!(deepcopy(W))
+reduce(w::GWord) = reduce!(deepcopy(w))
 
 @doc doc"""
     gens(G::AbstractFPGroups)
