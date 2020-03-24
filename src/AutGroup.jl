@@ -217,20 +217,16 @@ end
 #
 ###############################################################################
 
-function (s::AutSymbol)(v::NTuple{N, T}) where {N, T}
-   if s.pow != 0
-      v = s.fn(v, s.pow)::NTuple{N, T}
-   end
-   return v
-end
+(s::AutSymbol)(v::NTuple{N, T}) where {N, T} = s.fn(v, s.pow)::NTuple{N, T}
 
 function (f::Automorphism{N})(v::NTuple{N, T}) where {N, T}
-    for (i, s) in enumerate(f.symbols)
+    for s in syllables(f)
         v = s(v)::NTuple{N, T}
-        if i % 5 == 0
-            freereduce!.(v)
-        end
+        # if iszero(i % 3)
+            # freereduce!.(v)
+        # end
     end
+    # return freereduce!.(v)
     return v
 end
 
