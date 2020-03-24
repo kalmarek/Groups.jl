@@ -361,20 +361,11 @@ function simplifyperms!(W::Automorphism{N}) where N
     return reduced
 end
 
-function reduce!(W::Automorphism)
-    if length(W) == 0
-        return W
-    elseif length(W.symbols) == 1
-        deleteids!(W)
-    else
-        reduced = false
-        while !reduced
-            reduced = simplifyperms!(W) && freereduce!(W)
-        end
+function reduce!(w::Automorphism)
+    reduced = false
+    while !reduced
+        reduced = simplifyperms!(Bool, w) && freereduce!(Bool, w)
     end
-
-    W.modified = true
-
     return W
 end
 

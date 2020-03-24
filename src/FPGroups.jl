@@ -134,17 +134,11 @@ end
 (*)(s::FPSymbol, W::FPGroupElem) = l_multiply(W, [s])
 
 function reduce!(W::FPGroupElem)
-    if length(W) < 2
-        deleteat!(W.symbols, findall(x -> x.pow == 0, W.symbols))
-    else
-        reduced = false
-        while !reduced
-            reduced = freereduce!(W) || replace_all!(W, parent(W).rels)
-        end
+    reduced = false
+    while !reduced
+        W = replace(W, parent(W).rels)
+        reduced = freereduce!(Bool, W)
     end
-
-    W.savedhash = hash(W.symbols, hash(typeof(W)))
-    W.modified = false
     return W
 end
 
