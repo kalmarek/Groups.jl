@@ -66,7 +66,7 @@ function Base.one(G::FPGroup)
 end
 
 function (G::FPGroup)(w::GWord)
-   if length(w) == 0
+   if isempty(w)
       return one(G)
    end
 

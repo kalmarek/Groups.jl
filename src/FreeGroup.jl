@@ -59,7 +59,7 @@ function Base.one(G::FreeGroup)
 end
 
 function (G::FreeGroup)(w::GroupWord{FreeSymbol})
-   if length(w) > 0
+   if length(syllables(w)) > 0
       for s in w.symbols
          i = findfirst(g -> g.id == s.id, G.gens)
          i == 0 && throw(DomainError(

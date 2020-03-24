@@ -62,15 +62,21 @@ abstract type GWord{T<:GSymbol} <: GroupElem end
 
 """
 mutable struct GroupWord{T} <: GWord{T}
-   symbols::Vector{T}
-   savedhash::UInt
-   modified::Bool
-   parent::Group
+    symbols::Vector{T}
+    modified::Bool
+    savedhash::UInt
+    parent::Group
 
-   function GroupWord{T}(symbols::Vector{T}) where {T}
-      return new{T}(symbols, hash(symbols), true)
-   end
+    function GroupWord{T}(symbols::Vector{T}) where {T}
+       return new{T}(symbols, true, zero(UInt))
+    end
 end
+
+syllablelength(w::GWord) = length(w.symbols)
+syllables(w::GWord) = w.symbols
+ismodified(w::GWord) = w.modified
+setmodified!(w::GWord) = (w.modified = true; w)
+unsetmodified!(w::GWord) = (w.modified = false; w)
 
 abstract type AbstractFPGroup <: Group end
 
@@ -128,19 +134,7 @@ end
 # WARNING: Due to specialised (constant) hash function of GWords this one is actually necessary!
 function deepcopy_internal(W::T, dict::IdDict) where {T<:GWord}
     G = parent(W)
-    return G(T(deepcopy(W.symbols)))
-end
-
-length(W::GWord) = sum([length(s) for s in W.symbols])
-
-function deleteids!(W::GWord)
-    to_delete = Int[]
-    for i in 1:length(W.symbols)
-        if W.symbols[i].pow == 0
-           push!(to_delete, i)
-        end
-    end
-    deleteat!(W.symbols, to_delete)
+    return G(T(deepcopy(syllables(W))))
 end
 
 function freereduce!(W::GWord)
@@ -157,7 +151,7 @@ function freereduce!(W::GWord)
             W.symbols[i] = change_pow(W.symbols[i], 0)
         end
     end
-    deleteids!(W)
+    filter!(!isone, syllables(w))
     return reduced
 end
 
@@ -242,10 +236,9 @@ function (==)(W::GWord, Z::GWord)
 end
 
 function (==)(s::GSymbol, t::GSymbol)
-   s.pow == t.pow || return false
-   s.pow ==  0 && return true
-   s.id == t.id || return false
-   return true
+    isone(s) && isone(t) && return true
+    s.pow == t.pow && s.id == t.id && return true
+    return false
 end
 
 ###############################################################################
@@ -333,13 +326,12 @@ end
 #
 ###############################################################################
 
-function inv(W::T) where {T<:GWord}
+function inv(W::T) where T<:GWord
     if length(W) == 0
         return W
     else
         G = parent(W)
-        w = T(reverse([inv(s) for s in W.symbols]))
-        w.modified = true
+        w = T([inv(s) for s in Iterators.reverse(syllables(W))])
         return G(w)
     end
 end
