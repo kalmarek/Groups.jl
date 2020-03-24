@@ -80,8 +80,6 @@ end
 #
 ###############################################################################
 
-hash(s::FreeSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(FreeSymbol, h)))
-
 change_pow(s::FreeSymbol, n::Int) = FreeSymbol(s.id, n)
 
 length(s::FreeSymbol) = abs(s.pow)

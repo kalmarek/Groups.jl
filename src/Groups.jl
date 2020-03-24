@@ -101,8 +101,16 @@ convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 #
 ###############################################################################
 
+function hash_internal(W::GWord)
+    reduce!(W)
+    return hash(syllables(W), hash(typeof(W), hash(parent(W))))
+end
+
 function hash(W::GWord, h::UInt)
-    W.modified && reduce!(W)
+    if ismodified(W)
+        W.savedhash = hash_internal(W)
+        unsetmodified!(W)
+    end
     return xor(W.savedhash, h)
 end
 

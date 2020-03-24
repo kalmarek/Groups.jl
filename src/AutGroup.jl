@@ -242,19 +242,18 @@ evaluate(f::Automorphism) = f(domain(parent(f)))
 
 const HASHINGCONST = 0x7d28276b01874b19 # hash(Automorphism)
 
-hash(s::AutSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(:AutSymbol, h)))
+hash(s::AutSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(AutSymbol, h)))
 
-function hash(g::Automorphism{N}, images, h::UInt=HASHINGCONST) where N
-    return hash(images, hash(parent(g), hash(Automorphism{N}, h)))
+function hash_internal(g::Automorphism, images = freereduce!.(evaluate(g)),
+    h::UInt = HASHINGCONST)
+    return hash(images, hash(parent(g), h))
 end
 
-function hash(g::Automorphism, h::UInt)
-    if g.modified
-        g_im = reduce!.(evaluate(g))
-        g.savedhash = hash(g, g_im)
-        g.modified = false
-    end
-    return xor(g.savedhash, h)
+function compute_images(g::Automorphism)
+    images = reduce!.(evaluate(g))
+    g.savedhash = hash_internal(g, images)
+    unsetmodified!(g)
+    return images
 end
 
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N

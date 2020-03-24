@@ -95,8 +95,6 @@ end
 #
 ###############################################################################
 
-hash(s::FPSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(FPSymbol, h)))
-
 change_pow(s::FPSymbol, n::Int) = FPSymbol(s.id, n)
 
 length(s::FPSymbol) = abs(s.pow)
