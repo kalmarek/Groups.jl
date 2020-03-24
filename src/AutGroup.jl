@@ -335,31 +335,22 @@ end
 #
 ###############################################################################
 
-function getperm(s::AutSymbol)
-    if s.pow != 1
-        @warn("Power for perm_symbol should be never 0!")
-        return s.fn.perm^s.pow
-    else
-        return s.fn.perm
-    end
-end
+getperm(s::AutSymbol) = s.fn.perm^s.pow
 
-function simplifyperms!(W::Automorphism{N}) where N
+function simplifyperms!(::Type{Bool}, w::Automorphism{N}) where N
     reduced = true
-    to_delete = Int[]
-    for i in 1:length(W.symbols)-1
-        if W.symbols[i].pow == 0
+    for i in 1:syllablelength(w)-1
+        s, ns = syllables(w)[i], syllables(w)[i+1]
+        if isone(s)
             continue
-        elseif W.symbols[i].fn isa PermAut && W.symbols[i+1].fn isa PermAut
+        elseif s.fn isa PermAut && ns.fn isa PermAut
             reduced = false
-            c = W.symbols[i]
-            n = W.symbols[i+1]
-            W.symbols[i+1] = perm_autsymbol(getperm(c)*getperm(n))
-            push!(to_delete, i)
+            setmodified!(w)
+            syllables(w)[i+1] = AutSymbol(getperm(s)*getperm(ns))
+            syllables(w)[i] = change_pow(s, 0)
         end
     end
-    deleteat!(W.symbols, to_delete)
-    deleteids!(W)
+    filter!(!isone, syllables(w))
     return reduced
 end
 
