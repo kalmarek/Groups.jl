@@ -216,17 +216,10 @@ end
 #
 ###############################################################################
 
-function (==)(W::GWord, Z::GWord)
-    parent(W) == parent(Z) || return false
-
-    W.modified && reduce!(W)
-    Z.modified && reduce!(Z)
-
-    if W.savedhash != Z.savedhash
-        return false
-    end
-
-    return W.symbols == Z.symbols
+function (==)(W::T, Z::T) where T <: GWord
+    parent(W) != parent(Z) && return false
+    hash(W) != hash(Z) && return false
+    return syllables(W) == syllables(Z)
 end
 
 function (==)(s::GSymbol, t::GSymbol)
