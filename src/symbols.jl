@@ -18,3 +18,4 @@ function (==)(s::GSymbol, t::GSymbol)
 end
 
 Base.convert(::Type{GS}, s::GSymbol) where GS<:GSymbol = GS(s.id, s.pow)
+Base.convert(::Type{GS}, s::GS) where GS<:GSymbol = s

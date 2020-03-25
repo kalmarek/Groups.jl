@@ -34,7 +34,10 @@ mutable struct GroupWord{T} <: GWord{T}
     savedhash::UInt
     parent::Group
 
-    function GroupWord{T}(symbols::Vector{<:GSymbol}) where T
+    function GroupWord{T}(symbols::AbstractVector{<:GSymbol}) where T
        return new{T}(symbols, true, zero(UInt))
     end
+    GroupWord(v::AbstractVector{T}) where T<:GSymbol = GroupWord{T}(v)
+    GroupWord{T}(s::GSymbol) where T<:GSymbol = GroupWord{T}(T[s])
+    GroupWord(s::T) where T<:GSymbol = GroupWord{T}(s)
 end

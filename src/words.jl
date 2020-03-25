@@ -37,3 +37,5 @@ Base.@propagate_inbounds function Base.getindex(w::GWord, i::Integer)
 end
 
 # no setindex! for syllable based words
+
+Base.convert(::Type{GW}, s::GSymbol) where GW <: GWord = GW(s)
