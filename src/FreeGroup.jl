@@ -52,12 +52,6 @@ FreeGroup(a::Vector) = FreeGroup(FreeSymbol.(a))
 #
 ###############################################################################
 
-function Base.one(G::FreeGroup)
-   id = FreeGroupElem(FreeSymbol[])
-   id.parent = G
-   return id
-end
-
 function (G::FreeGroup)(w::GroupWord{FreeSymbol})
    if length(syllables(w)) > 0
       for s in w.symbols

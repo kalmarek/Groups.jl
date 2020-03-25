@@ -30,9 +30,8 @@ export FPGroupElem, FPGroup
 #
 ###############################################################################
 
+elem_type(::Type{FPGroup}) = FPGroupElem
 parent_type(::Type{FPGroupElem}) = FPGroup
-
-elem_type(::FPGroup) = FPGroupElem
 
 ###############################################################################
 #
@@ -58,12 +57,6 @@ FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 #   Parent object call overloads
 #
 ###############################################################################
-
-function Base.one(G::FPGroup)
-   id = FPGroupElem(FPSymbol[])
-   id.parent = G
-   return id
-end
 
 function (G::FPGroup)(w::GWord)
    if isempty(w)

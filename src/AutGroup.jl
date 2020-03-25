@@ -54,7 +54,7 @@ export Automorphism, AutGroup, Aut, SAut
 #
 ###############################################################################
 
-elem_type(::AutGroup{N}) where N = Automorphism{N}
+elem_type(::Type{AutGroup{N}}) where N = Automorphism{N}
 
 parent_type(::Automorphism{N}) where N = AutGroup{N}
 
@@ -187,12 +187,6 @@ SAut(G::Group) = AutGroup(G, special=true)
 ###############################################################################
 
 Automorphism{N}(s::AutSymbol) where N = Automorphism{N}(AutSymbol[s])
-
-function Base.one(G::AutGroup{N}) where N
-   id = Automorphism{N}(id_autsymbol())
-   id.parent = G
-   return id
-end
 
 function (G::AutGroup{N})(f::AutSymbol) where N
    g = Automorphism{N}([f])

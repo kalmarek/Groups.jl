@@ -15,13 +15,25 @@ export elements
 using LinearAlgebra
 using Markdown
 
-Base.one(G::Generic.PermGroup) = G(collect(1:G.n), false)
+
+Base.one(G::Generic.PermGroup) = Generic.Perm(G.n)
+Base.one(r::NCRingElem) = one(parent(r))
 
 ###############################################################################
 #
 #   ParentType / ObjectType definition
 #
-###############################################################################
+
+abstract type AbstractFPGroup <: Group end
+
+function Base.one(G::Gr) where Gr <: AbstractFPGroup
+    El = elem_type(G)
+    id = El(eltype(El)[])
+    id.parent = G
+    return id
+end
+
+elem_type(G::Gr) where Gr <:AbstractFPGroup = elem_type(Gr) # fallback definition
 
 @doc doc"""
     ::GSymbol
@@ -46,6 +58,8 @@ hash(s::S, h::UInt) where S<:GSymbol = hash(s.id, hash(s.pow, hash(S, h)))
 
 abstract type GWord{T<:GSymbol} <: GroupElem end
 
+# fallback definitions
+Base.eltype(w::GW) where GW<:GWord = eltype(GW)
 @doc doc"""
     W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
 > Basic representation of element of a finitely presented group. `W.symbols`
@@ -77,8 +91,8 @@ syllables(w::GWord) = w.symbols
 ismodified(w::GWord) = w.modified
 setmodified!(w::GWord) = (w.modified = true; w)
 unsetmodified!(w::GWord) = (w.modified = false; w)
+Base.one(w::GWord) = one(parent(w))
 
-abstract type AbstractFPGroup <: Group end
 
 ###############################################################################
 #
