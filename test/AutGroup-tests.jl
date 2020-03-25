@@ -8,72 +8,73 @@
       f = Groups.AutSymbol(:a, 1, Groups.FlipAut(2))
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
-      @test isa(Groups.perm_autsymbol(Int8.([1,2,3,4])), Groups.AutSymbol)
-      @test isa(Groups.rmul_autsymbol(1,2), Groups.AutSymbol)
-      @test isa(Groups.lmul_autsymbol(3,4), Groups.AutSymbol)
-      @test isa(Groups.flip_autsymbol(3), Groups.AutSymbol)
+      @test isa(Groups.AutSymbol(perm"(4)"), Groups.AutSymbol)
+      @test isa(Groups.AutSymbol([2,3,4,1]), Groups.AutSymbol)
+      @test isa(Groups.transvection_R(1,2), Groups.AutSymbol)
+      @test isa(Groups.transvection_R(3,4), Groups.AutSymbol)
+      @test isa(Groups.flip(3), Groups.AutSymbol)
    end
 
    a,b,c,d = gens(FreeGroup(4))
    D = NTuple{4,FreeGroupElem}([a,b,c,d])
 
-   @testset "flip_autsymbol correctness" begin
-      @test Groups.flip_autsymbol(1)(deepcopy(D)) == (a^-1, b,c,d)
-      @test Groups.flip_autsymbol(2)(deepcopy(D)) == (a, b^-1,c,d)
-      @test Groups.flip_autsymbol(3)(deepcopy(D)) == (a, b,c^-1,d)
-      @test Groups.flip_autsymbol(4)(deepcopy(D)) == (a, b,c,d^-1)
-      @test inv(Groups.flip_autsymbol(1))(deepcopy(D)) == (a^-1, b,c,d)
-      @test inv(Groups.flip_autsymbol(2))(deepcopy(D)) == (a, b^-1,c,d)
-      @test inv(Groups.flip_autsymbol(3))(deepcopy(D)) == (a, b,c^-1,d)
-      @test inv(Groups.flip_autsymbol(4))(deepcopy(D)) == (a, b,c,d^-1)
+   @testset "flip correctness" begin
+      @test Groups.flip(1)(deepcopy(D)) == (a^-1, b,c,d)
+      @test Groups.flip(2)(deepcopy(D)) == (a, b^-1,c,d)
+      @test Groups.flip(3)(deepcopy(D)) == (a, b,c^-1,d)
+      @test Groups.flip(4)(deepcopy(D)) == (a, b,c,d^-1)
+      @test inv(Groups.flip(1))(deepcopy(D)) == (a^-1, b,c,d)
+      @test inv(Groups.flip(2))(deepcopy(D)) == (a, b^-1,c,d)
+      @test inv(Groups.flip(3))(deepcopy(D)) == (a, b,c^-1,d)
+      @test inv(Groups.flip(4))(deepcopy(D)) == (a, b,c,d^-1)
    end
 
-   @testset "perm_autsymbol correctness" begin
-      σ = Groups.perm_autsymbol([1,2,3,4])
+   @testset "perm correctness" begin
+      σ = Groups.AutSymbol(perm"(4)")
       @test      σ(deepcopy(D)) == deepcopy(D)
       @test inv(σ)(deepcopy(D)) == deepcopy(D)
 
-      σ = Groups.perm_autsymbol([2,3,4,1])
+      σ = Groups.AutSymbol(perm"(1,2,3,4)")
       @test      σ(deepcopy(D)) == (b, c, d, a)
       @test inv(σ)(deepcopy(D)) == (d, a, b, c)
 
-      σ = Groups.perm_autsymbol([2,1,4,3])
+      σ = Groups.AutSymbol(perm"(1,2)(4,3)")
       @test      σ(deepcopy(D)) == (b, a, d, c)
       @test inv(σ)(deepcopy(D)) == (b, a, d, c)
 
-      σ = Groups.perm_autsymbol([2,3,1,4])
+      σ = Groups.AutSymbol(perm"(1,2,3)(4)")
       @test      σ(deepcopy(D)) == (b, c, a, d)
       @test inv(σ)(deepcopy(D)) == (c, a, b, d)
    end
 
-   @testset "rmul/lmul_autsymbol correctness" begin
+   @testset "rmul/transvection_R correctness" begin
       i,j = 1,2
-      r = Groups.rmul_autsymbol(i,j)
-      l = Groups.lmul_autsymbol(i,j)
+      r = Groups.transvection_R(i,j)
+      l = Groups.transvection_L(i,j)
       @test      r(deepcopy(D)) == (a*b,   b, c, d)
       @test inv(r)(deepcopy(D)) == (a*b^-1,b, c, d)
       @test      l(deepcopy(D)) == (b*a,   b, c, d)
       @test inv(l)(deepcopy(D)) == (b^-1*a,b, c, d)
 
       i,j = 3,1
-      r = Groups.rmul_autsymbol(i,j)
-      l = Groups.lmul_autsymbol(i,j)
+      r = Groups.transvection_R(i,j)
+      l = Groups.transvection_L(i,j)
       @test      r(deepcopy(D)) == (a, b, c*a,   d)
       @test inv(r)(deepcopy(D)) == (a, b, c*a^-1,d)
       @test      l(deepcopy(D)) == (a, b, a*c,   d)
       @test inv(l)(deepcopy(D)) == (a, b, a^-1*c,d)
 
       i,j = 4,3
-      r = Groups.rmul_autsymbol(i,j)
-      l = Groups.lmul_autsymbol(i,j)
+      r = Groups.transvection_R(i,j)
+      l = Groups.transvection_L(i,j)
       @test      r(deepcopy(D)) == (a, b, c, d*c)
       @test inv(r)(deepcopy(D)) == (a, b, c, d*c^-1)
       @test      l(deepcopy(D)) == (a, b, c, c*d)
       @test inv(l)(deepcopy(D)) == (a, b, c, c^-1*d)
 
       i,j = 2,4
-      r = Groups.rmul_autsymbol(i,j)
-      l = Groups.lmul_autsymbol(i,j)
+      r = Groups.transvection_R(i,j)
+      l = Groups.transvection_L(i,j)
       @test      r(deepcopy(D)) == (a, b*d,   c, d)
       @test inv(r)(deepcopy(D)) == (a, b*d^-1,c, d)
       @test      l(deepcopy(D)) == (a, d*b,   c, d)
@@ -94,40 +95,40 @@
       @test length(Groups.gens(A)) == 0
       A = AutGroup(FreeGroup(2))
       @test length(Groups.gens(A)) == 7
-      gens = Groups.gens(A)
+      Agens = Groups.gens(A)
 
-      @test isa(A(Groups.rmul_autsymbol(1,2)), Automorphism)
-      @test A(Groups.rmul_autsymbol(1,2)) in gens
+      @test isa(A(Groups.transvection_R(1,2)), Automorphism)
+      @test A(Groups.transvection_R(1,2)) in Agens
 
-      @test isa(A(Groups.rmul_autsymbol(2,1)), Automorphism)
-      @test A(Groups.rmul_autsymbol(2,1)) in gens
+      @test isa(A(Groups.transvection_R(2,1)), Automorphism)
+      @test A(Groups.transvection_R(2,1)) in Agens
 
-      @test isa(A(Groups.lmul_autsymbol(1,2)), Automorphism)
-      @test A(Groups.lmul_autsymbol(1,2)) in gens
+      @test isa(A(Groups.transvection_R(1,2)), Automorphism)
+      @test A(Groups.transvection_R(1,2)) in Agens
 
-      @test isa(A(Groups.lmul_autsymbol(2,1)), Automorphism)
-      @test A(Groups.lmul_autsymbol(2,1)) in gens
+      @test isa(A(Groups.transvection_R(2,1)), Automorphism)
+      @test A(Groups.transvection_R(2,1)) in Agens
 
-      @test isa(A(Groups.flip_autsymbol(1)), Automorphism)
-      @test A(Groups.flip_autsymbol(1)) in gens
+      @test isa(A(Groups.flip(1)), Automorphism)
+      @test A(Groups.flip(1)) in Agens
 
-      @test isa(A(Groups.flip_autsymbol(2)), Automorphism)
-      @test A(Groups.flip_autsymbol(2)) in gens
+      @test isa(A(Groups.flip(2)), Automorphism)
+      @test A(Groups.flip(2)) in Agens
 
-      @test isa(A(Groups.perm_autsymbol([2,1])), Automorphism)
-      @test A(Groups.perm_autsymbol([2,1])) in gens
+      @test isa(A(Groups.AutSymbol(perm"(1,2)")), Automorphism)
+      @test A(Groups.AutSymbol(perm"(1,2)")) in Agens
    end
 
    A = AutGroup(FreeGroup(4))
 
    @testset "eltary functions" begin
 
-      f = Groups.perm_autsymbol([2,3,4,1])
+      f = Groups.AutSymbol(perm"(1,2,3,4)")
       @test (Groups.change_pow(f, 2)).pow == 1
       @test (Groups.change_pow(f, -2)).pow == 1
       @test (inv(f)).pow == 1
 
-      f = Groups.perm_autsymbol([2,1,4,3])
+      f = Groups.AutSymbol(perm"(1,2)(3,4)")
       @test isa(inv(f), Groups.AutSymbol)
 
       @test_throws MethodError f*f
@@ -136,14 +137,15 @@
    end
 
    @testset "reductions/arithmetic" begin
-      f = Groups.perm_autsymbol([2,3,4,1])
+      f = Groups.AutSymbol(perm"(1,2,3,4)")
 
-      f² = Groups.r_multiply(A(f), [f], reduced=false)
-      @test Groups.simplifyperms!(f²) == false
+      f² = append!(A(f), [f])
+      @test Groups.simplifyperms!(Bool, f²) == false
       @test f²^2 == one(A)
+      @test !isone(f²)
 
-      a = A(Groups.rmul_autsymbol(1,2))*Groups.flip_autsymbol(2)
-      b = Groups.flip_autsymbol(2)*A(inv(Groups.rmul_autsymbol(1,2)))
+      a = A(Groups.transvection_L(1,2))*Groups.flip(2)
+      b = Groups.flip(2)*A(inv(Groups.transvection_L(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == one(A)
       g,h = Groups.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)
@@ -164,27 +166,22 @@
       # Not so simple arithmetic: applying starting on the left:
       # ϱ₁₂*ϱ₂₁⁻¹*λ₁₂*ε₂ == σ₂₁₃₄
 
-      g = A(Groups.rmul_autsymbol(1,2))
+      g = A(Groups.transvection_R(1,2))
       x1, x2, x3, x4 = Groups.domain(A)
       @test g(Groups.domain(A)) == (x1*x2, x2, x3, x4)
-      g = g*inv(A(Groups.rmul_autsymbol(2,1)))
+      g = g*inv(A(Groups.transvection_R(2,1)))
       @test g(Groups.domain(A)) == (x1*x2, x1^-1, x3, x4)
-      g = g*A(Groups.lmul_autsymbol(1,2))
+      g = g*A(Groups.transvection_L(1,2))
       @test g(Groups.domain(A)) == (x2, x1^-1, x3, x4)
-      g = g*A(Groups.flip_autsymbol(2))
+      g = g*A(Groups.flip(2))
       @test g(Groups.domain(A)) == (x2, x1, x3, x4)
 
-      @test g(Groups.domain(A)) == A(Groups.perm_autsymbol([2,1,3,4]))(Groups.domain(A))
+      @test g(Groups.domain(A)) == A(Groups.AutSymbol(perm"(1,2)(4)"))(Groups.domain(A))
 
-      @test g == A(Groups.perm_autsymbol([2,1,3,4]))
+      @test g == A(Groups.AutSymbol(perm"(1,2)(4)"))
 
       g_im = g(Groups.domain(A))
-      @test length(g_im[1]) == 5
-      @test length(g_im[2]) == 3
-      @test length(g_im[3]) == 1
-      @test length(g_im[4]) == 1
-      @test length.(Groups.reduce!.(g_im)) == (1,1,1,1)
-
+      @test length.(g_im) == (1,1,1,1)
    end
 
    @testset "specific Aut(F4) tests" begin
@@ -219,8 +216,8 @@
 
       M = Matrix{Int}(I, N, N)
       M[1,2] = 1
-      ϱ₁₂ = G(Groups.rmul_autsymbol(1,2))
-      λ₁₂ = G(Groups.rmul_autsymbol(1,2))
+      ϱ₁₂ = G(Groups.transvection_R(1,2))
+      λ₁₂ = G(Groups.transvection_R(1,2))
 
       @test Groups.linear_repr(ϱ₁₂) == M
       @test Groups.linear_repr(λ₁₂) == M
@@ -235,14 +232,14 @@
 
       M = Matrix{Int}(I, N, N)
       M[2,2] = -1
-      ε₂ = G(Groups.flip_autsymbol(2))
+      ε₂ = G(Groups.flip(2))
 
       @test Groups.linear_repr(ε₂) == M
       @test Groups.linear_repr(ε₂^2) == Matrix{Int}(I, N, N)
 
       M = [0 1 0; 0 0 1; 1 0 0]
 
-      σ = G(Groups.perm_autsymbol([2,3,1]))
+      σ = G(Groups.AutSymbol(perm"(1,2,3)"))
       @test Groups.linear_repr(σ) == M
       @test Groups.linear_repr(σ^3) == Matrix{Int}(I, 3, 3)
       @test Groups.linear_repr(σ)^3 == Matrix{Int}(I, 3, 3)
