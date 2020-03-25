@@ -249,24 +249,29 @@ function compute_images(g::Automorphism)
 end
 
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
-    parent(g) == parent(h) || return false
+    img_c, imh_c = false, false
 
-    if !g.modified && !h.modified
-        if g.savedhash != h.savedhash
-            return false
-        end
+    if ismodified(g)
+        img = compute_images(g)
+        img_c = true
     end
 
-    # expensive:
-    g_im = reduce!.(evaluate(g))
-    h_im = reduce!.(evaluate(h))
-    # cheap:
-    g.savedhash = hash(g, g_im)
-    g.modified = false
-    h.savedhash = hash(h, h_im)
-    h.modified = false
+    if ismodified(h)
+        imh = compute_images(h)
+        imh_c = true
+    end
 
-    return g_im == h_im
+    @assert !ismodified(g) && !ismodified(h)
+    # cheap
+    hash(g) != hash(h) && return false # hashes differ, so images must have differed as well
+    # equal elements, or possibly hash conflict
+    if !img_c
+        img = compute_images(g)
+    end
+    if !imh_c
+        imh = compute_images(h)
+    end
+    return img == imh
 end
 
 ###############################################################################
