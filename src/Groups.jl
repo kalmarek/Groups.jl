@@ -7,10 +7,8 @@ import AbstractAlgebra: order, gens, matrix_repr
 
 import Base: length, ==, hash, show, convert, eltype, iterate
 import Base: inv, reduce, *, ^, power_by_squaring
-import Base: findfirst, findnext
+import Base: findfirst, findnext, replace
 import Base: deepcopy_internal
-
-export elements
 
 using LinearAlgebra
 using Markdown
@@ -375,90 +373,156 @@ function issubword(z::GWord, w::GWord, sindex::Integer)
 end
 
 """doc
-Find the first linear index k>=i such that Z < W.symbols[k:k+length(Z)-1]
+Find the first syllable index k>=i such that Z < syllables(W)[k:k+syllablelength(Z)-1]
 """
-function findnext(W::GWord, Z::GWord, i::Int)
-    n = length(Z.symbols)
-   if n == 0
-      return 0
-   elseif n == 1
-      for idx in i:lastindex(W.symbols)
-         if issubsymbol(Z.symbols[1], W.symbols[idx])
-            return idx
-         end
-      end
-      return 0
-   else
-      for idx in i:lastindex(W.symbols) - n + 1
-         foundfirst = issubsymbol(Z.symbols[1], W.symbols[idx])
-         lastmatch = issubsymbol(Z.symbols[end], W.symbols[idx+n-1])
-         if foundfirst && lastmatch
-            # middles match:
-            if view(Z.symbols, 2:n-1) == view(W.symbols, idx+1:idx+n-2)
-               return idx
-            end
-         end
-      end
-   end
-   return 0
+function findnext(subword::GWord, word::GWord, start::Integer)
+    @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
+    isempty(subword) && return start
+    stop = syllablelength(word) - syllablelength(subword) +1
+
+    for idx in start:1:stop
+        issubword(subword, word, idx) && return idx
+    end
+    return nothing
 end
 
-findfirst(W::GWord, Z::GWord) = findnext(W, Z, 1)
+function findnext(s::FreeSymbol, word::GWord, start::Integer)
+    @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
+    isone(s) && return start
+    stop = syllablelength(word)
 
-function replace!(W::GWord, index, toreplace::GWord, replacement::GWord; check=true)
-   n = length(toreplace.symbols)
-   if n == 0
-      return reduce!(W)
-
-   elseif n == 1
-      if check
-         @assert issubsymbol(toreplace.symbols[1], W.symbols[index])
-      end
-
-      first = change_pow(W.symbols[index],
-         W.symbols[index].pow - toreplace.symbols[1].pow)
-      last = change_pow(W.symbols[index], 0)
-
-   else
-      if check
-         @assert issubsymbol(toreplace.symbols[1], W.symbols[index])
-         @assert W.symbols[index+1:index+n-2] == toreplace.symbols[2:end-1]
-         @assert issubsymbol(toreplace.symbols[end], W.symbols[index+n-1])
-      end
-
-      first = change_pow(W.symbols[index],
-      W.symbols[index].pow - toreplace.symbols[1].pow)
-      last = change_pow(W.symbols[index+n-1],
-      W.symbols[index+n-1].pow - toreplace.symbols[end].pow)
-   end
-
-   replacement = first * replacement * last
-   splice!(W.symbols, index:index+n-1, replacement.symbols)
-   return reduce!(W)
+    for idx in start:1:stop
+        issubsymbol(s, word, idx) && return idx
+    end
+    return nothing
 end
 
-function replace(W::GWord, index, toreplace::GWord, replacement::GWord)
-    replace!(deepcopy(W), index, toreplace, replacement)
+function findprev(subword::GWord, word::GWord, start::Integer)
+    @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
+    isempty(subword) && return start
+    stop = 1
+
+    for idx in start:-1:1
+        issubword(subword, word, idx) && return idx
+    end
+    return nothing
 end
 
-function replace_all!(W::T,subst_dict::Dict{T,T}) where {T<:GWord}
-    modified = false
+function findprev(s::FreeSymbol, word::GWord, start::Integer)
+    @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
+    isone(s) && return start
+    stop = 1
+
+    for idx in start:-1:stop
+        issubsymbol(s, word, idx) && return idx
+    end
+    return nothing
+end
+
+findfirst(subword::GWord, word::GWord) = findnext(subword, word, 1)
+findlast(subword::GWord, word::GWord) =
+    findprev(subword, word, syllablelength(word)-syllablelength(subword)+1)
+
+function replace!(out::GW, W::GW, lhs_rhs::Pair{GS, T}; count::Integer=typemax(Int)) where
+        {GS<:GSymbol, T<:GWord, GW<:GWord}
+    (count == 0 || isempty(W)) && return W
+    count < 0 && throw(DomainError(count, "`count` must be non-negative."))
+
+    lhs, rhs = lhs_rhs
+
+    sW = syllables(W)
+    sW_idx = 1
+    r = something(findnext(lhs, W, sW_idx), 0)
+
+    sout = syllables(out)
+    resize!(sout, 0)
+    sizehint!(sout, syllablelength(W))
+
+    c = 0
+
+    while !iszero(r)
+        append!(sout, view(sW, sW_idx:r-1))
+        a, b = divrem(sW[r].pow, lhs.pow)
+
+        if b != 0
+            push!(sout, change_pow(sW[r], b))
+        end
+
+        append!(sout, repeat(syllables(rhs), a))
+
+        sW_idx = r+1
+        sW_idx > syllablelength(W) && break
+
+        r = something(findnext(lhs, W, sW_idx), 0)
+        c += 1
+        c == count && break
+    end
+    append!(sout, sW[sW_idx:end])
+    return freereduce!(out)
+end
+
+function replace!(out::GW, W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
+    {GW<:GWord, T <: GWord}
+    (count == 0 || isempty(W)) && return W
+    count < 0 && throw(DomainError(count, "`count` must be non-negative."))
+
+    lhs, rhs = lhs_rhs
+    lhs_slen = syllablelength(lhs)
+    lhs_slen == 1 && return replace!(out, W, first(syllables(lhs))=>rhs; count=count)
+
+    sW = syllables(W)
+    sW_idx = 1
+    r = something(findnext(lhs, W, sW_idx), 0)
+
+    sout = syllables(out)
+    resize!(sout, 0)
+    sizehint!(sout, syllablelength(W))
+
+    c = 0
+
+    while !iszero(r)
+        append!(sout, view(sW, sW_idx:r-1))
+
+        exp = sW[r].pow - first(syllables(lhs)).pow
+        if exp != 0
+            push!(sout, change_pow(sW[r], exp))
+        end
+
+        append!(sout, syllables(rhs))
+
+        exp = sW[r+lhs_slen-1].pow - last(syllables(lhs)).pow
+        if exp != 0
+            push!(sout, change_pow(sW[r+lhs_slen-1], exp))
+        end
+
+        sW_idx = r+lhs_slen
+        sW_idx > syllablelength(W) && break
+
+        r = something(findnext(lhs, W, sW_idx), 0)
+        c += 1
+        c == count && break
+    end
+
+    # copy the rest
+    append!(sout, sW[sW_idx:end])
+    return freereduce!(out)
+end
+
+function replace(W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
+    {GW<:GWord, T <: GWord}
+    return replace!(one(W), W, lhs_rhs; count=count)
+end
+
+function replace(W::GW, subst_dict::Dict{T,T}) where {GW<:GWord, T<:GWord}
+    out = W
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]
-        i = findfirst(W, toreplace)
-        while i ≠ 0
-            modified = true
-            replace!(W,i,toreplace, replacement)
-            i = findnext(W, toreplace, i)
+        if length(toreplace) > length(out)
+            continue
         end
+        out = replace(out, toreplace=>replacement)
     end
-    return modified
-end
-
-function replace_all(W::T, subst_dict::Dict{T,T}) where {T<:GWord}
-   W = deepcopy(W)
-   replace_all!(W, subst_dict)
-   return W
+    return out
 end
 
 ###############################################################################
