@@ -13,6 +13,7 @@ import Base: deepcopy_internal
 using LinearAlgebra
 using Markdown
 
+export gens, FreeGroup, Aut, SAut
 
 include("types.jl")
 
@@ -87,6 +88,19 @@ function generate_balls(S::AbstractVector{T}, center::T=one(first(S));
     end
     isone(center) && return B, sizes
     return c.*B, sizes
+end
+
+@doc doc"""
+    image(A::GWord, homomorphism; kwargs...)
+Evaluate homomorphism `homomorphism` on a GWord `A`.
+`homomorphism` needs implement
+  > `hom(s; kwargs...)`,
+where `hom(;kwargs...)` evaluates the value at the identity element.
+"""
+function image(w::GWord, hom; kwargs...)
+    return reduce(*,
+        (hom(s; kwargs...) for s in syllables(w)),
+        init = hom(;kwargs...))
 end
 
 end # of module Groups

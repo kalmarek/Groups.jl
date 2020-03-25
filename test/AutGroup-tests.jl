@@ -9,7 +9,7 @@
       @test isa(f, Groups.GSymbol)
       @test isa(f, Groups.AutSymbol)
       @test isa(Groups.AutSymbol(perm"(4)"), Groups.AutSymbol)
-      @test isa(Groups.AutSymbol([2,3,4,1]), Groups.AutSymbol)
+      @test isa(Groups.AutSymbol(perm"(1,2,3,4)"), Groups.AutSymbol)
       @test isa(Groups.transvection_R(1,2), Groups.AutSymbol)
       @test isa(Groups.transvection_R(3,4), Groups.AutSymbol)
       @test isa(Groups.flip(3), Groups.AutSymbol)
@@ -205,48 +205,48 @@
       @test length(unique(B_2)) == 1777
    end
 
-   @testset "linear_repr tests" begin
-      N = 3
+   @testset "abelianization homomorphism" begin
+      N = 4
       G = AutGroup(FreeGroup(N))
       S = unique([gens(G); inv.(gens(G))])
       R = 3
 
-      @test Groups.linear_repr(one(G)) isa Matrix{Int}
-      @test Groups.linear_repr(one(G)) == Matrix{Int}(I, N, N)
+      @test Groups.abelianize(one(G)) isa Matrix{Int}
+      @test Groups.abelianize(one(G)) == Matrix{Int}(I, N, N)
 
       M = Matrix{Int}(I, N, N)
       M[1,2] = 1
-      ϱ₁₂ = G(Groups.transvection_R(1,2))
-      λ₁₂ = G(Groups.transvection_R(1,2))
+      ϱ₁₂ = G(Groups.ϱ(1,2))
+      λ₁₂ = G(Groups.λ(1,2))
 
-      @test Groups.linear_repr(ϱ₁₂) == M
-      @test Groups.linear_repr(λ₁₂) == M
+      @test Groups.abelianize(ϱ₁₂) == M
+      @test Groups.abelianize(λ₁₂) == M
 
       M[1,2] = -1
 
-      @test Groups.linear_repr(ϱ₁₂^-1) == M
-      @test Groups.linear_repr(λ₁₂^-1) == M
+      @test Groups.abelianize(ϱ₁₂^-1) == M
+      @test Groups.abelianize(λ₁₂^-1) == M
 
-      @test Groups.linear_repr(ϱ₁₂*λ₁₂^-1) == Matrix{Int}(I, N, N)
-      @test Groups.linear_repr(λ₁₂^-1*ϱ₁₂) == Matrix{Int}(I, N, N)
+      @test Groups.abelianize(ϱ₁₂*λ₁₂^-1) == Matrix{Int}(I, N, N)
+      @test Groups.abelianize(λ₁₂^-1*ϱ₁₂) == Matrix{Int}(I, N, N)
 
       M = Matrix{Int}(I, N, N)
       M[2,2] = -1
       ε₂ = G(Groups.flip(2))
 
-      @test Groups.linear_repr(ε₂) == M
-      @test Groups.linear_repr(ε₂^2) == Matrix{Int}(I, N, N)
+      @test Groups.abelianize(ε₂) == M
+      @test Groups.abelianize(ε₂^2) == Matrix{Int}(I, N, N)
 
-      M = [0 1 0; 0 0 1; 1 0 0]
+      M = [0 1 0 0; 0 0 0 1; 0 0 1 0; 1 0 0 0]
 
-      σ = G(Groups.AutSymbol(perm"(1,2,3)"))
-      @test Groups.linear_repr(σ) == M
-      @test Groups.linear_repr(σ^3) == Matrix{Int}(I, 3, 3)
-      @test Groups.linear_repr(σ)^3 == Matrix{Int}(I, 3, 3)
+      σ = G(Groups.AutSymbol(perm"(1,2,4)"))
+      @test Groups.abelianize(σ) == M
+      @test Groups.abelianize(σ^3) == Matrix{Int}(I, N, N)
+      @test Groups.abelianize(σ)^3 == Matrix{Int}(I, N, N)
 
       function test_homomorphism(S, r)
          for elts in Iterators.product([[g for g in S] for _ in 1:r]...)
-            prod(Groups.linear_repr.(elts)) == Groups.linear_repr(prod(elts)) || error("linear representaton test failed at $elts")
+            prod(Groups.abelianize.(elts)) == Groups.abelianize(prod(elts)) || error("linear representaton test failed at $elts")
          end
          return 0
       end

@@ -297,24 +297,28 @@ function reduce!(w::Automorphism)
     return W
 end
 
-function linear_repr(A::Automorphism{N}, hom=matrix_repr) where N
-    return reduce(*, linear_repr.(A.symbols, N, hom), init=hom(Identity(),N,1))
-end
+###############################################################################
+#
+#   Abelianization (natural Representation to GL(N,Z))
+#
 
-linear_repr(a::AutSymbol, n::Int, hom) = hom(a.fn, n, a.pow)
+abelianize(A::Automorphism{N}) where N = image(A, abelianize; n=N)
 
-function matrix_repr(a::Union{RTransvect, LTransvect}, n::Int, pow)
+# homomorphism definition
+abelianize(; n::Integer=1) = Matrix{Int}(I, n, n)
+abelianize(a::AutSymbol; n::Int=1) = abelianize(a.fn, n, a.pow)
+
+function abelianize(a::Union{RTransvect, LTransvect}, n::Int, pow)
     x = Matrix{Int}(I, n, n)
     x[a.i,a.j] = pow
     return x
 end
 
-function matrix_repr(a::FlipAut, n::Int, pow)
+function abelianize(a::FlipAut, n::Int, pow)
     x = Matrix{Int}(I, n, n)
-    x[a.i,a.i] = -1^pow
+    x[a.i,a.i] = -1
     return x
 end
 
-matrix_repr(a::PermAut, n::Int, pow) = Matrix{Int}(I, n, n)[(a.perm^pow).d, :]
-
-matrix_repr(a::Identity, n::Int, pow) = Matrix{Int}(I, n, n)
+abelianize(a::PermAut, n::Integer, pow) = Matrix{Int}(I, n, n)[(a.perm^pow).d, :]
+abelianize(a::Identity, n::Integer, pow) = abelianize(;n=n)
