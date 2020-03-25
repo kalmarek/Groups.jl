@@ -28,35 +28,29 @@ export FPGroupElem, FPGroup
 #
 #   Type and parent object methods
 #
-###############################################################################
 
-elem_type(::Type{FPGroup}) = FPGroupElem
-parent_type(::Type{FPGroupElem}) = FPGroup
+AbstractAlgebra.elem_type(::Type{FPGroup}) = FPGroupElem
+AbstractAlgebra.parent_type(::Type{FPGroupElem}) = FPGroup
 
 ###############################################################################
 #
 #   FPSymbol constructors
 #
-###############################################################################
 
 FPSymbol(s::Symbol) = FPSymbol(s, 1)
 FPSymbol(s::String) = FPSymbol(Symbol(s))
 FPSymbol(s::GSymbol) = FPSymbol(s.id, s.pow)
 
-convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.id, s.pow)
-
+FPGroup(n::Int, symbol::String="f") = FPGroup([Symbol(symbol,i) for i in 1:n])
+FPGroup(a::AbstractVector) = FPGroup([FPSymbol(i) for i in a])
 FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FreeGroupElem, FreeGroupElem}())
 
-FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
-
-FPGroup(n::Int, symbol::String="f") = FPGroup(["$symbol$i" for i in 1:n])
 FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 
 ###############################################################################
 #
 #   Parent object call overloads
 #
-###############################################################################
 
 function (G::FPGroup)(w::GWord)
    if isempty(w)
@@ -80,47 +74,22 @@ function (G::FPGroup)(w::GWord)
    return reduce!(w)
 end
 
-
-###############################################################################
-#
-#   Basic manipulation
-#
-###############################################################################
 (G::FPGroup)(s::GSymbol) = G(FPGroupElem(s))
 
 ###############################################################################
 #
 #   String I/O
 #
-###############################################################################
 
 function show(io::IO, G::FPGroup)
-   print(io, "FPgroup on $(length(G.gens)) generators ")
-   strrels = join(G.rels, ", ")
-   if length(strrels) > 300
-      print(io, "⟨ ", join(G.gens, ", "), " | $(length(G.rels)) relation(s) ⟩.")
-   else
-      print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
-   end
+    print(io, "FPgroup on $(length(G.gens)) generators ")
+    strrels = join(G.rels, ", ")
+    if length(strrels) > 200
+       print(io, "⟨ ", join(G.gens, ", "), " | $(length(G.rels)) relation(s) ⟩.")
+    else
+       print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
+    end
 end
-
-###############################################################################
-#
-#   Comparison
-#
-###############################################################################
-
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
-
-###############################################################################
-#
-#   Binary operations
-#
-###############################################################################
 
 function reduce!(W::FPGroupElem)
     reduced = false

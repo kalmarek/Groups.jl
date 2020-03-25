@@ -2,7 +2,6 @@
 #
 #   FreeSymbol/FreeGroupElem/FreeGroup definition
 #
-###############################################################################
 
 struct FreeSymbol <: GSymbol
    id::Symbol
@@ -14,7 +13,7 @@ FreeGroupElem = GroupWord{FreeSymbol}
 mutable struct FreeGroup <: AbstractFPGroup
    gens::Vector{FreeSymbol}
 
-   function FreeGroup(gens::Vector{T}) where {T<:GSymbol}
+   function FreeGroup(gens::AbstractVector{T}) where {T<:GSymbol}
       G = new(gens)
       G.gens = gens
       return G
@@ -27,72 +26,48 @@ export FreeGroupElem, FreeGroup
 #
 #   Type and parent object methods
 #
-###############################################################################
 
-elem_type(::Type{FreeGroup}) = FreeGroupElem
-
-parent_type(::Type{FreeGroupElem}) = FreeGroup
+AbstractAlgebra.elem_type(::Type{FreeGroup}) = FreeGroupElem
+AbstractAlgebra.parent_type(::Type{FreeGroupElem}) = FreeGroup
 
 ###############################################################################
 #
 #   FreeSymbol constructors
 #
-###############################################################################
 
 FreeSymbol(s::Symbol) = FreeSymbol(s,1)
-FreeSymbol(s::String) = FreeSymbol(Symbol(s))
+FreeSymbol(s::AbstractString) = FreeSymbol(Symbol(s))
+FreeSymbol(s::GSymbol) = FreeSymbol(s.id, s.pow)
 
 FreeGroup(n::Int, symbol::String="f") = FreeGroup([Symbol(symbol,i) for i in 1:n])
-
-FreeGroup(a::Vector) = FreeGroup(FreeSymbol.(a))
+FreeGroup(a::AbstractVector) = FreeGroup(FreeSymbol.(a))
 
 ###############################################################################
 #
 #   Parent object call overloads
 #
-###############################################################################
 
 function (G::FreeGroup)(w::GroupWord{FreeSymbol})
-   if length(syllables(w)) > 0
-      for s in w.symbols
-         i = findfirst(g -> g.id == s.id, G.gens)
-         i == 0 && throw(DomainError(
-            "Symbol $s does not belong to $G."))
-         s.pow % G.gens[i].pow == 0 || throw(DomainError(
-            "Symbol $s doesn't belong to $G."))
-      end
+   for s in syllables(w)
+      i = findfirst(g -> g.id == s.id, G.gens)
+      isnothing(i) && throw(DomainError(
+         "Symbol $s does not belong to $G."))
+      s.pow % G.gens[i].pow == 0 || throw(DomainError(
+         "Symbol $s doesn't belong to $G."))
    end
-   w.parent = G
-   return w
+   setparent!(w, G)
+   return reduce!(w)
 end
 
-(G::FreeGroup)(s::FreeSymbol) = G(FreeGroupElem(s))
-
-###############################################################################
-#
-#   Basic manipulation
-#
-###############################################################################
+(G::FreeGroup)(s::GSymbol) = G(FreeGroupElem(s))
+(G::FreeGroup)(v::AbstractVector{<:GSymbol}) = G(FreeGroupElem(FreeSymbol.(v)))
 
 ###############################################################################
 #
 #   String I/O
 #
-###############################################################################
 
 function show(io::IO, G::FreeGroup)
    print(io, "Free group on $(length(G.gens)) generators: ")
    join(io, G.gens, ", ")
 end
-
-###############################################################################
-#
-#   Comparison
-#
-###############################################################################
-
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
