@@ -270,14 +270,32 @@ for (mul, f) in ((:rmul!, :push!), (:lmul!, :pushfirst!))
     end
 end
 
-    end
+function rmul!(out::T, x::T, y::T) where T<: GWord
+    if out === x
+        out = deepcopy(out)
+        return freereduce!(append!(out, y))
+    elseif out === y
+        out = deepcopy(out)
+        return freereduce!(prepend!(out, x))
+    else
+        slenx = syllablelength(x)
+        sleny = syllablelength(y)
+        resize!(syllables(out), slenx+sleny)
+        syllables(out)[1:slenx] .= syllables(x)
+        syllables(out)[slenx+1:slenx+sleny] .= syllables(y)
+        return freereduce!(out)
     end
 end
 
+lmul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, y, x)
 
-(*)(W::GWord, Z::GWord) = r_multiply(W, Z.symbols)
-(*)(W::GWord, s::GSymbol) = r_multiply(W, [s])
-(*)(s::GSymbol, W::GWord) = l_multiply(W, [s])
+function AbstractAlgebra.mul!(out::T, x::T, y::T) where T <: GWord
+    return rmul!(out, x, y)
+end
+
+(*)(W::GW, Z::GW) where GW <: GWord = rmul!(deepcopy(W), W, Z)
+(*)(W::GWord, s::GSymbol) = rmul!(deepcopy(W), W, s)
+(*)(s::GSymbol, W::GWord) = lmul!(deepcopy(W), W, s)
 
 function power_by_squaring(W::GWord, p::Integer)
     if p < 0
@@ -293,18 +311,19 @@ function power_by_squaring(W::GWord, p::Integer)
     t = trailing_zeros(p) + 1
     p >>= t
     while (t -= 1) > 0
-        r_multiply!(W, W.symbols)
+        append!(W, W)
     end
     Z = deepcopy(W)
     while p > 0
         t = trailing_zeros(p) + 1
         p >>= t
         while (t -= 1) >= 0
-            r_multiply!(W, W.symbols)
+            append!(W, W)
         end
-        r_multiply!(Z, W.symbols)
+        append!(Z, W)
     end
-    return Z
+
+    return freereduce!(Z)
 end
 
 (^)(x::GWord, n::Integer) = power_by_squaring(x,n)

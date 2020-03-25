@@ -122,10 +122,6 @@ end
 #
 ###############################################################################
 
-(*)(W::FPGroupElem, Z::FPGroupElem) = r_multiply(W, Z.symbols)
-(*)(W::FPGroupElem, s::FPSymbol) = r_multiply(W, [s])
-(*)(s::FPSymbol, W::FPGroupElem) = l_multiply(W, [s])
-
 function reduce!(W::FPGroupElem)
     reduced = false
     while !reduced
