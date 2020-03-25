@@ -14,25 +14,9 @@ using LinearAlgebra
 using Markdown
 
 
-Base.one(G::Generic.PermGroup) = Generic.Perm(G.n)
-Base.one(r::NCRingElem) = one(parent(r))
-
-###############################################################################
-#
-#   ParentType / ObjectType definition
-#
-
 include("types.jl")
 include("gsymbols.jl")
-
-function Base.one(G::Gr) where Gr <: AbstractFPGroup
-    El = elem_type(G)
-    id = El(eltype(El)[])
-    id.parent = G
-    return id
-end
-
-elem_type(G::Gr) where Gr <:AbstractFPGroup = elem_type(Gr) # fallback definition
+include("fallbacks.jl")
 
 @doc doc"""
 
