@@ -53,25 +53,20 @@ FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 #
 
 function (G::FPGroup)(w::GWord)
-   if isempty(w)
-      return one(G)
-   end
+    if isempty(w)
+        return one(G)
+    end
 
-   if eltype(w.symbols) == FreeSymbol
-      w = FPGroupElem(FPSymbol.(w.symbols))
-   end
+    @boundscheck for s in syllables(w)
+        i = findfirst(g -> g.id == s.id, G.gens)
+        i == 0 && throw(DomainError("Symbol $s does not belong to $G."))
+        s.pow % G.gens[i].pow != 0 && throw(
+            DomainError("Symbol $s doesn't belong to $G."))
+    end
 
-   if eltype(w.symbols) == FPSymbol
-      for s in w.symbols
-         i = findfirst(g -> g.id == s.id, G.gens)
-         i == 0 && throw(DomainError(
-            "Symbol $s does not belong to $G."))
-         s.pow % G.gens[i].pow == 0 || throw(DomainError(
-         "Symbol $s doesn't belong to $G."))
-      end
-   end
-   w.parent = G
-   return reduce!(w)
+    w = FPGroupElem(FPSymbol.(syllables(w)))
+    setparent!(w, G)
+    return reduce!(w)
 end
 
 (G::FPGroup)(s::GSymbol) = G(FPGroupElem(s))
