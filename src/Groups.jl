@@ -22,7 +22,8 @@ Base.one(r::NCRingElem) = one(parent(r))
 #   ParentType / ObjectType definition
 #
 
-abstract type AbstractFPGroup <: Group end
+include("types.jl")
+include("gsymbols.jl")
 
 function Base.one(G::Gr) where Gr <: AbstractFPGroup
     El = elem_type(G)
@@ -34,25 +35,7 @@ end
 elem_type(G::Gr) where Gr <:AbstractFPGroup = elem_type(Gr) # fallback definition
 
 @doc doc"""
-    ::GSymbol
-> Abstract type which all group symbols of AbstractFPGroups should subtype. Each
-> concrete subtype should implement fields:
-> * `id` which is the `Symbol` representation/identification of a symbol
-> * `pow` which is the (multiplicative) exponent of a symbol.
 
-"""
-abstract type GSymbol end
-
-Base.iterate(s::GS, i=1) where GS<:GSymbol = i <= abs(s.pow) ? (GS(s.id, sign(s.pow)), i+1) : nothing
-Base.length(s::GSymbol) = abs(s.pow)
-Base.size(s::GSymbol) = (length(s), )
-Base.eltype(s::GS) where GS<:GSymbol = GS
-Base.isone(s::GSymbol) = iszero(s.pow)
-
-change_pow(s::S, n::Integer) where S<:GSymbol = S(s.id, n)
-Base.inv(s::GSymbol) = change_pow(s, -s.pow)
-
-hash(s::S, h::UInt) where S<:GSymbol = hash(s.id, hash(s.pow, hash(S, h)))
 
 abstract type GWord{T<:GSymbol} <: GroupElem end
 
@@ -233,13 +216,6 @@ function (==)(W::T, Z::T) where T <: GWord
     hash(W) != hash(Z) && return false
     return syllables(W) == syllables(Z)
 end
-
-function (==)(s::GSymbol, t::GSymbol)
-    isone(s) && isone(t) && return true
-    s.pow == t.pow && s.id == t.id && return true
-    return false
-end
-
 ###############################################################################
 #
 #   Binary operators
