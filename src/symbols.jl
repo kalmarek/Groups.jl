@@ -16,3 +16,5 @@ function (==)(s::GSymbol, t::GSymbol)
     s.pow == t.pow && s.id == t.id && return true
     return false
 end
+
+Base.convert(::Type{GS}, s::GSymbol) where GS<:GSymbol = GS(s.id, s.pow)

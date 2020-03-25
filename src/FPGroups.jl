@@ -12,14 +12,14 @@ end
 FPGroupElem = GroupWord{FPSymbol}
 
 mutable struct FPGroup <: AbstractFPGroup
-   gens::Vector{FPSymbol}
-   rels::Dict{FPGroupElem, FPGroupElem}
+    gens::Vector{FPSymbol}
+    rels::Dict{FreeGroupElem, FreeGroupElem}
 
-   function FPGroup(gens::Vector{T}, rels::Dict{FPGroupElem, FPGroupElem}) where {T<:GSymbol}
-      G = new(gens)
-      G.rels = Dict(G(k) => G(v) for (k,v) in rels)
-      return G
-   end
+    function FPGroup(gens::Vector{T}, rels::Dict{FreeGroupElem, FreeGroupElem}) where {T<:GSymbol}
+        G = new(gens)
+        G.rels = Dict(G(k) => G(v) for (k,v) in rels)
+        return G
+    end
 end
 
 export FPGroupElem, FPGroup
@@ -45,7 +45,7 @@ FPSymbol(s::GSymbol) = FPSymbol(s.id, s.pow)
 
 convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.id, s.pow)
 
-FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FPGroupElem, FPGroupElem}())
+FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FreeGroupElem, FreeGroupElem}())
 
 FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
 
@@ -80,13 +80,13 @@ function (G::FPGroup)(w::GWord)
    return reduce!(w)
 end
 
-(G::FPGroup)(s::FPSymbol) = G(FPGroupElem(s))
 
 ###############################################################################
 #
 #   Basic manipulation
 #
 ###############################################################################
+(G::FPGroup)(s::GSymbol) = G(FPGroupElem(s))
 
 ###############################################################################
 #
@@ -137,31 +137,35 @@ end
 #
 ###############################################################################
 
-function add_rels!(G::FPGroup, newrels::Dict{FPGroupElem,FPGroupElem})
-   for w in keys(newrels)
-      if !(w in keys(G.rels))
-         G.rels[w] = G(newrels[w])
-      end
-   end
+freepreimage(G::FPGroup) = parent(first(keys(G.rels)))
+freepreimage(g::FPGroupElem) = freepreimage(parent(g))(syllables(g))
+
+function add_rels!(G::FPGroup, newrels::Dict{FreeGroupElem,FreeGroupElem})
+    for w in keys(newrels)
+        haskey(G.rels, w) && continue
+        G.rels[w] = newrels[w]
+    end
+    return G
 end
 
 function Base.:/(G::FPGroup, newrels::Vector{FPGroupElem})
-   for r in newrels
-      parent(r) == G || throw(DomainError(
-      "Can not form quotient group: $r is not an element of $G"))
-   end
-   H = deepcopy(G)
-   newrels = Dict(H(r) => one(H) for r in newrels)
-   add_rels!(H, newrels)
-   return H
+    for r in newrels
+        parent(r) == G || throw(DomainError(
+        "Can not form quotient group: $r is not an element of $G"))
+    end
+    H = deepcopy(G)
+    F = freepreimage(H)
+    newrels = Dict(freepreimage(r) => one(F) for r in newrels)
+    add_rels!(H, newrels)
+    return H
 end
 
-function Base.:/(G::FreeGroup, rels::Vector{FreeGroupElem})
-   for r in rels
-      parent(r) == G || throw(DomainError(
-         "Can not form quotient group: $r is not an element of $G"))
-   end
-   H = FPGroup(deepcopy(G))
-   H.rels = Dict(H(rel) => one(H) for rel in unique(rels))
-   return H
+function Base.:/(F::FreeGroup, rels::Vector{FreeGroupElem})
+    for r in rels
+        parent(r) == F || throw(DomainError(
+         "Can not form quotient group: $r is not an element of $F"))
+    end
+    G = FPGroup(FPSymbol.(F.gens))
+    G.rels = Dict(rel => one(F) for rel in unique(rels))
+    return G
 end
