@@ -18,9 +18,8 @@ include("types.jl")
 include("gsymbols.jl")
 include("fallbacks.jl")
 include("words.jl")
-
-@doc doc"""
-"""
+include("hashing.jl")
+include("freereduce.jl")
 
 include("FreeGroup.jl")
 include("FPGroups.jl")
@@ -29,83 +28,6 @@ include("AutGroup.jl")
 include("DirectPower.jl")
 include("WreathProducts.jl")
 
-###############################################################################
-#
-#   Type and parent object methods
-#
-###############################################################################
-
-parent(w::GWord{T}) where {T<:GSymbol} = w.parent
-
-###############################################################################
-#
-#   ParentType / ObjectType constructors
-#
-###############################################################################
-
-###############################################################################
-#
-#   Basic manipulation
-#
-###############################################################################
-
-function hash_internal(W::GWord)
-    reduce!(W)
-    return hash(syllables(W), hash(typeof(W), hash(parent(W))))
-end
-
-function hash(W::GWord, h::UInt)
-    if ismodified(W)
-        W.savedhash = hash_internal(W)
-        unsetmodified!(W)
-    end
-    return xor(W.savedhash, h)
-end
-
-# WARNING: Due to specialised (constant) hash function of GWords this one is actually necessary!
-function deepcopy_internal(W::T, dict::IdDict) where {T<:GWord}
-    G = parent(W)
-    return G(T(deepcopy(syllables(W))))
-end
-
-function freereduce!(::Type{Bool}, w::GWord)
-    reduced = true
-    for i in 1:syllablelength(w)-1
-        s, ns = syllables(w)[i], syllables(w)[i+1]
-        if isone(s)
-            continue
-        elseif s.id == ns.id
-            reduced = false
-            setmodified!(w)
-            p1 = s.pow
-            p2 = ns.pow
-
-            syllables(w)[i+1] = change_pow(s, p1 + p2)
-            syllables(w)[i] = change_pow(s, 0)
-        end
-    end
-    filter!(!isone, syllables(w))
-    return reduced
-end
-
-function freereduce!(w::GWord)
-    reduced = false
-    while !reduced
-        reduced = freereduce!(Bool, w)
-    end
-    return w
-end
-
-reduce!(w::GWord) = freereduce!(w)
-
-@doc doc"""
-    reduce(w::GWord)
-> performs reduction/simplification of a group element (word in generators).
-> The default reduction is the free group reduction
-> More specific procedures should be dispatched on `GWord`s type parameter.
-
-"""
-reduce(w::GWord) = reduce!(deepcopy(w))
 
 @doc doc"""
     gens(G::AbstractFPGroups)
@@ -141,17 +63,6 @@ function show(io::IO, s::T) where {T<:GSymbol}
    end
 end
 
-###############################################################################
-#
-#   Comparison
-#
-###############################################################################
-
-function (==)(W::T, Z::T) where T <: GWord
-    parent(W) != parent(Z) && return false
-    hash(W) != hash(Z) && return false
-    return syllables(W) == syllables(Z)
-end
 ###############################################################################
 #
 #   Binary operators
