@@ -294,7 +294,7 @@ function reduce!(w::Automorphism)
     while !reduced
         reduced = simplifyperms!(Bool, w) && freereduce!(Bool, w)
     end
-    return W
+    return w
 end
 
 ###############################################################################

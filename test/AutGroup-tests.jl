@@ -182,6 +182,15 @@
 
       g_im = g(Groups.domain(A))
       @test length.(g_im) == (1,1,1,1)
+
+      g = A(Groups.σ(perm"(1,2)(4)"))
+      h = A(Groups.σ(perm"(2,3,4)"))
+      @test g*h isa Groups.Automorphism{4}
+      f = g*h
+      Groups
+      @test Groups.syllablelength(f) == 2
+      @test Groups.reduce!(f) isa Groups.Automorphism{4}
+      @test Groups.syllablelength(f) == 1
    end
 
    @testset "specific Aut(F4) tests" begin
