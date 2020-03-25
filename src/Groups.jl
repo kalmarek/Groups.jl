@@ -17,53 +17,10 @@ using Markdown
 include("types.jl")
 include("gsymbols.jl")
 include("fallbacks.jl")
+include("words.jl")
 
 @doc doc"""
-
-
-abstract type GWord{T<:GSymbol} <: GroupElem end
-
-# fallback definitions
-Base.eltype(w::GW) where GW<:GWord = eltype(GW)
-@doc doc"""
-    W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
-> Basic representation of element of a finitely presented group. `W.symbols`
-> fieldname contains particular group symbols which multiplied constitute a
-> group element, i.e. a word in generators.
-> As reduction (inside group) of such word may be time consuming we provide
-> `savedhash` and `modified` fields as well:
-> hash (used e.g. in the `unique` function) is calculated by reducing the word,
-> setting `modified` flag to `false` and computing the hash which is stored in
-> `savedhash` field.
-> whenever word `W` is changed `W.modified` is set to `false`;
-> Future comparisons don't perform reduction (and use `savedhash`) as long as
-> `modified` flag remains `false`.
-
 """
-mutable struct GroupWord{T} <: GWord{T}
-    symbols::Vector{T}
-    modified::Bool
-    savedhash::UInt
-    parent::Group
-
-    function GroupWord{T}(symbols::Vector{T}) where {T}
-       return new{T}(symbols, true, zero(UInt))
-    end
-end
-
-syllablelength(w::GWord) = length(w.symbols)
-syllables(w::GWord) = w.symbols
-ismodified(w::GWord) = w.modified
-setmodified!(w::GWord) = (w.modified = true; w)
-unsetmodified!(w::GWord) = (w.modified = false; w)
-Base.one(w::GWord) = one(parent(w))
-
-
-###############################################################################
-#
-#   Includes
-#
-###############################################################################
 
 include("FreeGroup.jl")
 include("FPGroups.jl")
@@ -85,11 +42,6 @@ parent(w::GWord{T}) where {T<:GSymbol} = w.parent
 #   ParentType / ObjectType constructors
 #
 ###############################################################################
-
-GroupWord(s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
-GroupWord{T}(s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
-GroupWord(w::GroupWord{T}) where {T<:GSymbol} = w
-convert(::Type{GroupWord{T}}, s::T) where {T<:GSymbol} = GroupWord{T}(T[s])
 
 ###############################################################################
 #
