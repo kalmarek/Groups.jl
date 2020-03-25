@@ -1,6 +1,6 @@
 @testset "Automorphisms" begin
 
-   G = PermutationGroup(Int8(4))
+   G = SymmetricGroup(Int8(4))
 
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol(:a)

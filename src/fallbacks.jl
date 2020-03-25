@@ -1,6 +1,5 @@
 # workarounds
-Base.one(G::Generic.PermGroup) = Generic.Perm(G.n)
-Base.one(r::NCRingElem) = one(parent(r))
+Base.one(G::Generic.SymmetricGroup) = Generic.Perm(G.n)
 
 # fallback definitions
 # note: the user should implement those on type, when possible

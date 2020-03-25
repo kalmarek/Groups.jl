@@ -170,7 +170,7 @@ function AutGroup(G::FreeGroup; special=false)
 
    if !special
       flips = [flip(i) for i in 1:n]
-      syms = [AutSymbol(p) for p in PermutationGroup(Int8(n))][2:end]
+      syms = [AutSymbol(p) for p in SymmetricGroup(Int8(n))][2:end]
 
       append!(S, [flips; syms])
    end
