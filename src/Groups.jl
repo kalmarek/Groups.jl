@@ -348,10 +348,31 @@ end
 #
 #   Replacement of symbols / sub-words
 #
-###############################################################################
 
 issubsymbol(s::GSymbol, t::GSymbol) =
     s.id == t.id && (0 ≤ s.pow ≤ t.pow || 0 ≥ s.pow ≥ t.pow)
+
+function issubsymbol(s::FreeSymbol, w::GWord, sindex::Integer)
+    @boundscheck 1 ≤ sindex ≤ syllablelength(w) || throw(BoundsError(w, sindex))
+    return issubsymbol(s, syllables(w)[sindex])
+end
+
+function issubword(z::GWord, w::GWord, sindex::Integer)
+    isempty(z) && return true
+    @boundscheck 1 ≤ sindex ≤ syllablelength(w) || throw(BoundsError(w, sindex))
+    n = syllablelength(z)
+    n == 1 && return issubsymbol(first(syllables(z)), syllables(w)[sindex])
+
+    lastindex = sindex + n - 1
+    lastindex > syllablelength(w) && return false
+
+    issubsymbol(first(z), syllables(w)[sindex]) || return false
+    issubsymbol(syllables(z)[end], syllables(w)[lastindex]) || return false
+    for (zidx, widx) in zip(2:n-1, sindex+1:lastindex-1)
+        syllables(z)[zidx] == syllables(w)[widx] || return false
+    end
+    return true
+end
 
 """doc
 Find the first linear index k>=i such that Z < W.symbols[k:k+length(Z)-1]
