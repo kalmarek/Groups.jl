@@ -55,23 +55,18 @@ end
 
    @testset "internal arithmetic" begin
 
-      @test Vector{Groups.FreeGroupElem}([s,t]) == [Groups.GroupWord(s), Groups.GroupWord(t)]
       @test (s*s).symbols == (s^2).symbols
       @test hash([t^1,s^1]) == hash([t^2*inv(t),s*inv(s)*s])
 
       t_symb = Groups.FreeSymbol(:t)
       tt = deepcopy(t)
-      @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
-         "(id)"
+      @test string(Groups.rmul!(tt, tt, inv(t_symb))) == "(id)"
       tt = deepcopy(t)
-      @test string(Groups.r_multiply!(tt,[inv(t_symb)]; reduced=false)) ==
-         "t*t^-1"
+      @test string(append!(tt, [inv(t_symb)])) == "t*t^-1"
       tt = deepcopy(t)
-      @test string(Groups.l_multiply!(tt,[inv(t_symb)]; reduced=true)) ==
-         "(id)"
+      @test string(Groups.lmul!(tt, tt, inv(t_symb))) == "(id)"
       tt = deepcopy(t)
-      @test string(Groups.l_multiply!(tt,[inv(t_symb)]; reduced=false)) ==
-         "t^-1*t"
+      @test string(prepend!(tt, [inv(t_symb)])) == "t^-1*t"
    end
 
    @testset "reductions" begin
@@ -79,7 +74,7 @@ end
       @test length((one(G)*one(G)).symbols) == 0
       @test one(G) == one(G)*one(G)
       w = deepcopy(s)
-      push!(w.symbols, (s^-1).symbols[1])
+      push!(Groups.syllables(w), (s^-1).symbols[1])
       @test Groups.reduce!(w) == one(parent(w))
       o = (t*s)^3
       @test o == t*s*t*s*t*s
@@ -116,23 +111,23 @@ end
       @test Groups.issubsymbol(inv(b), Groups.change_pow(b,-2)) == true
 
       c = s*t*s^-1*t^-1
-      @test findfirst(c, s^-1*t^-1) == 3
-      @test findnext(c*s^-1, s^-1*t^-1,3) == 3
-      @test findnext(c*s^-1*t^-1, s^-1*t^-1,4) == 5
-      @test findfirst(c*t, c) == 0
+      @test findfirst(s^-1*t^-1, c) == 3
+      @test findnext(s^-1*t^-1, c*s^-1,3) == 3
+      @test findnext(s^-1*t^-1, c*s^-1*t^-1,4) == 5
+      @test findfirst(c, c*t) === nothing
       w = s*t*s^-1
       subst = Dict{FreeGroupElem, FreeGroupElem}(w => s^1, s*t^-1 => t^4)
-      @test Groups.replace(c, 1, s*t, one(G)) == s^-1*t^-1
-      @test Groups.replace(c, 1, w, subst[w]) == s*t^-1
-      @test Groups.replace(s*c*t^-1, 1, w, subst[w]) == s^2*t^-2
-      @test Groups.replace(t*c*t, 2, w, subst[w]) == t*s
-      @test Groups.replace_all(s*c*s*c*s, subst) == s*t^4*s*t^4*s
+      @test Groups.replace(c, s*t=>one(G)) == s^-1*t^-1
+      @test Groups.replace(c, w=>subst[w]) == s*t^-1
+      @test Groups.replace(s*c*t^-1, w=>subst[w]) == s^2*t^-2
+      @test Groups.replace(t*c*t, w=>subst[w]) == t*s
+      @test Groups.replace(s*c*s*c*s, subst) == s*t^4*s*t^4*s
 
       G = FreeGroup(["x", "y"])
       x,y = gens(G)
 
-      @test Groups.replace(x*y^9, 2, y^2, y) == x*y^8
-      @test Groups.replace(x^3, 1, x^2, y) == x*y
-      @test Groups.replace(y*x^3*y, 2, x^2, y) == y*x*y^2
+      @test Groups.replace(x*y^9, y^2=>y) == x*y^5
+      @test Groups.replace(x^3, x^2=>y) == x*y
+      @test Groups.replace(y*x^3*y, x^2=>y) == y*x*y^2
    end
 end

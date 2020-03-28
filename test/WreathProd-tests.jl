@@ -1,6 +1,6 @@
 @testset "WreathProducts" begin
-   S_3 = PermutationGroup(3)
-   S_2 = PermutationGroup(2)
+   S_3 = SymmetricGroup(3)
+   S_2 = SymmetricGroup(2)
    b = perm"(1,2,3)"
    a = perm"(1,2)"
 
@@ -8,7 +8,7 @@
       @test Groups.WreathProduct(S_2, S_3) isa AbstractAlgebra.Group
       B3 = Groups.WreathProduct(S_2, S_3)
       @test B3 isa Groups.WreathProduct
-      @test B3 isa WreathProduct{3, Generic.PermGroup{Int}, Generic.PermGroup{Int}}
+      @test B3 isa WreathProduct{3, Generic.SymmetricGroup{Int}, Generic.SymmetricGroup{Int}}
 
       aa = Groups.DirectPowerGroupElem((a^0 ,a, a^2))
 
@@ -37,7 +37,7 @@
 
       @test elem_type(B3) == Groups.WreathProductElem{3, Generic.Perm{Int}, Generic.Perm{Int}}
 
-      @test parent_type(typeof(one(B3))) == Groups.WreathProduct{3, parent_type(typeof(one(B3.N.group))), Generic.PermGroup{Int}}
+      @test parent_type(typeof(one(B3))) == Groups.WreathProduct{3, parent_type(typeof(one(B3.N.group))), Generic.SymmetricGroup{Int}}
 
       @test parent(one(B3)) == Groups.WreathProduct(S_2,S_3)
       @test parent(one(B3)) == B3
@@ -64,7 +64,7 @@
    end
 
    @testset "Group arithmetic" begin
-      B4 = Groups.WreathProduct(PermutationGroup(3), PermutationGroup(4))
+      B4 = Groups.WreathProduct(SymmetricGroup(3), SymmetricGroup(4))
 
       id, a, b = perm"(3)", perm"(1,2)(3)", perm"(1,2,3)"
 
@@ -84,7 +84,7 @@
    end
 
    @testset "Iteration" begin
-      Wr = WreathProduct(PermutationGroup(2),PermutationGroup(4))
+      Wr = WreathProduct(SymmetricGroup(2),SymmetricGroup(4))
 
       elts = collect(Wr)
       @test elts isa Vector{Groups.WreathProductElem{4, Generic.Perm{Int}, Generic.Perm{Int}}}

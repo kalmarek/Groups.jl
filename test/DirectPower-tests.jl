@@ -3,11 +3,11 @@
    ×(a,b) = Groups.DirectPower(a,b)
 
    @testset "Constructors" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
 
       @test Groups.DirectPowerGroup(G,2) isa AbstractAlgebra.Group
       @test G×G isa AbstractAlgebra.Group
-      @test Groups.DirectPowerGroup(G,2) isa Groups.DirectPowerGroup{2, Generic.PermGroup{Int64}}
+      @test Groups.DirectPowerGroup(G,2) isa Groups.DirectPowerGroup{2, Generic.SymmetricGroup{Int64}}
 
       @test (G×G)×G == DirectPowerGroup(G, 3)
       @test (G×G)×G == (G×G)×G
@@ -42,7 +42,7 @@
    end
 
    @testset "Basic arithmetic" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
       GG = G×G
       i = perm"(1,3)"
       g = perm"(1,2,3)"
@@ -65,7 +65,7 @@
    end
 
    @testset "elem/parent_types" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
       g = perm"(1,2,3)"
 
       @test elem_type(G×G) == DirectPowerGroupElem{2, elem_type(G)}
@@ -75,7 +75,7 @@
    end
 
    @testset "Misc" begin
-      G = PermutationGroup(3)
+      G = SymmetricGroup(3)
       GG = Groups.DirectPowerGroup(G,3)
       @test order(GG) == 216
 

@@ -12,14 +12,14 @@ end
 FPGroupElem = GroupWord{FPSymbol}
 
 mutable struct FPGroup <: AbstractFPGroup
-   gens::Vector{FPSymbol}
-   rels::Dict{FPGroupElem, FPGroupElem}
+    gens::Vector{FPSymbol}
+    rels::Dict{FreeGroupElem, FreeGroupElem}
 
-   function FPGroup(gens::Vector{T}, rels::Dict{FPGroupElem, FPGroupElem}) where {T<:GSymbol}
-      G = new(gens)
-      G.rels = Dict(G(k) => G(v) for (k,v) in rels)
-      return G
-   end
+    function FPGroup(gens::Vector{T}, rels::Dict{FreeGroupElem, FreeGroupElem}) where {T<:GSymbol}
+        G = new(gens)
+        G.rels = Dict(G(k) => G(v) for (k,v) in rels)
+        return G
+    end
 end
 
 export FPGroupElem, FPGroup
@@ -28,131 +28,70 @@ export FPGroupElem, FPGroup
 #
 #   Type and parent object methods
 #
-###############################################################################
 
-parent_type(::Type{FPGroupElem}) = FPGroup
-
-elem_type(::FPGroup) = FPGroupElem
+AbstractAlgebra.elem_type(::Type{FPGroup}) = FPGroupElem
+AbstractAlgebra.parent_type(::Type{FPGroupElem}) = FPGroup
 
 ###############################################################################
 #
 #   FPSymbol constructors
 #
-###############################################################################
 
 FPSymbol(s::Symbol) = FPSymbol(s, 1)
 FPSymbol(s::String) = FPSymbol(Symbol(s))
 FPSymbol(s::GSymbol) = FPSymbol(s.id, s.pow)
 
-convert(::Type{FPSymbol}, s::FreeSymbol) = FPSymbol(s.id, s.pow)
+FPGroup(n::Int, symbol::String="f") = FPGroup([Symbol(symbol,i) for i in 1:n])
+FPGroup(a::AbstractVector) = FPGroup([FPSymbol(i) for i in a])
+FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FreeGroupElem, FreeGroupElem}())
 
-FPGroup(gens::Vector{FPSymbol}) = FPGroup(gens, Dict{FPGroupElem, FPGroupElem}())
-
-FPGroup(a::Vector{String}) = FPGroup([FPSymbol(i) for i in a])
-
-FPGroup(n::Int, symbol::String="f") = FPGroup(["$symbol$i" for i in 1:n])
 FPGroup(H::FreeGroup) = FPGroup([FPSymbol(s) for s in H.gens])
 
 ###############################################################################
 #
 #   Parent object call overloads
 #
-###############################################################################
-
-function Base.one(G::FPGroup)
-   id = FPGroupElem(FPSymbol[])
-   id.parent = G
-   return id
-end
 
 function (G::FPGroup)(w::GWord)
-   if length(w) == 0
-      return one(G)
-   end
+    if isempty(w)
+        return one(G)
+    end
 
-   if eltype(w.symbols) == FreeSymbol
-      w = FPGroupElem(FPSymbol.(w.symbols))
-   end
+    @boundscheck for s in syllables(w)
+        i = findfirst(g -> g.id == s.id, G.gens)
+        i == 0 && throw(DomainError("Symbol $s does not belong to $G."))
+        s.pow % G.gens[i].pow != 0 && throw(
+            DomainError("Symbol $s doesn't belong to $G."))
+    end
 
-   if eltype(w.symbols) == FPSymbol
-      for s in w.symbols
-         i = findfirst(g -> g.id == s.id, G.gens)
-         i == 0 && throw(DomainError(
-            "Symbol $s does not belong to $G."))
-         s.pow % G.gens[i].pow == 0 || throw(DomainError(
-         "Symbol $s doesn't belong to $G."))
-      end
-   end
-   w.parent = G
-   return reduce!(w)
+    w = FPGroupElem(FPSymbol.(syllables(w)))
+    setparent!(w, G)
+    return reduce!(w)
 end
 
-(G::FPGroup)(s::FPSymbol) = G(FPGroupElem(s))
-
-###############################################################################
-#
-#   Basic manipulation
-#
-###############################################################################
-
-hash(s::FPSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(FPSymbol, h)))
-
-change_pow(s::FPSymbol, n::Int) = FPSymbol(s.id, n)
-
-length(s::FPSymbol) = abs(s.pow)
+(G::FPGroup)(s::GSymbol) = G(FPGroupElem(s))
 
 ###############################################################################
 #
 #   String I/O
 #
-###############################################################################
 
 function show(io::IO, G::FPGroup)
-   print(io, "FPgroup on $(length(G.gens)) generators ")
-   strrels = join(G.rels, ", ")
-   if length(strrels) > 300
-      print(io, "⟨ ", join(G.gens, ", "), " | $(length(G.rels)) relation(s) ⟩.")
-   else
-      print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
-   end
+    print(io, "FPgroup on $(length(G.gens)) generators ")
+    strrels = join(G.rels, ", ")
+    if length(strrels) > 200
+       print(io, "⟨ ", join(G.gens, ", "), " | $(length(G.rels)) relation(s) ⟩.")
+    else
+       print(io, "⟨ ", join(G.gens, ", "), " | ", join(G.rels, ", "), " ⟩.")
+    end
 end
 
-###############################################################################
-#
-#   Comparison
-#
-###############################################################################
-
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
-
-inv(s::FPSymbol) = change_pow(s, -s.pow)
-
-###############################################################################
-#
-#   Binary operations
-#
-###############################################################################
-
-(*)(W::FPGroupElem, Z::FPGroupElem) = r_multiply(W, Z.symbols)
-(*)(W::FPGroupElem, s::FPSymbol) = r_multiply(W, [s])
-(*)(s::FPSymbol, W::FPGroupElem) = l_multiply(W, [s])
-
 function reduce!(W::FPGroupElem)
-    if length(W) < 2
-        deleteat!(W.symbols, findall(x -> x.pow == 0, W.symbols))
-    else
-        reduced = false
-        while !reduced
-            reduced = freereduce!(W) || replace_all!(W, parent(W).rels)
-        end
+    reduced = false
+    while !reduced
+        W = replace(W, parent(W).rels)
+        reduced = freereduce!(Bool, W)
     end
-
-    W.savedhash = hash(W.symbols, hash(typeof(W)))
-    W.modified = false
     return W
 end
 
@@ -162,31 +101,35 @@ end
 #
 ###############################################################################
 
-function add_rels!(G::FPGroup, newrels::Dict{FPGroupElem,FPGroupElem})
-   for w in keys(newrels)
-      if !(w in keys(G.rels))
-         G.rels[w] = G(newrels[w])
-      end
-   end
+freepreimage(G::FPGroup) = parent(first(keys(G.rels)))
+freepreimage(g::FPGroupElem) = freepreimage(parent(g))(syllables(g))
+
+function add_rels!(G::FPGroup, newrels::Dict{FreeGroupElem,FreeGroupElem})
+    for w in keys(newrels)
+        haskey(G.rels, w) && continue
+        G.rels[w] = newrels[w]
+    end
+    return G
 end
 
 function Base.:/(G::FPGroup, newrels::Vector{FPGroupElem})
-   for r in newrels
-      parent(r) == G || throw(DomainError(
-      "Can not form quotient group: $r is not an element of $G"))
-   end
-   H = deepcopy(G)
-   newrels = Dict(H(r) => one(H) for r in newrels)
-   add_rels!(H, newrels)
-   return H
+    for r in newrels
+        parent(r) == G || throw(DomainError(
+        "Can not form quotient group: $r is not an element of $G"))
+    end
+    H = deepcopy(G)
+    F = freepreimage(H)
+    newrels = Dict(freepreimage(r) => one(F) for r in newrels)
+    add_rels!(H, newrels)
+    return H
 end
 
-function Base.:/(G::FreeGroup, rels::Vector{FreeGroupElem})
-   for r in rels
-      parent(r) == G || throw(DomainError(
-         "Can not form quotient group: $r is not an element of $G"))
-   end
-   H = FPGroup(deepcopy(G))
-   H.rels = Dict(H(rel) => one(H) for rel in unique(rels))
-   return H
+function Base.:/(F::FreeGroup, rels::Vector{FreeGroupElem})
+    for r in rels
+        parent(r) == F || throw(DomainError(
+         "Can not form quotient group: $r is not an element of $F"))
+    end
+    G = FPGroup(FPSymbol.(F.gens))
+    G.rels = Dict(rel => one(F) for rel in unique(rels))
+    return G
 end

@@ -1,5 +1,7 @@
 export WreathProduct, WreathProductElem
 
+import AbstractAlgebra: AbstractPermutationGroup, AbstractPerm
+
 ###############################################################################
 #
 #   WreathProduct / WreathProductElem
@@ -19,22 +21,23 @@ export WreathProduct, WreathProductElem
 * `N::Group` : the single factor of the group $N$
 * `P::Generic.PermGroup` : full `PermutationGroup`
 """
-struct WreathProduct{N, T<:Group, PG<:Generic.PermGroup} <: Group
+struct WreathProduct{N, T<:Group, PG<:AbstractPermutationGroup} <: Group
    N::DirectPowerGroup{N, T}
    P::PG
 
-   function WreathProduct(Gr::T, P::PG) where {T, PG<:Generic.PermGroup}
-      N = DirectPowerGroup(Gr, Int(P.n))
-      return new{Int(P.n), T, PG}(N, P)
+   function WreathProduct(G::Gr, P::PG) where
+      {Gr <: Group, PG <: AbstractPermutationGroup}
+      N = DirectPowerGroup(G, Int(P.n))
+      return new{Int(P.n), Gr, PG}(N, P)
    end
 end
 
-struct WreathProductElem{N, T<:GroupElem, P<:Generic.Perm} <: GroupElem
+struct WreathProductElem{N, T<:GroupElem, P<:AbstractPerm} <: GroupElem
    n::DirectPowerGroupElem{N, T}
    p::P
 
    function WreathProductElem(n::DirectPowerGroupElem{N,T}, p::P,
-      check::Bool=true) where {N, T, P<:Generic.Perm}
+      check::Bool=true) where {N, T, P<:AbstractPerm}
       if check
          N == length(p.d) || throw(DomainError(
             "Can't form WreathProductElem: lengths differ"))

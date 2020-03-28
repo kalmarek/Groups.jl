@@ -1,8 +1,9 @@
+export Automorphism, AutGroup, Aut, SAut
+
 ###############################################################################
 #
 #   AutSymbol/ AutGroup / Automorphism
 #
-###############################################################################
 
 struct RTransvect
     i::Int8
@@ -25,78 +26,10 @@ end
 struct Identity end
 
 struct AutSymbol <: GSymbol
-   id::Symbol
-   pow::Int8
-   fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
+    id::Symbol
+    pow::Int8
+    fn::Union{LTransvect, RTransvect, PermAut, FlipAut, Identity}
 end
-
-mutable struct AutGroup{N} <: AbstractFPGroup
-   objectGroup::FreeGroup
-   gens::Vector{AutSymbol}
-end
-
-mutable struct Automorphism{N} <: GWord{AutSymbol}
-    symbols::Vector{AutSymbol}
-    modified::Bool
-    savedhash::UInt
-    parent::AutGroup{N}
-
-    function Automorphism{N}(f::Vector{AutSymbol}) where {N}
-        return new{N}(f, true, zero(UInt))
-    end
-end
-
-export Automorphism, AutGroup, Aut, SAut
-
-###############################################################################
-#
-#   Type and parent object methods
-#
-###############################################################################
-
-elem_type(::AutGroup{N}) where N = Automorphism{N}
-
-parent_type(::Automorphism{N}) where N = AutGroup{N}
-
-###############################################################################
-#
-#   AutSymbol defining functions
-#
-###############################################################################
-
-function (ϱ::RTransvect)(v, pow::Integer=1)
-    @inbounds Groups.r_multiply!(v[ϱ.i], (v[ϱ.j]^pow).symbols, reduced=false)
-    return v
-end
-
-function (λ::LTransvect)(v, pow::Integer=1)
-    @inbounds Groups.l_multiply!(v[λ.i], (v[λ.j]^pow).symbols, reduced=false)
-    return v
-end
-
-function (σ::PermAut)(v, pow::Integer=1)
-   w = deepcopy(v)
-   if pow == 1
-       @inbounds for k in eachindex(v)
-           v[k].symbols = w[σ.perm.d[k]].symbols
-       end
-   else
-       s = (σ.perm^pow).d
-       @inbounds for k in eachindex(v)
-           v[k].symbols = w[s[k]].symbols
-       end
-   end
-   return v
-end
-
-function (ɛ::FlipAut)(v, pow::Integer=1)
-   @inbounds if isodd(pow)
-       v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
-   end
-   return v
-end
-
-(::Identity)(v, pow::Integer=1) = v
 
 # taken from ValidatedNumerics, under under the MIT "Expat" License:
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
@@ -111,53 +44,82 @@ function id_autsymbol()
    return AutSymbol(Symbol("(id)"), 0, Identity())
 end
 
-function rmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+function transvection_R(i::Integer, j::Integer, pow::Integer=1)
     id = Symbol("ϱ", subscriptify(i), subscriptify(j))
     return AutSymbol(id, pow, RTransvect(i, j))
 end
 
-function lmul_autsymbol(i::Integer, j::Integer; pow::Integer=1)
+function transvection_L(i::Integer, j::Integer, pow::Integer=1)
     id = Symbol("λ", subscriptify(i), subscriptify(j))
     return AutSymbol(id, pow, LTransvect(i, j))
 end
 
-function flip_autsymbol(i::Integer; pow::Integer=1)
-    if iseven(pow)
-       return id_autsymbol()
-    else
-        id = Symbol("ɛ", subscriptify(i))
-        return AutSymbol(id, 1, FlipAut(i))
-    end
+function flip(i::Integer, pow::Integer=1)
+    iseven(pow) && return id_autsymbol()
+    id = Symbol("ɛ", subscriptify(i))
+    return AutSymbol(id, 1, FlipAut(i))
 end
 
-function perm_autsymbol(p::Generic.Perm{I}; pow::Integer=one(I)) where I<:Integer
+function AutSymbol(p::Generic.Perm, pow::Integer=1)
     if pow != 1
         p = p^pow
     end
-    for i in eachindex(p.d)
-        if p.d[i] != i
-            id = Symbol("σ", [subscriptify(i) for i in p.d]...)
-            return AutSymbol(id, 1, PermAut(p))
-        end
+
+    if any(p.d[i] != i for i in eachindex(p.d))
+        id = Symbol("σ", "₍", [subscriptify(i) for i in p.d]..., "₎")
+        return AutSymbol(id, 1, PermAut(p))
     end
     return id_autsymbol()
 end
 
-function perm_autsymbol(a::Vector{<:Integer})
-   return perm_autsymbol(Generic.Perm(Vector{Int8}(a), false))
-end
+ϱ(i::Integer, j::Integer, pow::Integer=1) = transvection_R(i, j, pow)
+λ(i::Integer, j::Integer, pow::Integer=1) = transvection_L(i, j, pow)
+ε(i::Integer, pow::Integer=1) = flip(i, pow)
+σ(v::Generic.Perm, pow::Integer=1) = AutSymbol(v, pow)
 
-function domain(G::AutGroup{N}) where N
-    F = G.objectGroup
-    gg = gens(F)
-    return ntuple(i->gg[i], N)
+function change_pow(s::AutSymbol, n::Integer)
+    if n == zero(n)
+        return id_autsymbol()
+    end
+    symbol = s.fn
+    if symbol isa FlipAut
+        return flip(symbol.i, n)
+    elseif symbol isa PermAut
+        return AutSymbol(symbol.perm, n)
+    elseif symbol isa RTransvect
+        return transvection_R(symbol.i, symbol.j, n)
+    elseif symbol isa LTransvect
+        return transvection_L(symbol.i, symbol.j, n)
+    elseif symbol isa Identity
+        return s
+    else
+        throw(DomainError("Unknown type of AutSymbol: $s"))
+    end
 end
 
 ###############################################################################
 #
-#   AutGroup / Automorphism constructors
+#   AutGroup / Automorphism
 #
-###############################################################################
+
+mutable struct AutGroup{N} <: AbstractFPGroup
+    objectGroup::FreeGroup
+    gens::Vector{AutSymbol}
+end
+
+mutable struct Automorphism{N} <: GWord{AutSymbol}
+    symbols::Vector{AutSymbol}
+    modified::Bool
+    savedhash::UInt
+    parent::AutGroup{N}
+
+    function Automorphism{N}(f::Vector{AutSymbol}) where {N}
+        return new{N}(f, true, zero(UInt))
+    end
+end
+
+elem_type(::Type{AutGroup{N}}) where N = Automorphism{N}
+parent_type(::Type{Automorphism{N}}) where N = AutGroup{N}
 
 function AutGroup(G::FreeGroup; special=false)
    S = AutSymbol[]
@@ -166,17 +128,16 @@ function AutGroup(G::FreeGroup; special=false)
 
    indexing = [[i,j] for i in 1:n for j in 1:n if i≠j]
 
-   rmuls = [rmul_autsymbol(i,j) for (i,j) in indexing]
-   lmuls = [lmul_autsymbol(i,j) for (i,j) in indexing]
+   rmuls = [ϱ(i,j) for (i,j) in indexing]
+   lmuls = [λ(i,j) for (i,j) in indexing]
 
    append!(S, [rmuls; lmuls])
 
    if !special
-      flips = [flip_autsymbol(i) for i in 1:n]
-      syms = [perm_autsymbol(p) for p in PermutationGroup(n)][2:end]
+      flips = [ε(i) for i in 1:n]
+      syms = [σ(p) for p in SymmetricGroup(Int8(n))][2:end]
 
       append!(S, [flips; syms])
-
    end
    return AutGroup{n}(G, S)
 end
@@ -184,134 +145,120 @@ end
 Aut(G::Group) = AutGroup(G)
 SAut(G::Group) = AutGroup(G, special=true)
 
-###############################################################################
-#
-#   Types call overloads
-#
-###############################################################################
-
 Automorphism{N}(s::AutSymbol) where N = Automorphism{N}(AutSymbol[s])
-
-function Base.one(G::AutGroup{N}) where N
-   id = Automorphism{N}(id_autsymbol())
-   id.parent = G
-   return id
-end
 
 function (G::AutGroup{N})(f::AutSymbol) where N
    g = Automorphism{N}([f])
-   g.parent = G
+   setparent!(g, G)
    return g
 end
 
-function (G::AutGroup{N})(g::Automorphism{N}) where N
-   g.parent = G
-   return g
+(G::AutGroup{N})(g::Automorphism{N}) where N = (setparent!(g, G); g)
+
+###############################################################################
+#
+#   AutSymbol defining functions && evaluation
+#   NOTE: all automorphisms operate on a tuple of FreeWords INPLACE!
+#
+
+function (ϱ::RTransvect)(v, pow::Integer=1)
+    append!(v[ϱ.i], v[ϱ.j]^pow)
+    freereduce!(v[ϱ.i])
+    return v
 end
+
+function (λ::LTransvect)(v, pow::Integer=1)
+    prepend!(v[λ.i], v[λ.j]^pow)
+    freereduce!(v[λ.i])
+    return v
+end
+
+function (σ::PermAut)(v, pow::Integer=1)
+    w = deepcopy(v)
+    s = (σ.perm^pow).d
+    @inbounds for k in eachindex(v)
+        v[k].symbols = w[s[k]].symbols
+    end
+    return v
+end
+
+function (ɛ::FlipAut)(v, pow::Integer=1)
+    @inbounds if isodd(pow)
+        v[ɛ.i].symbols = inv(v[ɛ.i]).symbols
+    end
+    return v
+end
+
+(::Identity)(v, pow::Integer=1) = v
 
 ###############################################################################
 #
 #   Functional call overloads for evaluation of AutSymbol and Automorphism
 #
-###############################################################################
 
-function (s::AutSymbol)(v::NTuple{N, T}) where {N, T}
-   if s.pow != 0
-      v = s.fn(v, s.pow)::NTuple{N, T}
-   end
-   return v
-end
+(s::AutSymbol)(v::NTuple{N, T}) where {N, T} = s.fn(v, s.pow)::NTuple{N, T}
 
 function (f::Automorphism{N})(v::NTuple{N, T}) where {N, T}
-    for (i, s) in enumerate(f.symbols)
+    for s in syllables(f)
         v = s(v)::NTuple{N, T}
-        if i % 5 == 0
-            freereduce!.(v)
-        end
     end
     return v
+end
+
+function domain(G::AutGroup{N}) where N
+    F = G.objectGroup
+    return ntuple(i->F(F.gens[i]), N)
 end
 
 evaluate(f::Automorphism) = f(domain(parent(f)))
 
 ###############################################################################
 #
-#   Comparison
+#   hashing && equality
 #
-###############################################################################
 
-const HASHINGCONST = 0x7d28276b01874b19 # hash(Automorphism)
-
-hash(s::AutSymbol, h::UInt) = hash(s.id, hash(s.pow, hash(:AutSymbol, h)))
-
-function hash(g::Automorphism{N}, images, h::UInt=HASHINGCONST) where N
-    return hash(images, hash(parent(g), hash(Automorphism{N}, h)))
+function hash_internal(g::Automorphism, images = freereduce!.(evaluate(g)),
+    h::UInt = 0x7d28276b01874b19) # hash(Automorphism)
+    return hash(images, hash(parent(g), h))
 end
 
-function hash(g::Automorphism, h::UInt)
-    if g.modified
-        g_im = reduce!.(evaluate(g))
-        g.savedhash = hash(g, g_im)
-        g.modified = false
-    end
-    return xor(g.savedhash, h)
+function compute_images(g::Automorphism)
+    images = reduce!.(evaluate(g))
+    savehash!(g, hash_internal(g, images))
+    unsetmodified!(g)
+    return images
 end
 
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
-    parent(g) == parent(h) || return false
+    img_c, imh_c = false, false
 
-    if !g.modified && !h.modified
-        if g.savedhash != h.savedhash
-            return false
-        end
+    if ismodified(g)
+        img = compute_images(g)
+        img_c = true
     end
 
-    # expensive:
-    g_im = reduce!.(evaluate(g))
-    h_im = reduce!.(evaluate(h))
-    # cheap:
-    g.savedhash = hash(g, g_im)
-    g.modified = false
-    h.savedhash = hash(h, h_im)
-    h.modified = false
+    if ismodified(h)
+        imh = compute_images(h)
+        imh_c = true
+    end
 
-    return g_im == h_im
+    @assert !ismodified(g) && !ismodified(h)
+    # cheap
+    hash(g) != hash(h) && return false # hashes differ, so images must have differed as well
+    # equal elements, or possibly hash conflict
+    if !img_c
+        img = compute_images(g)
+    end
+    if !imh_c
+        imh = compute_images(h)
+    end
+    return img == imh
 end
-
-###############################################################################
-#
-#   Basic manipulation
-#
-###############################################################################
-
-function change_pow(s::AutSymbol, n::Integer)
-    if n == zero(n)
-        return id_autsymbol()
-    end
-    symbol = s.fn
-    if symbol isa FlipAut
-        return flip_autsymbol(symbol.i, pow=n)
-    elseif symbol isa PermAut
-        return perm_autsymbol(symbol.perm, pow=n)
-    elseif symbol isa RTransvect
-        return rmul_autsymbol(symbol.i, symbol.j, pow=n)
-    elseif symbol isa LTransvect
-        return lmul_autsymbol(symbol.i, symbol.j, pow=n)
-    elseif symbol isa Identity
-        return s
-    else
-        warn("Changing power of an unknown type of symbol! $s")
-        return AutSymbol(s.id, n, s.fn)
-    end
-end
-
-length(s::AutSymbol) = abs(s.pow)
 
 ###############################################################################
 #
 #   String I/O
 #
-###############################################################################
 
 function show(io::IO, G::AutGroup)
    print(io, "Automorphism Group of $(G.objectGroup)\n")
@@ -320,87 +267,58 @@ end
 
 ###############################################################################
 #
-#   Binary operators
+#   Reduction
 #
-###############################################################################
 
-###############################################################################
-#
-#   Inversion
-#
-###############################################################################
+getperm(s::AutSymbol) = s.fn.perm^s.pow
 
-inv(f::AutSymbol) = change_pow(f, -f.pow)
-
-###############################################################################
-#
-#   Misc
-#
-###############################################################################
-
-function getperm(s::AutSymbol)
-    if s.pow != 1
-        @warn("Power for perm_symbol should be never 0!")
-        return s.fn.perm^s.pow
-    else
-        return s.fn.perm
-    end
-end
-
-function simplifyperms!(W::Automorphism{N}) where N
+function simplifyperms!(::Type{Bool}, w::Automorphism{N}) where N
     reduced = true
-    to_delete = Int[]
-    for i in 1:length(W.symbols)-1
-        if W.symbols[i].pow == 0
+    for i in 1:syllablelength(w)-1
+        s, ns = syllables(w)[i], syllables(w)[i+1]
+        if isone(s)
             continue
-        elseif W.symbols[i].fn isa PermAut && W.symbols[i+1].fn isa PermAut
+        elseif s.fn isa PermAut && ns.fn isa PermAut
             reduced = false
-            c = W.symbols[i]
-            n = W.symbols[i+1]
-            W.symbols[i+1] = perm_autsymbol(getperm(c)*getperm(n))
-            push!(to_delete, i)
+            setmodified!(w)
+            syllables(w)[i+1] = AutSymbol(getperm(s)*getperm(ns))
+            syllables(w)[i] = change_pow(s, 0)
         end
     end
-    deleteat!(W.symbols, to_delete)
-    deleteids!(W)
+    filter!(!isone, syllables(w))
     return reduced
 end
 
-function reduce!(W::Automorphism)
-    if length(W) == 0
-        return W
-    elseif length(W.symbols) == 1
-        deleteids!(W)
-    else
-        reduced = false
-        while !reduced
-            reduced = simplifyperms!(W) && freereduce!(W)
-        end
+function reduce!(w::Automorphism)
+    reduced = false
+    while !reduced
+        reduced = simplifyperms!(Bool, w) && freereduce!(Bool, w)
     end
-
-    W.modified = true
-
-    return W
+    return w
 end
 
-function linear_repr(A::Automorphism{N}, hom=matrix_repr) where N
-    return reduce(*, linear_repr.(A.symbols, N, hom), init=hom(Identity(),N,1))
-end
+###############################################################################
+#
+#   Abelianization (natural Representation to GL(N,Z))
+#
 
-linear_repr(a::AutSymbol, n::Int, hom) = hom(a.fn, n, a.pow)
+abelianize(A::Automorphism{N}) where N = image(A, abelianize; n=N)
 
-function matrix_repr(a::Union{RTransvect, LTransvect}, n::Int, pow)
+# homomorphism definition
+abelianize(; n::Integer=1) = Matrix{Int}(I, n, n)
+abelianize(a::AutSymbol; n::Int=1) = abelianize(a.fn, n, a.pow)
+
+function abelianize(a::Union{RTransvect, LTransvect}, n::Int, pow)
     x = Matrix{Int}(I, n, n)
     x[a.i,a.j] = pow
     return x
 end
 
-function matrix_repr(a::FlipAut, n::Int, pow)
+function abelianize(a::FlipAut, n::Int, pow)
     x = Matrix{Int}(I, n, n)
-    x[a.i,a.i] = -1^pow
+    x[a.i,a.i] = -1
     return x
 end
 
-matrix_repr(a::PermAut, n::Int, pow) = Matrix{Int}(I, n, n)[(a.perm^pow).d, :]
-
-matrix_repr(a::Identity, n::Int, pow) = Matrix{Int}(I, n, n)
+abelianize(a::PermAut, n::Integer, pow) = Matrix{Int}(I, n, n)[(a.perm^pow).d, :]
+abelianize(a::Identity, n::Integer, pow) = abelianize(;n=n)
