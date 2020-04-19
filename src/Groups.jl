@@ -7,7 +7,7 @@ import AbstractAlgebra: order, gens, matrix_repr
 
 import Base: length, ==, hash, show, convert, eltype, iterate
 import Base: inv, reduce, *, ^, power_by_squaring
-import Base: findfirst, findnext, replace
+import Base: findfirst, findnext, findlast, findprev, replace
 import Base: deepcopy_internal
 
 using LinearAlgebra
