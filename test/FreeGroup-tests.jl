@@ -36,7 +36,8 @@ end
    @test isa(Vector{FreeGroupElem}([s,t]), Vector{FreeGroupElem})
    @test length(FreeGroupElem(s)) == 1
    @test length(FreeGroupElem(t)) == 2
-
+   @test Groups.FreeSymbol(:s, 1) != Groups.FreeSymbol(:s, 2)
+   @test Groups.FreeSymbol(:s, 1) != Groups.FreeSymbol(:t, 1)
 end
 
 @testset "FreeGroup" begin
@@ -64,6 +65,8 @@ end
       @test w[end] == tt
 
       @test collect(ttinv) == [ttinv]
+
+      @test Groups.GroupWord([tt, inv(tt)]) isa FreeGroupElem
    end
 
    @testset "internal arithmetic" begin
@@ -96,7 +99,7 @@ end
       @test o*p == one(parent(o*p))
       w = FreeGroupElem([o.symbols..., p.symbols...])
       w.parent = G
-      @test Groups.reduce!(w).symbols ==Vector{Groups.FreeSymbol}([])
+      @test Groups.syllables(Groups.reduce(w)) == Vector{Groups.FreeSymbol}([])
    end
 
    @testset "Group operations" begin
@@ -126,8 +129,14 @@ end
       c = s*t*s^-1*t^-1
       @test findfirst(s^-1*t^-1, c) == 3
       @test findnext(s^-1*t^-1, c*s^-1,3) == 3
-      @test findnext(s^-1*t^-1, c*s^-1*t^-1,4) == 5
+      @test findnext(s^-1*t^-1, c*s^-1*t^-1, 4) == 5
       @test findfirst(c, c*t) === nothing
+
+      @test findlast(s^-1*t^-1, c) == 3
+      @test findprev(s, s*t*s*t, 4) == 3
+      @test findprev(s*t, s*t*s*t, 2) == 1
+      @test findlast(t^2*s, c) === nothing
+
       w = s*t*s^-1
       subst = Dict{FreeGroupElem, FreeGroupElem}(w => s^1, s*t^-1 => t^4)
       @test Groups.replace(c, s*t=>one(G)) == s^-1*t^-1
