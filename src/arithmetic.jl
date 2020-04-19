@@ -10,29 +10,28 @@ end
 #   Binary operators
 #
 
-function Base.append!(w::GWord{T}, v::AbstractVector{T}) where T
-    append!(syllables(w), v)
+function Base.push!(w::GWord{T}, s::T) where T <: GSymbol
+    push!(syllables(w), s)
     return w
 end
 
-function Base.prepend!(w::GWord{T}, v::AbstractVector{T}) where T
-    prepend!(syllables(w), v)
+function Base.pushfirst!(w::GWord{T}, s::T) where T <: GSymbol
+    pushfirst!(syllables(w), s)
     return w
 end
 
-Base.append!(w::T, v::T) where T <: GWord = append!(w, syllables(v))
-Base.prepend!(w::T, v::T) where T <: GWord = prepend!(w, syllables(v))
-
-for (mul, f) in ((:rmul!, :push!), (:lmul!, :pushfirst!))
-    @eval begin
-        function $mul(out::T, w::T, s::GSymbol) where T <:GWord
-            resize!(syllables(out), syllablelength(w))
-            syllables(out) .= syllables(w)
-            $f(syllables(out), s)
-            return freereduce!(out)
-        end
-    end
+function Base.append!(w::T, v::T) where T <: GWord
+    append!(syllables(w), syllables(v))
+    return w
 end
+
+function Base.prepend!(w::T, v::T) where T <: GWord
+    prepend!(syllables(w), syllables(v))
+    return w
+end
+
+Base.append!(w::T, v::T, others::Vararg{T,N}) where {N,T <: GWord} =
+    append!(append!(w, v), others...)
 
 function rmul!(out::T, x::T, y::T) where T<: GWord
     if out === x
@@ -51,15 +50,16 @@ function rmul!(out::T, x::T, y::T) where T<: GWord
     end
 end
 
+rmul!(out::T, v::T) where T<:GWord = freereduce!(append!(out, v))
+lmul!(out::T, v::T) where T<:GWord = freereduce!(prepend!(out, v))
+
 lmul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, y, x)
 
-function AbstractAlgebra.mul!(out::T, x::T, y::T) where T <: GWord
-    return rmul!(out, x, y)
-end
+AbstractAlgebra.mul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, x, y)
 
 (*)(W::GW, Z::GW) where GW <: GWord = rmul!(deepcopy(W), W, Z)
-(*)(W::GWord, s::GSymbol) = rmul!(deepcopy(W), W, s)
-(*)(s::GSymbol, W::GWord) = lmul!(deepcopy(W), W, s)
+(*)(W::GWord, s::GSymbol) = freereduce!(push!(deepcopy(W), s))
+(*)(s::GSymbol, W::GWord) = freereduce!(pushfirst!(deepcopy(W), s))
 
 function power_by_squaring(W::GWord, p::Integer)
     if p < 0

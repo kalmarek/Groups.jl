@@ -139,7 +139,7 @@
    @testset "reductions/arithmetic" begin
       f = Groups.AutSymbol(perm"(1,2,3,4)")
 
-      f² = append!(A(f), [f])
+      f² = push!(A(f), f)
       @test Groups.simplifyperms!(Bool, f²) == false
       @test f²^2 == one(A)
       @test !isone(f²)

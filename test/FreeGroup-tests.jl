@@ -60,13 +60,28 @@ end
 
       t_symb = Groups.FreeSymbol(:t)
       tt = deepcopy(t)
-      @test string(Groups.rmul!(tt, tt, inv(t_symb))) == "(id)"
+      @test string(Groups.rmul!(tt, tt, inv(tt))) == "(id)"
       tt = deepcopy(t)
-      @test string(append!(tt, [inv(t_symb)])) == "t*t^-1"
+      @test string(Groups.lmul!(tt, tt, inv(tt))) == "(id)"
+
       tt = deepcopy(t)
-      @test string(Groups.lmul!(tt, tt, inv(t_symb))) == "(id)"
+      push!(tt, inv(t_symb))
+      @test string(tt) == "t*t^-1"
       tt = deepcopy(t)
-      @test string(prepend!(tt, [inv(t_symb)])) == "t^-1*t"
+      pushfirst!(tt, inv(t_symb))
+      @test string(tt) == "t^-1*t"
+
+      tt = deepcopy(t)
+      append!(tt, inv(t))
+      @test string(tt) == "t*t^-1"
+
+      tt = deepcopy(t)
+      prepend!(tt, inv(t))
+      @test string(tt) == "t^-1*t"
+
+      tt = deepcopy(t)
+      append!(tt, s, inv(t))
+      @test string(tt) == "t*s*t^-1"
    end
 
    @testset "reductions" begin
