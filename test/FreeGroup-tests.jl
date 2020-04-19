@@ -42,6 +42,7 @@ end
 @testset "FreeGroup" begin
    @test isa(FreeGroup(["s", "t"]), AbstractAlgebra.Group)
    G = FreeGroup(["s", "t"])
+   s, t = gens(G)
 
    @testset "elements constructors" begin
       @test isa(one(G), FreeGroupElem)
@@ -49,9 +50,21 @@ end
       @test length(G.gens) == 2
       @test eltype(gens(G)) == FreeGroupElem
       @test length(gens(G)) == 2
-   end
 
-   s, t = gens(G)
+      @test collect(s*t) == Groups.syllables(s*t)
+      tt, ss = Groups.FreeSymbol(:t), Groups.FreeSymbol(:s)
+      @test collect(t^2) == [tt, tt]
+      ttinv = Groups.FreeSymbol(:t, -1)
+      w = t^-2*s^3*t^2
+      @test collect(w) == [inv(tt), inv(tt), ss, ss, ss, tt, tt]
+      @test w[1] == inv(tt)
+      @test w[2] == inv(tt)
+      @test w[3] == ss
+      @test w[3:5] == [ss, ss, ss]
+      @test w[end] == tt
+
+      @test collect(ttinv) == [ttinv]
+   end
 
    @testset "internal arithmetic" begin
 

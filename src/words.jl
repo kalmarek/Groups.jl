@@ -36,6 +36,8 @@ Base.@propagate_inbounds function Base.getindex(w::GWord, i::Integer)
     return first(syllables(w)[idx])
 end
 
+Base.@propagate_inbounds Base.getindex(w::GWord, itr) = [w[i] for i in itr]
+
 # no setindex! for syllable based words
 
 Base.convert(::Type{GW}, s::GSymbol) where GW <: GWord = GW(s)
