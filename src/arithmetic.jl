@@ -1,5 +1,5 @@
 function Base.inv(W::T) where T<:GWord
-    length(W) == 0 && return W
+    length(W) == 0 && return one(W)
     G = parent(W)
     w = T([inv(s) for s in Iterators.reverse(syllables(W))])
     return setparent!(w, G)

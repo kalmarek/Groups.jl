@@ -109,6 +109,13 @@ end
       tt = deepcopy(t)
       append!(tt, s, inv(t))
       @test string(tt) == "t*s*t^-1"
+
+      o = one(t)
+      o_inv = inv(o)
+      @test o == o_inv
+      @test o !== o_inv
+      Groups.rmul!(o, t)
+      @test o != o_inv
    end
 
    @testset "reductions" begin
