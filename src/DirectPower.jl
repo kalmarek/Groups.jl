@@ -65,7 +65,7 @@ parent(g::DirectPowerGroupElem{N, T}) where {N,T} =
 #
 ###############################################################################
 
-size(g::DirectPowerGroupElem{N}) where N = (N,)
+Base.size(g::DirectPowerGroupElem{N}) where N = (N,)
 Base.IndexStyle(::Type{DirectPowerGroupElem}) = Base.LinearFast()
 Base.getindex(g::DirectPowerGroupElem, i::Int) = g.elts[i]
 
@@ -188,7 +188,7 @@ end
 ###############################################################################
 
 order(G::DirectPowerGroup{N}) where N = order(G.group)^N
-length(G::DirectPowerGroup) = order(G)
+Base.length(G::DirectPowerGroup) = order(G)
 
 function iterate(G::DirectPowerGroup{N}) where N
    elts = collect(G.group)
