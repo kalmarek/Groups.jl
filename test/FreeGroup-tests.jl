@@ -38,6 +38,7 @@ end
    @test length(FreeGroupElem(t)) == 2
    @test Groups.FreeSymbol(:s, 1) != Groups.FreeSymbol(:s, 2)
    @test Groups.FreeSymbol(:s, 1) != Groups.FreeSymbol(:t, 1)
+   @test collect(Groups.FreeSymbol(:s, 2)) == [i for i in Groups.FreeSymbol(:s, 2)] == [s, s]
 end
 
 @testset "FreeGroup" begin
@@ -52,8 +53,10 @@ end
       @test eltype(gens(G)) == FreeGroupElem
       @test length(gens(G)) == 2
 
-      @test collect(s*t) == Groups.syllables(s*t)
       tt, ss = Groups.FreeSymbol(:t), Groups.FreeSymbol(:s)
+      @test Groups.GroupWord([tt, inv(tt)]) isa FreeGroupElem
+
+      @test collect(s*t) == Groups.syllables(s*t)
       @test collect(t^2) == [tt, tt]
       ttinv = Groups.FreeSymbol(:t, -1)
       w = t^-2*s^3*t^2
@@ -66,7 +69,8 @@ end
 
       @test collect(ttinv) == [ttinv]
 
-      @test Groups.GroupWord([tt, inv(tt)]) isa FreeGroupElem
+      @test isone(t^0)
+      @test !isone(t^1)
    end
 
    @testset "internal arithmetic" begin
@@ -79,6 +83,13 @@ end
       @test string(Groups.rmul!(tt, tt, inv(tt))) == "(id)"
       tt = deepcopy(t)
       @test string(Groups.lmul!(tt, tt, inv(tt))) == "(id)"
+
+      w = deepcopy(t)
+      @test length(Groups.rmul!(w, t)) == 2
+      @test length(Groups.lmul!(w, inv(t))) == 1
+      w = AbstractAlgebra.mul!(w, w, s)
+      @test length(w) == 2
+      @test length(Groups.lmul!(w, inv(s))) == 3
 
       tt = deepcopy(t)
       push!(tt, inv(t_symb))
@@ -150,7 +161,7 @@ end
       @test findlast(s^-1*t^-1, c) == 3
       @test findprev(s, s*t*s*t, 4) == 3
       @test findprev(s*t, s*t*s*t, 2) == 1
-      @test findlast(t^2*s, c) === nothing
+      @test findprev(Groups.FreeSymbol(:t, 2), c, 4) === nothing
 
       w = s*t*s^-1
       subst = Dict{FreeGroupElem, FreeGroupElem}(w => s^1, s*t^-1 => t^4)
