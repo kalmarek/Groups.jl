@@ -6,13 +6,17 @@
       @test_throws MethodError Groups.AutSymbol(:a)
       @test_throws MethodError Groups.AutSymbol(:a, 1)
       f = Groups.AutSymbol(:a, 1, Groups.FlipAut(2))
-      @test isa(f, Groups.GSymbol)
-      @test isa(f, Groups.AutSymbol)
-      @test isa(Groups.AutSymbol(perm"(4)"), Groups.AutSymbol)
-      @test isa(Groups.AutSymbol(perm"(1,2,3,4)"), Groups.AutSymbol)
-      @test isa(Groups.transvection_R(1,2), Groups.AutSymbol)
-      @test isa(Groups.transvection_R(3,4), Groups.AutSymbol)
-      @test isa(Groups.flip(3), Groups.AutSymbol)
+      @test f isa Groups.GSymbol
+      @test f isa Groups.AutSymbol
+      @test Groups.AutSymbol(perm"(4)") isa Groups.AutSymbol
+      @test Groups.AutSymbol(perm"(1,2,3,4)") isa Groups.AutSymbol
+      @test Groups.transvection_R(1,2) isa Groups.AutSymbol
+      @test Groups.transvection_R(3,4) isa Groups.AutSymbol
+      @test Groups.flip(3) isa Groups.AutSymbol
+
+      @test Groups.id_autsymbol() isa Groups.AutSymbol
+      @test inv(Groups.id_autsymbol()) isa Groups.AutSymbol
+      @test inv(Groups.id_autsymbol()) == Groups.id_autsymbol()
    end
 
    a,b,c,d = gens(FreeGroup(4))
@@ -88,35 +92,44 @@
       @test isa(Automorphism{3}(f), Automorphism)
       @test isa(AutGroup(FreeGroup(3)), AbstractAlgebra.Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
+
       A = AutGroup(FreeGroup(1))
-      @test isa(Groups.gens(A), Vector{Automorphism{1}})
+      @test Groups.gens(A) isa Vector{Automorphism{1}}
       @test length(Groups.gens(A)) == 1
+      @test length(Groups.gens(Aut(FreeGroup(1)))) == 1
+      @test Groups.gens(A) == [A(Groups.flip(1))]
+
       A = AutGroup(FreeGroup(1), special=true)
-      @test length(Groups.gens(A)) == 0
+      @test isempty(Groups.gens(A))
+      @test Groups.gens(SAut(FreeGroup(1))) == Automorphism{1}[]
+
       A = AutGroup(FreeGroup(2))
       @test length(Groups.gens(A)) == 7
       Agens = Groups.gens(A)
+      @test A(first(Agens)) isa Automorphism
 
-      @test isa(A(Groups.transvection_R(1,2)), Automorphism)
+      @test A(Groups.transvection_R(1,2)) isa Automorphism
       @test A(Groups.transvection_R(1,2)) in Agens
 
-      @test isa(A(Groups.transvection_R(2,1)), Automorphism)
+      @test A(Groups.transvection_R(2,1)) isa Automorphism
       @test A(Groups.transvection_R(2,1)) in Agens
 
-      @test isa(A(Groups.transvection_R(1,2)), Automorphism)
+      @test A(Groups.transvection_R(1,2)) isa Automorphism
       @test A(Groups.transvection_R(1,2)) in Agens
 
-      @test isa(A(Groups.transvection_R(2,1)), Automorphism)
+      @test A(Groups.transvection_R(2,1)) isa Automorphism
       @test A(Groups.transvection_R(2,1)) in Agens
 
-      @test isa(A(Groups.flip(1)), Automorphism)
+      @test A(Groups.flip(1)) isa Automorphism
       @test A(Groups.flip(1)) in Agens
 
-      @test isa(A(Groups.flip(2)), Automorphism)
+      @test A(Groups.flip(2)) isa Automorphism
       @test A(Groups.flip(2)) in Agens
 
-      @test isa(A(Groups.AutSymbol(perm"(1,2)")), Automorphism)
+      @test A(Groups.AutSymbol(perm"(1,2)")) isa Automorphism
       @test A(Groups.AutSymbol(perm"(1,2)")) in Agens
+
+      @test A(Groups.id_autsymbol()) isa Automorphism
    end
 
    A = AutGroup(FreeGroup(4))
@@ -144,8 +157,8 @@
       @test f²^2 == one(A)
       @test !isone(f²)
 
-      a = A(Groups.transvection_L(1,2))*Groups.flip(2)
-      b = Groups.flip(2)*A(inv(Groups.transvection_L(1,2)))
+      a = A(Groups.λ(1,2))*Groups.ε(2)
+      b = Groups.ε(2)*A(inv(Groups.λ(1,2)))
       @test a*b == b*a
       @test a^3 * b^3 == one(A)
       g,h = Groups.gens(A)[[1,8]] # (g, h) = (ϱ₁₂, ϱ₃₂)

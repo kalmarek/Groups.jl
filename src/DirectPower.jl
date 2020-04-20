@@ -31,11 +31,6 @@ function DirectPower(G::DirectPowerGroup{N}, H::Group) where N
    return DirectPowerGroup(G.group, N+1)
 end
 
-function DirectPower(R::AbstractAlgebra.Ring, n::Int)
-   @warn "Creating DirectPower of the multilplicative group!"
-   return DirectPowerGroup(MultiplicativeGroup(R), n)
-end
-
 struct DirectPowerGroupElem{N, T<:GroupElem} <: GroupElem
    elts::NTuple{N,T}
 end
@@ -188,7 +183,6 @@ end
 ###############################################################################
 
 order(G::DirectPowerGroup{N}) where N = order(G.group)^N
-Base.length(G::DirectPowerGroup) = order(G)
 
 function iterate(G::DirectPowerGroup{N}) where N
    elts = collect(G.group)
@@ -212,3 +206,4 @@ function iterate(G::DirectPowerGroup{N}, state) where N
 end
 
 eltype(::Type{DirectPowerGroup{N, G}}) where {N, G} = DirectPowerGroupElem{N, elem_type(G)}
+Base.length(G::DirectPowerGroup) = order(G)
