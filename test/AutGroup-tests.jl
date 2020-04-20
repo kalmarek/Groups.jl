@@ -266,6 +266,8 @@
       @test Groups.abelianize(σ^3) == Matrix{Int}(I, N, N)
       @test Groups.abelianize(σ)^3 == Matrix{Int}(I, N, N)
 
+      @test Groups.abelianize(G(Groups.id_autsymbol())) == Matrix{Int}(I, N, N) 
+
       function test_homomorphism(S, r)
          for elts in Iterators.product([[g for g in S] for _ in 1:r]...)
             prod(Groups.abelianize.(elts)) == Groups.abelianize(prod(elts)) || error("linear representaton test failed at $elts")
