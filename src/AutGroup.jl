@@ -91,7 +91,7 @@ function change_pow(s::AutSymbol, n::Integer)
     elseif symbol isa LTransvect
         return transvection_L(symbol.i, symbol.j, n)
     elseif symbol isa Identity
-        return s
+        return id_autsymbol()
     else
         throw(DomainError("Unknown type of AutSymbol: $s"))
     end

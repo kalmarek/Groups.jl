@@ -16,7 +16,8 @@
 
       @test Groups.id_autsymbol() isa Groups.AutSymbol
       @test inv(Groups.id_autsymbol()) isa Groups.AutSymbol
-      @test inv(Groups.id_autsymbol()) == Groups.id_autsymbol()
+      x = Groups.id_autsymbol()
+      @test inv(x) == Groups.id_autsymbol()
    end
 
    a,b,c,d = gens(FreeGroup(4))
@@ -266,7 +267,7 @@
       @test Groups.abelianize(σ^3) == Matrix{Int}(I, N, N)
       @test Groups.abelianize(σ)^3 == Matrix{Int}(I, N, N)
 
-      @test Groups.abelianize(G(Groups.id_autsymbol())) == Matrix{Int}(I, N, N) 
+      @test Groups.abelianize(G(Groups.id_autsymbol())) == Matrix{Int}(I, N, N)
 
       function test_homomorphism(S, r)
          for elts in Iterators.product([[g for g in S] for _ in 1:r]...)
