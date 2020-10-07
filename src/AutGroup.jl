@@ -222,29 +222,38 @@ evaluate(f::Automorphism) = f(domain(parent(f)))
 #   hashing && equality
 #
 
-function hash_internal(g::Automorphism, images = freereduce!.(evaluate(g)),
-    h::UInt = 0x7d28276b01874b19) # hash(Automorphism)
-    return hash(images, hash(parent(g), h))
+function hash_internal(
+    g::Automorphism,
+    h::UInt = 0x7d28276b01874b19; # hash(Automorphism)
+    # alternatively: 0xcbf29ce484222325 from FNV-1a algorithm
+    images = compute_images(g),
+    prime = 0x00000100000001b3, # prime from FNV-1a algorithm
+)
+    return foldl((h,x) -> hash(x, h)*prime, images, init = hash(parent(g), h))
 end
 
 function compute_images(g::Automorphism)
-    images = reduce!.(evaluate(g))
-    savehash!(g, hash_internal(g, images))
-    unsetmodified!(g)
+    images = evaluate(g)
+    for im in images
+        reduce!(im)
+    end
     return images
 end
 
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
-    img_c, imh_c = false, false
+    syllables(g) == syllables(h) && return true
+    img_computed, imh_computed = false, false
 
     if ismodified(g)
-        img = compute_images(g)
-        img_c = true
+        img = compute_images(g) # sets modified bit
+        hash(g, images=img)
+        img_computed = true
     end
 
     if ismodified(h)
-        imh = compute_images(h)
-        imh_c = true
+        imh = compute_images(h) # sets modified bit
+        hash(h, images=imh)
+        imh_computed = true
     end
 
     @assert !ismodified(g) && !ismodified(h)
