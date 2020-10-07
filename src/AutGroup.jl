@@ -256,13 +256,20 @@ function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
 
     @assert !ismodified(g) && !ismodified(h)
     # cheap
-    hash(g) != hash(h) && return false # hashes differ, so images must have differed as well
-    # equal elements, or possibly hash conflict
-    if !img_c
-        img = compute_images(g)
-    end
-    if !imh_c
-        imh = compute_images(h)
+    # if hashes differ, images must have differed as well
+    hash(g) != hash(h) && return false
+    # equal elements, or possibly a hash conflict
+    begin
+        if !img_computed
+            img_task = Threads.@spawn img = compute_images(g)
+            # img = compute_images(g)
+        end
+        if !imh_computed
+            imh_task = Threads.@spawn imh = compute_images(h)
+            # imh = compute_images(h)
+        end
+        !img_computed && fetch(img_task)
+        !imh_computed && fetch(imh_task)
     end
     return img == imh
 end
