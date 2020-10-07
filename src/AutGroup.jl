@@ -167,14 +167,12 @@ end
 #
 
 function (ϱ::RTransvect)(v, pow::Integer=1)
-    append!(v[ϱ.i], v[ϱ.j]^pow)
-    freereduce!(v[ϱ.i])
+    rmul!(v[ϱ.i], v[ϱ.j]^pow)
     return v
 end
 
 function (λ::LTransvect)(v, pow::Integer=1)
-    prepend!(v[λ.i], v[λ.j]^pow)
-    freereduce!(v[λ.i])
+    lmul!(v[λ.i], v[λ.j]^pow)
     return v
 end
 
