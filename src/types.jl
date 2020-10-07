@@ -1,31 +1,31 @@
 abstract type AbstractFPGroup <: Group end
 
-@doc doc"""
+"""
     ::GSymbol
-> Represents a syllable.
-> Abstract type which all group symbols of AbstractFPGroups should subtype. Each
-> concrete subtype should implement fields:
-> * `id` which is the `Symbol` representation/identification of a symbol
-> * `pow` which is the (multiplicative) exponent of a symbol.
+Represents a syllable. Abstract type which all group symbols of
+`AbstractFPGroups` should subtype. Each concrete subtype should implement fields:
+ * `id` which is the `Symbol` representation/identification of a symbol
+ * `pow` which is the (multiplicative) exponent of a symbol.
 """
 abstract type GSymbol end
 
 abstract type GWord{T<:GSymbol} <: GroupElem end
 
-@doc doc"""
+"""
     W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem
-> Basic representation of element of a finitely presented group. `W.symbols`
-> fieldname contains particular group symbols which multiplied constitute a
-> group element, i.e. a word in generators.
-> As reduction (inside group) of such word may be time consuming we provide
-> `savedhash` and `modified` fields as well:
-> hash (used e.g. in the `unique` function) is calculated by reducing the word,
-> setting `modified` flag to `false` and computing the hash which is stored in
-> `savedhash` field.
-> whenever word `W` is changed `W.modified` is set to `false`;
-> Future comparisons don't perform reduction (and use `savedhash`) as long as
-> `modified` flag remains `false`.
+Basic representation of element of a finitely presented group.
+* `syllables(W)` return particular group syllables which multiplied constitute `W`
+group as a word in generators.
+* `parent(W)` return the parent group.
 
+As the reduction (inside the parent group) of word to normal form may be time
+consuming, we provide a shortcut that is useful in practice:
+`savehash!(W, h)` and `ismodified(W)` functions.
+When computing `hash(W)`, a reduction to normal form is performed and a
+persistent hash is stored inside `W`, setting `ismodified(W)` flag to `false`.
+This hash can be accessed by `savedhash(W)`.
+Future comparisons of `W` try not to perform reduction and use the stored hash as shortcut. Only when hashes collide reduction is performed. Whenever word `W` is
+changed, `ismodified(W)` returns `false` and stored hash is invalidated.
 """
 
 mutable struct GroupWord{T} <: GWord{T}

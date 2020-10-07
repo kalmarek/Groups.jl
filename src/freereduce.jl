@@ -40,11 +40,10 @@ end
 
 reduce!(w::GWord) = freereduce!(w)
 
-@doc doc"""
+"""
     reduce(w::GWord)
-> performs reduction/simplification of a group element (word in generators).
-> The default reduction is the free group reduction
-> More specific procedures should be dispatched on `GWord`s type parameter.
-
+performs reduction/simplification of a group element (word in generators).
+The default reduction is the reduction in the free group reduction.
+More specific procedures should be dispatched on `GWord`s type parameter.
 """
 reduce(w::GWord) = reduce!(deepcopy(w))
