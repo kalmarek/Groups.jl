@@ -4,14 +4,18 @@
 #
 
 function freereduce!(::Type{Bool}, w::GWord)
+    if syllablelength(w) == 1
+        filter!(!isone, syllables(w))
+        return syllablelength(w) == 1
+    end
+
     reduced = true
-    for i in 1:syllablelength(w)-1
+    @inbounds for i in 1:syllablelength(w)-1
         s, ns = syllables(w)[i], syllables(w)[i+1]
         if isone(s)
             continue
-        elseif s.id == ns.id
+        elseif s.id === ns.id
             reduced = false
-            setmodified!(w)
             p1 = s.pow
             p2 = ns.pow
 
@@ -19,7 +23,10 @@ function freereduce!(::Type{Bool}, w::GWord)
             syllables(w)[i] = change_pow(s, 0)
         end
     end
-    filter!(!isone, syllables(w))
+    if !reduced
+        filter!(!isone, syllables(w))
+        setmodified!(w)
+    end
     return reduced
 end
 
