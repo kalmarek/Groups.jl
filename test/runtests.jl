@@ -13,7 +13,7 @@ using LinearAlgebra
       s = one(M); s[1,3] = 2; s[3,2] = -1;
 
       S = [w,r,s]; S = unique([S; inv.(S)]);
-      _, sizes = Groups.generate_balls(S, radius=4);
+      _, sizes = Groups.wlmetric_ball(S, radius=4);
       @test sizes == [7, 33, 141, 561]
    end
 

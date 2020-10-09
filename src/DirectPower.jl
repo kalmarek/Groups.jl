@@ -6,9 +6,9 @@ export DirectPowerGroup, DirectPowerGroupElem
 #
 ###############################################################################
 
-@doc doc"""
+"""
     DirectPowerGroup(G::Group, n::Int) <: Group
-Implements `n`-fold direct product of `G`. The group operation is
+Return `n`-fold direct product of `G`. The group operation is
 `*` distributed component-wise, with component-wise identity as neutral element.
 """
 struct DirectPowerGroup{N, T<:Group} <: Group
@@ -70,11 +70,11 @@ Base.getindex(g::DirectPowerGroupElem, i::Int) = g.elts[i]
 #
 ###############################################################################
 
-@doc doc"""
+"""
     (G::DirectPowerGroup)(a::Vector, check::Bool=true)
-> Constructs element of the $n$-fold direct product group `G` by coercing each
-> element of vector `a` to `G.group`. If `check` flag is set to `false` neither
-> check on the correctness nor coercion is performed.
+Constructs element of the `n`-fold direct product group `G` by coercing each
+element of vector `a` to `G.group`. If `check` flag is set to `false` neither
+check on the correctness nor coercion is performed.
 """
 function (G::DirectPowerGroup{N})(a::Vector, check::Bool=true) where N
    if check
@@ -131,20 +131,12 @@ end
 #
 ###############################################################################
 
-@doc doc"""
-    ==(g::DirectPowerGroup, h::DirectPowerGroup)
-> Checks if two direct product groups are the same.
-"""
 function (==)(G::DirectPowerGroup{N}, H::DirectPowerGroup{M}) where {N,M}
    N == M || return false
    G.group == H.group || return false
    return true
 end
 
-@doc doc"""
-    ==(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
-> Checks if two direct product group elements are the same.
-"""
 (==)(g::DirectPowerGroupElem, h::DirectPowerGroupElem) = g.elts == h.elts
 
 ###############################################################################
@@ -153,11 +145,6 @@ end
 #
 ###############################################################################
 
-@doc doc"""
-    *(g::DirectPowerGroupElem, h::DirectPowerGroupElem)
-> Return the direct-product group operation of elements, i.e. component-wise
-> operation as defined by `operations` field of the parent object.
-"""
 function *(g::DirectPowerGroupElem{N}, h::DirectPowerGroupElem{N}, check::Bool=true) where N
    if check
       parent(g) == parent(h) || throw(DomainError(
@@ -168,10 +155,6 @@ end
 
 ^(g::DirectPowerGroupElem, n::Integer) = Base.power_by_squaring(g, n)
 
-@doc doc"""
-    inv(g::DirectPowerGroupElem)
-> Return the inverse of the given element in the direct product group.
-"""
 function inv(g::DirectPowerGroupElem{N}) where {N}
    return DirectPowerGroupElem(ntuple(i-> inv(g.elts[i]), N))
 end

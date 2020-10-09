@@ -35,9 +35,7 @@ end
 # https://github.com/JuliaIntervals/ValidatedNumerics.jl/blob/master/LICENSE.md
 function subscriptify(n::Integer)
     subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
-    @assert 0 <= n <= 9
-    return Char(subscript_0 + n)
-    # return [Char(subscript_0 + i) for i in reverse(digits(n))])
+    return join([Char(subscript_0 + i) for i in reverse(digits(n))], "")
 end
 
 function id_autsymbol()
@@ -45,18 +43,26 @@ function id_autsymbol()
 end
 
 function transvection_R(i::Integer, j::Integer, pow::Integer=1)
-    id = Symbol("ϱ", subscriptify(i), subscriptify(j))
+    if 0 < i < 10 && 0 < j < 10
+        id = Symbol(:ϱ, subscriptify(i), subscriptify(j))
+    else
+        id = Symbol(:ϱ, subscriptify(i), "." ,subscriptify(j))
+    end
     return AutSymbol(id, pow, RTransvect(i, j))
 end
 
 function transvection_L(i::Integer, j::Integer, pow::Integer=1)
-    id = Symbol("λ", subscriptify(i), subscriptify(j))
+    if 0 < i < 10 && 0 < j < 10
+        id = Symbol(:λ, subscriptify(i), subscriptify(j))
+    else
+        id = Symbol(:λ, subscriptify(i), "." ,subscriptify(j))
+    end
     return AutSymbol(id, pow, LTransvect(i, j))
 end
 
 function flip(i::Integer, pow::Integer=1)
     iseven(pow) && return id_autsymbol()
-    id = Symbol("ɛ", subscriptify(i))
+    id = Symbol(:ɛ, subscriptify(i))
     return AutSymbol(id, 1, FlipAut(i))
 end
 
@@ -66,7 +72,7 @@ function AutSymbol(p::Generic.Perm, pow::Integer=1)
     end
 
     if any(p.d[i] != i for i in eachindex(p.d))
-        id = Symbol("σ", "₍", [subscriptify(i) for i in p.d]..., "₎")
+        id = Symbol(:σ, "₍", join([subscriptify(i) for i in p.d],""), "₎")
         return AutSymbol(id, 1, PermAut(p))
     end
     return id_autsymbol()
@@ -78,9 +84,8 @@ end
 σ(v::Generic.Perm, pow::Integer=1) = AutSymbol(v, pow)
 
 function change_pow(s::AutSymbol, n::Integer)
-    if n == zero(n)
-        return id_autsymbol()
-    end
+    iszero(n) && id_autsymbol()
+
     symbol = s.fn
     if symbol isa FlipAut
         return flip(symbol.i, n)
@@ -162,14 +167,12 @@ end
 #
 
 function (ϱ::RTransvect)(v, pow::Integer=1)
-    append!(v[ϱ.i], v[ϱ.j]^pow)
-    freereduce!(v[ϱ.i])
+    rmul!(v[ϱ.i], v[ϱ.j]^pow)
     return v
 end
 
 function (λ::LTransvect)(v, pow::Integer=1)
-    prepend!(v[λ.i], v[λ.j]^pow)
-    freereduce!(v[λ.i])
+    lmul!(v[λ.i], v[λ.j]^pow)
     return v
 end
 
@@ -217,41 +220,60 @@ evaluate(f::Automorphism) = f(domain(parent(f)))
 #   hashing && equality
 #
 
-function hash_internal(g::Automorphism, images = freereduce!.(evaluate(g)),
-    h::UInt = 0x7d28276b01874b19) # hash(Automorphism)
-    return hash(images, hash(parent(g), h))
+function hash_internal(
+    g::Automorphism,
+    h::UInt = 0x7d28276b01874b19; # hash(Automorphism)
+    # alternatively: 0xcbf29ce484222325 from FNV-1a algorithm
+    images = compute_images(g),
+    prime = 0x00000100000001b3, # prime from FNV-1a algorithm
+)
+    return foldl((h,x) -> hash(x, h)*prime, images, init = hash(parent(g), h))
 end
 
 function compute_images(g::Automorphism)
-    images = reduce!.(evaluate(g))
-    savehash!(g, hash_internal(g, images))
-    unsetmodified!(g)
+    images = evaluate(g)
+    for im in images
+        reduce!(im)
+    end
     return images
 end
 
 function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
-    img_c, imh_c = false, false
+    syllables(g) == syllables(h) && return true
+    img_computed, imh_computed = false, false
 
     if ismodified(g)
-        img = compute_images(g)
-        img_c = true
+        img = compute_images(g) # sets modified bit
+        hash(g, images=img)
+        img_computed = true
     end
 
     if ismodified(h)
-        imh = compute_images(h)
-        imh_c = true
+        imh = compute_images(h) # sets modified bit
+        hash(h, images=imh)
+        imh_computed = true
     end
 
     @assert !ismodified(g) && !ismodified(h)
     # cheap
-    hash(g) != hash(h) && return false # hashes differ, so images must have differed as well
-    # equal elements, or possibly hash conflict
-    if !img_c
-        img = compute_images(g)
+    # if hashes differ, images must have differed as well
+    hash(g) != hash(h) && return false
+
+    # hashes equal, hence either equal elements, or a hash conflict
+    begin
+        if !img_computed
+            img_task = Threads.@spawn img = compute_images(g)
+            # img = compute_images(g)
+        end
+        if !imh_computed
+            imh_task = Threads.@spawn imh = compute_images(h)
+            # imh = compute_images(h)
+        end
+        !img_computed && fetch(img_task)
+        !imh_computed && fetch(imh_task)
     end
-    if !imh_c
-        imh = compute_images(h)
-    end
+
+    img != imh && @warn "hash collision in == :" g h
     return img == imh
 end
 

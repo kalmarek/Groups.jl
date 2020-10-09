@@ -8,18 +8,17 @@ import AbstractAlgebra: AbstractPermutationGroup, AbstractPerm
 #
 ###############################################################################
 
-@doc doc"""
+"""
     WreathProduct(N, P) <: Group
-> Implements Wreath product of a group `N` by permutation group $P = S_n$,
-> usually written as $N \wr P$.
-> The multiplication inside wreath product is defined as
->  >  `(n, σ) * (m, τ) = (n*σ(m), στ)`
-> where `σ(m)` denotes the action (from the right) of the permutation group on
-> `n-tuples` of elements from `N`
+Return the wreath product of a group `N` by permutation group `P`, usually
+written as `N ≀ P`. The multiplication inside wreath product is defined as
+>  `(n, σ) * (m, τ) = (n*σ(m), στ)`
+where `σ(m)` denotes the action (from the right) of the permutation group on
+`n-tuples` of elements from `N`
 
 # Arguments:
-* `N::Group` : the single factor of the group $N$
-* `P::Generic.PermGroup` : full `PermutationGroup`
+* `N::Group` : the single factor of the `DirectPower` group `N`
+* `P::AbstractPermutationGroup` acting on `DirectPower` of `N`
 """
 struct WreathProduct{N, T<:Group, PG<:AbstractPermutationGroup} <: Group
    N::DirectPowerGroup{N, T}
@@ -71,25 +70,25 @@ function (G::WreathProduct{N})(g::WreathProductElem{N}) where {N}
    return WreathProductElem(n, p)
 end
 
-@doc doc"""
+"""
     (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.Perm)
-> Creates an element of wreath product `G` by coercing `n` and `p` to `G.N` and
-> `G.P`, respectively.
+Create an element of wreath product `G` by coercing `n` and `p` to `G.N` and
+`G.P`, respectively.
 """
 (G::WreathProduct)(n::DirectPowerGroupElem, p::Generic.Perm) = WreathProductElem(n,p)
 
 Base.one(G::WreathProduct) = WreathProductElem(one(G.N), one(G.P), false)
 
-@doc doc"""
+"""
     (G::WreathProduct)(p::Generic.Perm)
-> Returns the image of permutation `p` in `G` via embedding `p -> (id,p)`.
+Return the image of permutation `p` in `G` via embedding `p → (id,p)`.
 """
 (G::WreathProduct)(p::Generic.Perm) = G(one(G.N), p)
 
-@doc doc"""
+"""
     (G::WreathProduct)(n::DirectPowerGroupElem)
-> Returns the image of `n` in `G` via embedding `n -> (n,())`. This is the
-> embedding that makes the sequence `1 -> N -> G -> P -> 1` exact.
+Return the image of `n` in `G` via embedding `n → (n, ())`. This is the
+embedding that makes the sequence `1 → N → G → P → 1` exact.
 """
 (G::WreathProduct)(n::DirectPowerGroupElem) = G(n, one(G.P))
 
@@ -149,14 +148,12 @@ end
 
 (p::Generic.Perm)(n::DirectPowerGroupElem) = DirectPowerGroupElem(n.elts[p.d])
 
-@doc doc"""
+"""
     *(g::WreathProductElem, h::WreathProductElem)
-> Return the wreath product group operation of elements, i.e.
->
+Return the group operation of wreath product elements, i.e.
 > `g*h = (g.n*g.p(h.n), g.p*h.p)`,
->
-> where `g.p(h.n)` denotes the action of `g.p::Generic.Perm` on
-> `h.n::DirectPowerGroupElem` via standard permutation of coordinates.
+where `g.p(h.n)` denotes the action of `g.p::Generic.Perm` on
+`h.n::DirectPowerGroupElem` via standard permutation of coordinates.
 """
 function *(g::WreathProductElem, h::WreathProductElem)
    return WreathProductElem(g.n*g.p(h.n), g.p*h.p, false)
@@ -164,9 +161,9 @@ end
 
 ^(g::WreathProductElem, n::Integer) = Base.power_by_squaring(g, n)
 
-@doc doc"""
+"""
     inv(g::WreathProductElem)
-> Returns the inverse of element of a wreath product, according to the formula
+Return the inverse of element of a wreath product, according to the formula
 >   `g^-1 = (g.n, g.p)^-1 = (g.p^-1(g.n^-1), g.p^-1)`.
 """
 function inv(g::WreathProductElem)

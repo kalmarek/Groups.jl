@@ -9,9 +9,9 @@ function hash_internal(W::GWord)
     return hash(syllables(W), hash(typeof(W), h))
 end
 
-function hash(W::GWord, h::UInt)
+function hash(W::GWord, h::UInt=UInt(0); kwargs...)
     if ismodified(W)
-        savehash!(W, hash_internal(W))
+        savehash!(W, hash_internal(W; kwargs...))
         unsetmodified!(W)
     end
     return xor(savedhash(W), h)
