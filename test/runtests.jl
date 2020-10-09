@@ -6,7 +6,7 @@ using LinearAlgebra
 
 @testset "Groups" begin
 
-   @testset "generate balls" begin
+   @testset "wlmetric_ball" begin
       M = MatrixAlgebra(zz, 3)
       w = one(M); w[1,2] = 1;
       r = one(M); r[2,3] = -3;
