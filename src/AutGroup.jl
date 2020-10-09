@@ -258,7 +258,8 @@ function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
     # cheap
     # if hashes differ, images must have differed as well
     hash(g) != hash(h) && return false
-    # equal elements, or possibly a hash conflict
+
+    # hashes equal, hence either equal elements, or a hash conflict
     begin
         if !img_computed
             img_task = Threads.@spawn img = compute_images(g)
@@ -271,6 +272,8 @@ function (==)(g::Automorphism{N}, h::Automorphism{N}) where N
         !img_computed && fetch(img_task)
         !imh_computed && fetch(imh_task)
     end
+
+    img != imh && @warn "hash collision in == :" g h
     return img == imh
 end
 
