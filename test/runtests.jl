@@ -15,6 +15,8 @@ using LinearAlgebra
       S = [w,r,s]; S = unique([S; inv.(S)]);
       _, sizes = Groups.wlmetric_ball(S, radius=4);
       @test sizes == [7, 33, 141, 561]
+      _, sizes = Groups.wlmetric_ball_serial(S, radius=4);
+      @test sizes == [7, 33, 141, 561]
    end
 
    include("FreeGroup-tests.jl")
