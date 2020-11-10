@@ -1,7 +1,7 @@
 change_pow(s::S, n::Integer) where S<:GSymbol = S(s.id, n)
 
 function Base.iterate(s::GS, i=1) where GS<:GSymbol
-    return i <= abs(s.pow) ? (GS(s.id, sign(s.pow)), i+1) : nothing
+    return i <= abs(s.pow) ? (change_pow(s, sign(s.pow)), i+1) : nothing
 end
 Base.size(s::GSymbol) = (abs(s.pow), )
 Base.length(s::GSymbol) = first(size(s))

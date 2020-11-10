@@ -142,12 +142,17 @@
       @test (Groups.change_pow(f, -2)).pow == 1
       @test (inv(f)).pow == 1
 
-      f = Groups.AutSymbol(perm"(1,2)(3,4)")
-      @test isa(inv(f), Groups.AutSymbol)
+      g = Groups.AutSymbol(perm"(1,2)(3,4)")
+      @test isa(inv(g), Groups.AutSymbol)
 
-      @test_throws MethodError f*f
+      @test_throws MethodError g*f
 
-      @test A(f)^-1 == A(inv(f))
+      @test A(g)^-1 == A(inv(g))
+
+      h = Groups.transvection_R(1,2)
+
+      @test collect(A(g)*A(h)) == [g, h]
+      @test collect(A(h)^2) == [h, h]
    end
 
    @testset "reductions/arithmetic" begin
