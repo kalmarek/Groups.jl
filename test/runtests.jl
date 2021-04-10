@@ -21,7 +21,5 @@ using LinearAlgebra
 
    include("FreeGroup-tests.jl")
    include("AutGroup-tests.jl")
-   include("DirectPower-tests.jl")
-   include("WreathProd-tests.jl")
    include("FPGroup-tests.jl")
 end

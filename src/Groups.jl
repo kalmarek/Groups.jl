@@ -10,6 +10,7 @@ import Base: inv, reduce, *, ^, power_by_squaring
 import Base: findfirst, findnext, findlast, findprev, replace
 import Base: deepcopy_internal
 
+using GroupsCore
 using LinearAlgebra
 using ThreadsX
 
@@ -28,9 +29,6 @@ include("hashing.jl")
 include("freereduce.jl")
 include("arithmetic.jl")
 include("findreplace.jl")
-
-include("DirectPower.jl")
-include("WreathProducts.jl")
 
 ###############################################################################
 #
