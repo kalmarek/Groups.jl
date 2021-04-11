@@ -1,18 +1,10 @@
 module Groups
 
-using AbstractAlgebra
-import AbstractAlgebra: Group, GroupElem, Ring
-import AbstractAlgebra: parent, parent_type, elem_type
-import AbstractAlgebra: order, gens, matrix_repr
-
-import Base: length, ==, hash, show, convert, eltype, iterate
-import Base: inv, reduce, *, ^, power_by_squaring
-import Base: findfirst, findnext, findlast, findprev, replace
-import Base: deepcopy_internal
-
 using GroupsCore
 using LinearAlgebra
 using ThreadsX
+
+import AbstractAlgebra
 
 export gens, FreeGroup, Aut, SAut
 
@@ -23,7 +15,6 @@ include("FPGroups.jl")
 include("AutGroup.jl")
 
 include("symbols.jl")
-include("fallbacks.jl")
 include("words.jl")
 include("hashing.jl")
 include("freereduce.jl")
@@ -56,11 +47,7 @@ end
 #   Misc
 #
 
-"""
-    gens(G::AbstractFPGroups)
-Return vector of generators of `G`, as its elements.
-"""
-AbstractAlgebra.gens(G::AbstractFPGroup) = G.(G.gens)
+GroupsCore.gens(G::AbstractFPGroup) = G.(G.gens)
 
 """
     wlmetric_ball(S::AbstractVector{<:GroupElem}
@@ -74,7 +61,7 @@ function wlmetric_ball_serial(
     S::AbstractVector{T};
     radius = 2,
     op = *,
-) where {T<:Union{GroupElem,NCRingElem}}
+) where {T<:Union{GroupElement,AbstractAlgebra.NCRingElem}}
     old = unique!([one(first(S)), S...])
     sizes = [1, length(old)]
     for i = 2:radius
@@ -91,7 +78,7 @@ function wlmetric_ball_thr(
     S::AbstractVector{T};
     radius = 2,
     op = *,
-) where {T<:Union{GroupElem,NCRingElem}}
+) where {T<:Union{GroupElement,AbstractAlgebra.NCRingElem}}
     old = unique!([one(first(S)), S...])
     sizes = [1, length(old)]
     for r = 2:radius
@@ -114,7 +101,7 @@ function wlmetric_ball_serial(
     center::T;
     radius = 2,
     op = *,
-) where {T<:Union{GroupElem,NCRingElem}}
+) where {T<:Union{GroupElement,AbstractAlgebra.NCRingElem}}
     E, sizes = wlmetric_ball_serial(S, radius = radius, op = op)
     isone(center) && return E, sizes
     return c .* E, sizes
@@ -125,7 +112,7 @@ function wlmetric_ball_thr(
     center::T;
     radius = 2,
     op = *,
-) where {T<:Union{GroupElem,NCRingElem}}
+) where {T<:Union{GroupElement,AbstractAlgebra.NCRingElem}}
     E, sizes = wlmetric_ball_thr(S, radius = radius, op = op)
     isone(center) && return E, sizes
     return c .* E, sizes
@@ -137,7 +124,7 @@ function wlmetric_ball(
     radius = 2,
     op = *,
     threading = true,
-) where {T<:Union{GroupElem,NCRingElem}}
+) where {T<:Union{GroupElement,AbstractAlgebra.NCRingElem}}
     threading && return wlmetric_ball_thr(S, center, radius = radius, op = op)
     return return wlmetric_ball_serial(S, center, radius = radius, op = op)
 end

@@ -27,8 +27,8 @@ export FreeGroupElem, FreeGroup
 #   Type and parent object methods
 #
 
-AbstractAlgebra.elem_type(::Type{FreeGroup}) = FreeGroupElem
-AbstractAlgebra.parent_type(::Type{FreeGroupElem}) = FreeGroup
+Base.eltype(::Type{FreeGroup}) = FreeGroupElem
+GroupsCore.parent_type(::Type{FreeGroupElem}) = FreeGroup
 
 ###############################################################################
 #
@@ -67,7 +67,7 @@ end
 #   String I/O
 #
 
-function show(io::IO, G::FreeGroup)
+function Base.show(io::IO, G::FreeGroup)
    print(io, "Free group on $(length(G.gens)) generators: ")
    join(io, G.gens, ", ")
 end

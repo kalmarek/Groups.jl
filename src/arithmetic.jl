@@ -55,15 +55,15 @@ lmul!(out::T, v::T) where T<:GWord = freereduce!(prepend!(out, v))
 
 lmul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, y, x)
 
-AbstractAlgebra.mul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, x, y)
+GroupsCore.mul!(out::T, x::T, y::T) where T <: GWord = rmul!(out, x, y)
 
-(*)(W::GW, Z::GW) where GW <: GWord = rmul!(deepcopy(W), W, Z)
-(*)(W::GWord, s::GSymbol) = freereduce!(push!(deepcopy(W), s))
-(*)(s::GSymbol, W::GWord) = freereduce!(pushfirst!(deepcopy(W), s))
+Base.:(*)(W::GW, Z::GW) where GW <: GWord = rmul!(deepcopy(W), W, Z)
+Base.:(*)(W::GWord, s::GSymbol) = freereduce!(push!(deepcopy(W), s))
+Base.:(*)(s::GSymbol, W::GWord) = freereduce!(pushfirst!(deepcopy(W), s))
 
-function power_by_squaring(W::GWord, p::Integer)
+function Base.power_by_squaring(W::GWord, p::Integer)
     if p < 0
-        return power_by_squaring(inv(W), -p)
+        return Base.power_by_squaring(inv(W), -p)
     elseif p == 0
         return one(W)
     elseif p == 1
@@ -90,4 +90,4 @@ function power_by_squaring(W::GWord, p::Integer)
     return freereduce!(Z)
 end
 
-(^)(x::GWord, n::Integer) = power_by_squaring(x,n)
+Base.:(^)(x::GWord, n::Integer) = Base.power_by_squaring(x,n)

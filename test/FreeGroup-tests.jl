@@ -42,7 +42,7 @@ end
 end
 
 @testset "FreeGroup" begin
-   @test isa(FreeGroup(["s", "t"]), AbstractAlgebra.Group)
+   @test isa(FreeGroup(["s", "t"]), GroupsCore.Group)
    G = FreeGroup(["s", "t"])
    s, t = gens(G)
 
@@ -87,7 +87,7 @@ end
       w = deepcopy(t)
       @test length(Groups.rmul!(w, t)) == 2
       @test length(Groups.lmul!(w, inv(t))) == 1
-      w = AbstractAlgebra.mul!(w, w, s)
+      w = GroupsCore.mul!(w, w, s)
       @test length(w) == 2
       @test length(Groups.lmul!(w, inv(s))) == 3
 

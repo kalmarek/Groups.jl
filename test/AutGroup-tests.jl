@@ -1,6 +1,8 @@
+import AbstractAlgebra.@perm_str
+
 @testset "Automorphisms" begin
 
-   G = SymmetricGroup(Int8(4))
+   G = AbstractAlgebra.SymmetricGroup(Int8(4))
 
    @testset "AutSymbol" begin
       @test_throws MethodError Groups.AutSymbol(:a)
@@ -91,7 +93,7 @@
       f = Groups.AutSymbol(:a, 1, Groups.FlipAut(1))
       @test isa(Automorphism{3}(f), Groups.GWord)
       @test isa(Automorphism{3}(f), Automorphism)
-      @test isa(AutGroup(FreeGroup(3)), AbstractAlgebra.Group)
+      @test isa(AutGroup(FreeGroup(3)), GroupsCore.Group)
       @test isa(AutGroup(FreeGroup(1)), Groups.AbstractFPGroup)
 
       A = AutGroup(FreeGroup(1))

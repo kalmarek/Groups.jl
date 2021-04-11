@@ -1,7 +1,14 @@
-abstract type AbstractFPGroup <: Group end
+abstract type AbstractFPGroup <: GroupsCore.Group end
+
+function Base.one(G::Gr) where Gr <: AbstractFPGroup
+    El = eltype(G)
+    id = El(eltype(El)[])
+    id.parent = G
+    return id
+end
 
 """
-    ::GSymbol
+    GSymbol
 Represents a syllable. Abstract type which all group symbols of
 `AbstractFPGroups` should subtype. Each concrete subtype should implement fields:
  * `id` which is the `Symbol` representation/identification of a symbol
@@ -9,7 +16,7 @@ Represents a syllable. Abstract type which all group symbols of
 """
 abstract type GSymbol end
 
-abstract type GWord{T<:GSymbol} <: GroupElem end
+abstract type GWord{T<:GSymbol} <: GroupsCore.GroupElement end
 
 """
     W::GroupWord{T} <: GWord{T<:GSymbol} <:GroupElem

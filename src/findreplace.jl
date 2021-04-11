@@ -28,10 +28,11 @@ function issubword(z::GWord, w::GWord, sindex::Integer)
     return true
 end
 
-"""doc
+"""
+
 Find the first syllable index k>=i such that Z < syllables(W)[k:k+syllablelength(Z)-1]
 """
-function findnext(subword::GWord, word::GWord, start::Integer)
+function Base.findnext(subword::GWord, word::GWord, start::Integer)
     @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
     isempty(subword) && return start
     stop = syllablelength(word) - syllablelength(subword) +1
@@ -42,7 +43,7 @@ function findnext(subword::GWord, word::GWord, start::Integer)
     return nothing
 end
 
-function findnext(s::FreeSymbol, word::GWord, start::Integer)
+function Base.findnext(s::FreeSymbol, word::GWord, start::Integer)
     @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
     isone(s) && return start
     stop = syllablelength(word)
@@ -53,7 +54,7 @@ function findnext(s::FreeSymbol, word::GWord, start::Integer)
     return nothing
 end
 
-function findprev(subword::GWord, word::GWord, start::Integer)
+function Base.findprev(subword::GWord, word::GWord, start::Integer)
     @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
     isempty(subword) && return start
     stop = 1
@@ -64,7 +65,7 @@ function findprev(subword::GWord, word::GWord, start::Integer)
     return nothing
 end
 
-function findprev(s::FreeSymbol, word::GWord, start::Integer)
+function Base.findprev(s::FreeSymbol, word::GWord, start::Integer)
     @boundscheck 1 ≤ start ≤ syllablelength(word) || throw(BoundsError(word, start))
     isone(s) && return start
     stop = 1
@@ -75,11 +76,11 @@ function findprev(s::FreeSymbol, word::GWord, start::Integer)
     return nothing
 end
 
-findfirst(subword::GWord, word::GWord) = findnext(subword, word, 1)
-findlast(subword::GWord, word::GWord) =
+Base.findfirst(subword::GWord, word::GWord) = findnext(subword, word, 1)
+Base.findlast(subword::GWord, word::GWord) =
     findprev(subword, word, syllablelength(word)-syllablelength(subword)+1)
 
-function replace!(out::GW, W::GW, lhs_rhs::Pair{GS, T}; count::Integer=typemax(Int)) where
+function Base.replace!(out::GW, W::GW, lhs_rhs::Pair{GS, T}; count::Integer=typemax(Int)) where
         {GS<:GSymbol, T<:GWord, GW<:GWord}
     (count == 0 || isempty(W)) && return W
     count < 0 && throw(DomainError(count, "`count` must be non-negative."))
@@ -117,7 +118,7 @@ function replace!(out::GW, W::GW, lhs_rhs::Pair{GS, T}; count::Integer=typemax(I
     return freereduce!(out)
 end
 
-function replace!(out::GW, W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
+function Base.replace!(out::GW, W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
     {GW<:GWord, T <: GWord}
     (count == 0 || isempty(W)) && return W
     count < 0 && throw(DomainError(count, "`count` must be non-negative."))
@@ -164,12 +165,12 @@ function replace!(out::GW, W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(In
     return freereduce!(out)
 end
 
-function replace(W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
+function Base.replace(W::GW, lhs_rhs::Pair{T, T}; count::Integer=typemax(Int)) where
     {GW<:GWord, T <: GWord}
     return replace!(one(W), W, lhs_rhs; count=count)
 end
 
-function replace(W::GW, subst_dict::Dict{T,T}) where {GW<:GWord, T<:GWord}
+function Base.replace(W::GW, subst_dict::Dict{T,T}) where {GW<:GWord, T<:GWord}
     out = W
     for toreplace in reverse!(sort!(collect(keys(subst_dict)), by=length))
         replacement = subst_dict[toreplace]

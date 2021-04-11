@@ -29,8 +29,8 @@ export FPGroupElem, FPGroup
 #   Type and parent object methods
 #
 
-AbstractAlgebra.elem_type(::Type{FPGroup}) = FPGroupElem
-AbstractAlgebra.parent_type(::Type{FPGroupElem}) = FPGroup
+Base.eltype(::Type{FPGroup}) = FPGroupElem
+GroupsCore.parent_type(::Type{FPGroupElem}) = FPGroup
 
 ###############################################################################
 #
@@ -76,7 +76,7 @@ end
 #   String I/O
 #
 
-function show(io::IO, G::FPGroup)
+function Base.show(io::IO, G::FPGroup)
     print(io, "FPgroup on $(length(G.gens)) generators ")
     strrels = join(G.rels, ", ")
     if length(strrels) > 200

@@ -1,13 +1,14 @@
 using Test
-using AbstractAlgebra
+import AbstractAlgebra
 using Groups
 
+include("symmetric.jl")
 using LinearAlgebra
 
 @testset "Groups" begin
 
    @testset "wlmetric_ball" begin
-      M = MatrixAlgebra(zz, 3)
+      M = AbstractAlgebra.MatrixAlgebra(AbstractAlgebra.zz, 3)
       w = one(M); w[1,2] = 1;
       r = one(M); r[2,3] = -3;
       s = one(M); s[1,3] = 2; s[3,2] = -1;

@@ -5,7 +5,7 @@ setmodified!(w::GWord) = (w.modified = true; w)
 unsetmodified!(w::GWord) = (w.modified = false; w)
 savehash!(w::GWord, h::UInt) = (w.savedhash = h; w)
 savedhash(w::GWord) = w.savedhash
-parent(w::GWord) = w.parent
+Base.parent(w::GWord) = w.parent
 hasparent(w::GWord) = isdefined(w, :parent)
 setparent!(w::GWord, G::AbstractFPGroup) = (w.parent = G; w)
 
