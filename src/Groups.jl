@@ -21,6 +21,12 @@ include("freereduce.jl")
 include("arithmetic.jl")
 include("findreplace.jl")
 
+module New
+include("new_types.jl")
+include("normalform.jl")
+
+end # module New
+
 ###############################################################################
 #
 #   String I/O
