@@ -91,7 +91,8 @@ GroupsCore.ngens(G::AbstractFPGroup) = length(G.gens)
 
 function GroupsCore.gens(G::AbstractFPGroup, i::Integer)
     @boundscheck 1<=i<=GroupsCore.ngens(G)
-    return FPGroupElement(word_type(G)([i]), G)
+    l = alphabet(G)[G.gens[i]]
+    return FPGroupElement(word_type(G)([l]), G)
 end
 GroupsCore.gens(G::AbstractFPGroup) = [gens(G, i) for i in 1:GroupsCore.ngens(G)]
 
@@ -102,8 +103,8 @@ function Base.rand(
     )
     l = rand(10:100)
     G = rs[]
-    symmgens_len = length(alphabet(F))
-    return FPGroupElement(word_type(G)(rand(1:symmgens_len, l)), G)
+    nletters = length(alphabet(G))
+    return FPGroupElement(word_type(G)(rand(1:nletters, l)), G)
 end
 
 ## FPGroupElement
@@ -204,10 +205,10 @@ struct FreeGroup{T} <: AbstractFPGroup
     end
 end
 
-function FreeGroup(a::Alphabet)
+function FreeGroup(A::Alphabet)
     @boundscheck @assert all(KnuthBendix.hasinverse(l, A)
-        for l in KnuthBendix.letters(a))
-    return FreeGroup(KnuthBendix.letters(a), a)
+        for l in KnuthBendix.letters(A))
+    return FreeGroup(KnuthBendix.letters(A), A)
 end
 
 Base.show(io::IO, F::FreeGroup) = print(io, "free group on $(ngens(F)) generators")
