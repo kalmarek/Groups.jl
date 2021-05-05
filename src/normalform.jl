@@ -44,7 +44,7 @@ Defaults to the rewriting in the free group.
     if isnormalform(g) && inv(alphabet(g), last(out)) != first(word(g))
         return append!(res, word(g))
     end
-    return free_rewrite!(res, word(g), alphabet(g))
+    return KnuthBendix.rewrite_from_left!(res, word(g), rewriting(parent(g)))
 end
 
 """

@@ -13,17 +13,22 @@ using Random
 
 An Abstract type representing finitely presented groups. Every instance `` must implement
  * `KnuthBendix.alphabet(G::MyFPGroup)`
+ * `rewriting(G::MyFPGroup)` : return the rewriting object which must implement
+ > `KnuthBendix.rewrite_from_left!(u, v, rewriting(G))`.
+By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
 
-By default `word_type(::Type{MyFPGroup}) = Word{UInt16}` returns the default
-word type used for group elements. You may wish to override this if e.g. to
+AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt16}`,
+which controls the word type used for group elements. If if your group has less
+than `255` generators you may define
 > `word_type(::Type{MyFPGroup}) = Word{UInt8}`
-if your group has less than `255` generators.
 """
 abstract type AbstractFPGroup <: GroupsCore.Group end
 
 word_type(G::AbstractFPGroup) = word_type(typeof(G))
 # the default:
 word_type(::Type{<:AbstractFPGroup}) = Word{UInt16}
+
+rewriting(G::AbstractFPGroup) = alphabet(G)
 
 function (G::AbstractFPGroup)(word::AbstractVector{<:Integer})
     @boundscheck @assert all(l -> 1<= l <=length(KnuthBendix.alphabet(G)), word)
