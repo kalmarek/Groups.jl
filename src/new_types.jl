@@ -16,6 +16,7 @@ An Abstract type representing finitely presented groups. Every instance `` must 
  * `rewriting(G::MyFPGroup)` : return the rewriting object which must implement
  > `KnuthBendix.rewrite_from_left!(u, v, rewriting(G))`.
 By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
+ * `relations(G::MyFPGroup)` : return a set of defining relations.
 
 AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt16}`,
 which controls the word type used for group elements. If if your group has less
@@ -215,3 +216,43 @@ Base.show(io::IO, F::FreeGroup) = print(io, "free group on $(ngens(F)) generator
 
 # mandatory methods:
 KnuthBendix.alphabet(F::FreeGroup) = F.alphabet
+relations(F::FreeGroup) = Pair{eltype(F)}[]
+
+## FP Groups
+
+struct FPGroup{T, R, S} <: AbstractFPGroup
+    gens::Vector{T}
+    relations::Vector{Pair{S, S}}
+    rws::R
+end
+
+KnuthBendix.alphabet(G::FPGroup) = alphabet(rewriting(G))
+rewriting(G::FPGroup) = G.rws
+
+relations(G::FPGroup) = G.relations
+
+function FPGroup(
+    G::AbstractFPGroup,
+    rels::AbstractVector{<:Pair{GEl, GEl}};
+    ordering=KnuthBendix.LenLex,
+    kwargs...) where GEl<:FPGroupElement
+
+    O = ordering(alphabet(G))
+    for (lhs, rhs) in rels
+        @assert parent(lhs) === parent(rhs) === G
+    end
+    word_rels = [word(lhs)=>word(rhs) for (lhs, rhs) in [relations(G); rels]]
+    rws = RewritingSystem(word_rels, O)
+
+    KnuthBendix.knuthbendix!(rws; kwargs...)
+
+    return FPGroup(G.gens, rels, rws)
+end
+
+function Base.show(io::IO, G::FPGroup)
+    print(io, "⟨")
+    Base.print_array(io, reshape(gens(G), (1, New.ngens(G))))
+    print(io, " | ")
+    Base.print_array(io, relations(G))
+    print(io, "⟩")
+end
