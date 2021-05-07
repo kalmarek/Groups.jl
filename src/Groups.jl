@@ -22,6 +22,8 @@ include("arithmetic.jl")
 include("findreplace.jl")
 
 module New
+using DataStructures
+
 include("new_types.jl")
 include("new_hashing.jl")
 include("normalform.jl")

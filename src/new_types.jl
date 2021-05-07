@@ -43,50 +43,7 @@ Base.one(G::AbstractFPGroup) = FPGroupElement(one(word_type(G)), G)
 Base.eltype(::Type{FPG}) where {FPG<:AbstractFPGroup} =
     FPGroupElement{FPG, word_type(FPG)}
 
-struct FPGroupIter{GEl}
-    elts::Vector{GEl}
-    seen::Set{GEl}
-    u::GEl
-    v::GEl
-end
-
-FPGroupIter(G::AbstractFPGroup) =
-    FPGroupIter([one(G)], Set([one(G)]), one(G), one(G))
-
-Base.iterate(G::AbstractFPGroup) = one(G), (FPGroupIter(G), 1, 1)
-@inline function Base.iterate(G::AbstractFPGroup, state)
-    iter, elt_idx, gen_idx = state
-
-    if gen_idx > length(alphabet(G))
-        elt_idx == length(iter.elts) && return nothing
-        gen_idx = 1
-        elt_idx += 1
-    end
-
-
-    res = let (u, v) = (iter.u, iter.v), elt = iter.elts[elt_idx]
-        copyto!(v, elt) # this invalidates normalform of v
-        @assert !isnormalform(v)
-        push!(word(v), gen_idx)
-        resize!(word(u), 0)
-
-        normalform!(u, v)
-    end
-
-    if res in iter.seen
-        return iterate(G, (iter, elt_idx, gen_idx+1))
-    else
-        w = deepcopy(res)
-        @assert isnormalform(w)
-        push!(iter.elts, w)
-        push!(iter.seen, w)
-        state = (iter, elt_idx, gen_idx+1)
-        return w, state
-    end
-end
-
-# the default:
-# Base.IteratorSize(::Type{<:AbstractFPGroup}) = Base.SizeUnknown()
+include("iteration.jl")
 
 GroupsCore.ngens(G::AbstractFPGroup) = length(G.gens)
 
