@@ -132,38 +132,6 @@ function Base.show(io::IO, f::FPGroupElement)
     print(io, KnuthBendix.string_repr(word(f), alphabet(f)))
 end
 
-## Hashing
-
-# We store hash of a word in field `savedhash` to use it as cheap replacement
-# for equality checking. In the last bit of `savehash` we store the information
-# whether the word is already reduced (in normal form) or not. Hence
-isnormalform(g::FPGroupElement) = Bool(g.savedhash & 1)
-
-# To update hash use this internal method, possibly only after computing the
-# normal form of `g`:
-_update_savedhash!(g::FPGroupElement, h = hash(word(g))) =
-    (g.savedhash = h | 1; return g)
-
-# If `g` has been mutated (e.g. `word(g)` has been modified, `_invalidate_hash`
-# must be called.
-_invalidate_hash!(g::FPGroupElement) = g.savedhash = g.savedhash & 0
-
-# Accessor for the saved hash
-@inline _savedhash(f::FPGroupElement) = f.savedhash
-
-function Base.hash(g::FPGroupElement, h::UInt)
-    normalform!(g)
-    # compute the best approximation of the normal form
-    return hash(parent(g), _savedhash(g) ⊻ h)
-end
-
-function Base.copyto!(res::FPGroupElement, g::FPGroupElement)
-    resize!(word(res), length(word(g)))
-    copyto!(word(res), word(g))
-    _invalidate_hash!(res)
-    return res
-end
-
 ## GroupElement Interface for FPGroupElement
 
 Base.parent(f::FPGroupElement) = f.parent
@@ -171,13 +139,14 @@ GroupsCore.parent_type(::Type{<:FPGroupElement{G}}) where G = G
 
 function Base.:(==)(g::FPGroupElement, h::FPGroupElement)
     @boundscheck @assert parent(g) === parent(h)
+    normalform!(g)
+    normalform!(h)
     hash(g) != hash(h) && return false
-    # hash reduces to normal form behind the scenes
     return word(g) == word(h)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
-    return FPGroupElement(copy(word(g)), _savedhash(g), parent(g))
+    return FPGroupElement(copy(word(g)), g.savedhash, parent(g))
 end
 
 Base.inv(g::FPGroupElement) =

@@ -11,7 +11,8 @@ Compute the normal form of `g`, possibly modifying `g` in-place.
         copyto!(word(g), w)
     end
 
-    g = _update_savedhash!(g)
+    _setnormalform!(g, true)
+    _setvalidhash!(g, false)
     @assert isnormalform(g)
     return g
 end
@@ -24,11 +25,11 @@ function normalform!(res::GEl, g::GEl) where GEl<:FPGroupElement
     @boundscheck @assert parent(res) === parent(g)
     if isnormalform(g)
         copyto!(res, g)
-        _update_savedhash!(res, g.savedhash)
     else
         resize!(word(res), 0)
         normalform!(word(res), g)
-        res = _update_savedhash!(res)
+        _setnormalform!(res, true)
+        _setvalidhash!(res, false)
     end
     return res
 end

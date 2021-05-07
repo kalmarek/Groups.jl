@@ -23,6 +23,7 @@ include("findreplace.jl")
 
 module New
 include("new_types.jl")
+include("new_hashing.jl")
 include("normalform.jl")
 
 end # module New
