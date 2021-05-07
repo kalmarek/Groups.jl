@@ -9,6 +9,7 @@ Base.length(s::GSymbol) = first(size(s))
 Base.eltype(s::GS) where GS<:GSymbol = GS
 
 Base.isone(s::GSymbol) = iszero(s.pow)
+Base.literal_pow(::typeof(^), s::Groups.GSymbol, ::Val{-1}) = inv(s)
 Base.inv(s::GSymbol) = change_pow(s, -s.pow)
 Base.hash(s::S, h::UInt) where S<:GSymbol = hash(s.id, hash(s.pow, hash(S, h)))
 
