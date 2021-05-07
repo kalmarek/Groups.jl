@@ -47,31 +47,3 @@ Defaults to the rewriting in the free group.
     end
     return KnuthBendix.rewrite_from_left!(res, word(g), rewriting(parent(g)))
 end
-
-"""
-    free_rewrite!(v::AbstractWord, w::AbstractWord, A::Alphabet)
-Append `w` to `v` applying free reductions as defined by the inverses of `A`.
-"""
-free_rewrite!(v::AbstractWord, w::AbstractWord, A::Alphabet) =
-    KnuthBendix.rewrite_from_left!(v, w, A)
-
-function KnuthBendix.rewrite_from_left!(
-    v::AbstractWord,
-    w::AbstractWord,
-    A::Alphabet
-    )
-    while !isone(w)
-        if isone(v)
-            push!(v, popfirst!(w))
-        else
-            # the first check is for monoids only
-            if KnuthBendix.hasinverse(last(v), A) && inv(A, last(v)) == first(w)
-                pop!(v)
-                popfirst!(w)
-            else
-                push!(v, popfirst!(w))
-            end
-        end
-    end
-    return v
-end
