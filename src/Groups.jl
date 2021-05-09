@@ -5,6 +5,7 @@ using LinearAlgebra
 using ThreadsX
 
 import AbstractAlgebra
+import KnuthBendix
 
 export gens, FreeGroup, Aut, SAut
 
@@ -22,11 +23,15 @@ include("arithmetic.jl")
 include("findreplace.jl")
 
 module New
+import Groups: AutSymbol, GSymbol, λ, ϱ, RTransvect, LTransvect
 using DataStructures
 
 include("new_types.jl")
 include("new_hashing.jl")
 include("normalform.jl")
+
+include("gersten_relations.jl")
+include("new_autgroups.jl")
 
 end # module New
 
