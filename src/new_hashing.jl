@@ -1,6 +1,6 @@
 ## Hashing
 
-_hashing_data(g::FPGroupElement) = word(g)
+equality_data(g::FPGroupElement) = (normalform!(g); word(g))
 
 bitget(h::UInt, n::Int) = Bool((h & (1 << n)) >> n)
 bitclear(h::UInt, n::Int) = h & ~(1 << n)
@@ -27,7 +27,7 @@ _setvalidhash!(g::FPGroupElement, v::Bool) =
 
 # To update hash use this internal method, possibly only after computing the
 # normal form of `g`:
-function _update_savedhash!(g::FPGroupElement, data=_hashing_data(g))
+function _update_savedhash!(g::FPGroupElement, data)
     h = hash(data, hash(parent(g)))
     h = (h << count_ones(__BITFLAGS_MASK)) | (__BITFLAGS_MASK & g.savedhash)
     g.savedhash = _setvalidhash(h, true)
@@ -36,7 +36,7 @@ end
 
 function Base.hash(g::FPGroupElement, h::UInt)
     normalform!(g)
-    _isvalidhash(g) || _update_savedhash!(g)
+    _isvalidhash(g) || _update_savedhash!(g, equality_data(g))
     return hash(g.savedhash >> count_ones(__BITFLAGS_MASK) , h)
 end
 

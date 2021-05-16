@@ -33,7 +33,7 @@ function relations(G::AutomorphismGroup)
     return last(gersten_relations(n, commutative=false))
 end
 
-_hashing_data(f::FPGroupElement{<:AutomorphismGroup}) = normalform!.(evaluate(f))
+equality_data(f::FPGroupElement{<:AutomorphismGroup}) = normalform!.(evaluate(f))
 
 function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
     @assert parent(g) === parent(h)
@@ -52,12 +52,12 @@ function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
     img_computed, imh_computed = false, false
 
     if !_isvalidhash(g)
-        img = _hashing_data(g)
+        img = equality_data(g)
         _update_savedhash!(g, img)
         img_computed = true
     end
     if !_isvalidhash(h)
-        imh = _hashing_data(h)
+        imh = equality_data(h)
         _update_savedhash!(h, imh)
         imh_computed = true
     end
@@ -68,17 +68,15 @@ function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
     hash(g) != hash(h) && return false
 
     # words are different, but hashes agree
-    if !img_computed
-        img = _hashing_data(g)
-    end
-    if !imh_computed
-        imh = _hashing_data(h)
+    @sync begin
+        !img_computed && Threads.@spawn img = equality_data(g)
+        !imh_computed && Threads.@spawn imh = equality_data(h)
     end
 
-    res = img == imh
-    !res && @warn "hash collision in == :" g h
+    equal = img == imh
+    equal || @warn "hash collision in == :" g h
 
-    return res
+    return equal
 end
 
 # eye-candy
