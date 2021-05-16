@@ -27,7 +27,7 @@ abstract type AbstractFPGroup <: GroupsCore.Group end
 
 word_type(G::AbstractFPGroup) = word_type(typeof(G))
 # the default:
-word_type(::Type{<:AbstractFPGroup}) = Word{UInt16}
+word_type(::Type{<:AbstractFPGroup}) = Word{UInt8}
 
 # the default (results in free rewriting)
 rewriting(G::AbstractFPGroup) = alphabet(G)
