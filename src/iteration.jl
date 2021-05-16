@@ -1,4 +1,4 @@
-mutable struct FPIterState{GEl, T}
+mutable struct FPIterState{GEl,T}
     elts::OrderedSet{GEl}
     u::GEl
     v::GEl
@@ -42,12 +42,12 @@ function Base.iterate(G::AbstractFPGroup, state)
     end
 
     if res in iter
-        return iterate(G, (iter, elt, gen_idx+1))
+        return iterate(G, (iter, elt, gen_idx + 1))
     else
         w = deepcopy(res)
         @assert isnormalform(w)
         push!(iter, w)
-        return w, (iter, elt, gen_idx+1)
+        return w, (iter, elt, gen_idx + 1)
     end
 end
 

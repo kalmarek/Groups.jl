@@ -6,16 +6,16 @@ struct Transvection <: GSymbol
     ij::UInt8
     inv::Bool
 
-    function Transvection(id::Symbol, i::Integer, j::Integer, inv=false)
+    function Transvection(id::Symbol, i::Integer, j::Integer, inv = false)
         @assert id in (:ϱ, :λ)
-        return new(id, _indices(UInt8(i),UInt8(j)), inv)
+        return new(id, _indices(UInt8(i), UInt8(j)), inv)
     end
 end
 
 ϱ(i, j) = Transvection(:ϱ, i, j)
 λ(i, j) = Transvection(:λ, i, j)
 
-_indices(ij::UInt8) = (ij & 0xf0)>>4, (ij & 0x0f)
+_indices(ij::UInt8) = (ij & 0xf0) >> 4, (ij & 0x0f)
 
 function _indices(i::UInt8, j::UInt8)
     @boundscheck @assert i < typemax(i) ÷ 2

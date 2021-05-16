@@ -21,7 +21,7 @@ end
     normalform!(res::GEl, g::GEl) where GEl<:FPGroupElement
 Compute the normal fom of `g`, storing it in `res`.
 """
-function normalform!(res::GEl, g::GEl) where GEl<:FPGroupElement
+function normalform!(res::GEl, g::GEl) where {GEl<:FPGroupElement}
     @boundscheck @assert parent(res) === parent(g)
     if isnormalform(g)
         copyto!(res, g)

@@ -20,10 +20,8 @@ _isvalidhash(g::FPGroupElement) = bitget(g.savedhash, 1)
 _setnormalform(h::UInt, v::Bool) = bitset(h, v, 0)
 _setvalidhash(h::UInt, v::Bool) = bitset(h, v, 1)
 
-_setnormalform!(g::FPGroupElement, v::Bool) =
-    g.savedhash = _setnormalform(g.savedhash, v)
-_setvalidhash!(g::FPGroupElement, v::Bool) =
-    g.savedhash = _setvalidhash(g.savedhash, v)
+_setnormalform!(g::FPGroupElement, v::Bool) = g.savedhash = _setnormalform(g.savedhash, v)
+_setvalidhash!(g::FPGroupElement, v::Bool) = g.savedhash = _setvalidhash(g.savedhash, v)
 
 # To update hash use this internal method, possibly only after computing the
 # normal form of `g`:
@@ -36,7 +34,7 @@ end
 
 function Base.hash(g::FPGroupElement, h::UInt)
     _isvalidhash(g) || _update_savedhash!(g, equality_data(g))
-    return hash(g.savedhash >> count_ones(__BITFLAGS_MASK) , h)
+    return hash(g.savedhash >> count_ones(__BITFLAGS_MASK), h)
 end
 
 function Base.copyto!(res::FPGroupElement, g::FPGroupElement)

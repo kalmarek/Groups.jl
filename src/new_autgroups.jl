@@ -4,7 +4,7 @@ function KnuthBendix.Alphabet(S::AbstractVector{<:GSymbol})
     return Alphabet(S, inversions)
 end
 
-struct AutomorphismGroup{G<:Group, T, R, S} <: AbstractFPGroup
+struct AutomorphismGroup{G<:Group,T,R,S} <: AbstractFPGroup
     group::G
     gens::Vector{T}
     rws::R
@@ -13,29 +13,28 @@ end
 
 object(G::AutomorphismGroup) = G.group
 
-function SpecialAutomorphismGroup(F::FreeGroup;
-    ordering=KnuthBendix.LenLex, kwargs...)
+function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, kwargs...)
 
-    n = length(KnuthBendix.alphabet(F))÷2
-    A, rels = gersten_relations(n, commutative=false)
-    S = KnuthBendix.letters(A)[1:2(n^2 - n)]
+    n = length(KnuthBendix.alphabet(F)) ÷ 2
+    A, rels = gersten_relations(n, commutative = false)
+    S = KnuthBendix.letters(A)[1:2(n^2-n)]
 
     rws = KnuthBendix.RewritingSystem(rels, ordering(A))
     KnuthBendix.knuthbendix!(rws; kwargs...)
-    return AutomorphismGroup(F, S, rws, ntuple(i->gens(F, i), n))
+    return AutomorphismGroup(F, S, rws, ntuple(i -> gens(F, i), n))
 end
 
 KnuthBendix.alphabet(G::AutomorphismGroup{<:FreeGroup}) = alphabet(rewriting(G))
 rewriting(G::AutomorphismGroup) = G.rws
 
 function relations(G::AutomorphismGroup)
-    n = length(KnuthBendix.alphabet(object(G)))÷2
-    return last(gersten_relations(n, commutative=false))
+    n = length(KnuthBendix.alphabet(object(G))) ÷ 2
+    return last(gersten_relations(n, commutative = false))
 end
 
 equality_data(f::FPGroupElement{<:AutomorphismGroup}) = normalform!.(evaluate(f))
 
-function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
+function Base.:(==)(g::A, h::A) where {A<:FPGroupElement{<:AutomorphismGroup}}
     @assert parent(g) === parent(h)
 
     if _isvalidhash(g) && _isvalidhash(h)
@@ -81,15 +80,15 @@ end
 
 # eye-candy
 
-Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where T <: FreeGroup = print(io, "Automorphism{$T}")
+Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T<:FreeGroup} =
+    print(io, "Automorphism{$T,…}")
 
 ## Automorphism Evaluation
 
 domain(f::FPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
 # tuple(gens(object(parent(f)))...)
 
-evaluate(f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) =
-    evaluate!(domain(f), f)
+evaluate(f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) = evaluate!(domain(f), f)
 
 function evaluate!(
     t::NTuple{N,T},
