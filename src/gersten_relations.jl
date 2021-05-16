@@ -1,12 +1,9 @@
 function gersten_alphabet(n::Integer; commutative::Bool = true)
-    indexing = [[i, j] for i in 1:n for j in 1:n if i ≠ j]
-    rmuls = [ϱ(i, j) for (i, j) in indexing]
+    indexing = [(i, j) for i in 1:n for j in 1:n if i ≠ j]
+    S = [ϱ(i, j) for (i, j) in indexing]
 
-    S = if commutative
-        Vector{AutSymbol}(rmuls)
-    else
-        lmuls = [λ(i, j) for (i, j) in indexing]
-        AutSymbol[rmuls; lmuls]
+    if !commutative
+        append!(S, [λ(i, j) for (i, j) in indexing])
     end
 
     return Alphabet(S)

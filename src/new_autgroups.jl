@@ -89,37 +89,13 @@ domain(f::FPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
 evaluate(f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) =
     evaluate!(domain(f), f)
 
-function evaluate!(t::NTuple{N, T}, f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) where {T<:FPGroupElement, N}
+function evaluate!(
+    t::NTuple{N,T},
+    f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}},
+) where {T<:FPGroupElement,N}
     A = alphabet(f)
     for idx in word(f)
-        t = evaluate!(t, A[idx])::NTuple{N, T}
+        t = evaluate!(t, A[idx], alphabet(object(parent(f))))::NTuple{N,T}
     end
     return t
-end
-
-function evaluate!(v::NTuple{N, T}, s::AutSymbol) where {N, T}
-    @assert s.pow in (-1, 1)
-    return evaluate!(v, s.fn, isone(s.pow))::NTuple{N, T}
-end
-
-function evaluate!(v, ϱ::RTransvect, flag)
-    if flag
-        append!(New.word(v[ϱ.i]), New.word(v[ϱ.j]   ))
-    else
-        append!(New.word(v[ϱ.i]), New.word(v[ϱ.j]^-1))
-    end
-    _setnormalform!(v[ϱ.i], false)
-    _setvalidhash!(v[ϱ.i], false)
-    return v
-end
-
-function evaluate!(v, λ::LTransvect, flag)
-    if flag
-        prepend!(New.word(v[λ.i]), New.word(v[λ.j]   ))
-    else
-        prepend!(New.word(v[λ.i]), New.word(v[λ.j]^-1))
-    end
-    _setnormalform!(v[λ.i], false)
-    _setvalidhash!(v[λ.i], false)
-    return v
 end
