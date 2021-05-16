@@ -35,7 +35,6 @@ function _update_savedhash!(g::FPGroupElement, data)
 end
 
 function Base.hash(g::FPGroupElement, h::UInt)
-    normalform!(g)
     _isvalidhash(g) || _update_savedhash!(g, equality_data(g))
     return hash(g.savedhash >> count_ones(__BITFLAGS_MASK) , h)
 end

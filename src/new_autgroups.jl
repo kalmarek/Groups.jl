@@ -42,12 +42,10 @@ function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
         hash(g) != hash(h) && return false
     end
 
-    normalform!(g)
-    normalform!(h)
-    word(g) == word(h) && return true
+    length(word(g)) > 8 && normalform!(g)
+    length(word(h)) > 8 && normalform!(h)
 
-    @assert isnormalform(g)
-    @assert isnormalform(h)
+    word(g) == word(h) && return true
 
     img_computed, imh_computed = false, false
 
