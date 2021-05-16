@@ -66,9 +66,11 @@ function Base.:(==)(g::A, h::A) where A<:FPGroupElement{<:AutomorphismGroup}
     hash(g) != hash(h) && return false
 
     # words are different, but hashes agree
-    @sync begin
-        !img_computed && Threads.@spawn img = equality_data(g)
-        !imh_computed && Threads.@spawn imh = equality_data(h)
+    if !img_computed
+        img = equality_data(g)
+    end
+    if !imh_computed
+        imh = equality_data(h)
     end
 
     equal = img == imh
