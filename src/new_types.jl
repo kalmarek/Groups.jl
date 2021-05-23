@@ -19,9 +19,8 @@ By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
  * `relations(G::MyFPGroup)` : return a set of defining relations.
 
 AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt16}`,
-which controls the word type used for group elements. If if your group has less
-than `255` generators you may define
-> `word_type(::Type{MyFPGroup}) = Word{UInt8}`
+which controls the word type used for group elements. If a group has more than `255` generators you need to define e.g.
+> `word_type(::Type{MyFPGroup}) = Word{UInt16}`
 """
 abstract type AbstractFPGroup <: GroupsCore.Group end
 
@@ -83,7 +82,7 @@ KnuthBendix.alphabet(g::FPGroupElement) = alphabet(parent(g))
 
 function Base.show(io::IO, f::FPGroupElement)
     f = normalform!(f)
-    print(io, KnuthBendix.string_repr(word(f), alphabet(f)))
+    KnuthBendix.print_repr(io, word(f), alphabet(f))
 end
 
 ## GroupElement Interface for FPGroupElement
