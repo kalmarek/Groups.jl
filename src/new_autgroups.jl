@@ -32,7 +32,17 @@ function relations(G::AutomorphismGroup)
     return last(gersten_relations(n, commutative = false))
 end
 
-equality_data(f::FPGroupElement{<:AutomorphismGroup}) = normalform!.(evaluate(f))
+function equality_data(f::FPGroupElement{<:AutomorphismGroup})
+    imf = evaluate(f)
+    # return normalform!.(imf)
+
+    tmp = one(first(imf))
+    for g in imf
+        normalform!(tmp, g)
+        copyto!(g, tmp)
+    end
+    return imf
+end
 
 function Base.:(==)(g::A, h::A) where {A<:FPGroupElement{<:AutomorphismGroup}}
     @assert parent(g) === parent(h)
