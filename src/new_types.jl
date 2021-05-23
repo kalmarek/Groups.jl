@@ -32,7 +32,7 @@ word_type(::Type{<:AbstractFPGroup}) = Word{UInt8}
 # the default (results in free rewriting)
 rewriting(G::AbstractFPGroup) = alphabet(G)
 
-function (G::AbstractFPGroup)(word::AbstractVector{<:Integer})
+Base.@propagate_inbounds function (G::AbstractFPGroup)(word::AbstractVector{<:Integer})
     @boundscheck @assert all(l -> 1 <= l <= length(KnuthBendix.alphabet(G)), word)
     return FPGroupElement(word_type(G)(word), G)
 end

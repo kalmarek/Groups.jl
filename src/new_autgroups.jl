@@ -106,7 +106,7 @@ function evaluate!(
 ) where {T<:FPGroupElement,N}
     A = alphabet(f)
     for idx in word(f)
-        t = evaluate!(t, A[idx], alphabet(object(parent(f))))::NTuple{N,T}
+        t = @inbounds evaluate!(t, A[idx], alphabet(object(parent(f))))::NTuple{N,T}
     end
     return t
 end

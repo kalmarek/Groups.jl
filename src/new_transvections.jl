@@ -49,7 +49,7 @@ Base.:(==)(t::Transvection, s::Transvection) =
     t.id === s.id && t.ij == s.ij && t.inv == s.inv
 Base.hash(t::Transvection, h::UInt) = hash(t.id, hash(t.ij, hash(t.inv, h)))
 
-function evaluate!(v::Tuple, t::Transvection, A::Alphabet)
+Base.@propagate_inbounds function evaluate!(v::Tuple, t::Transvection, A::Alphabet)
     i, j = indices(t)
     @assert i ≤ length(v) && j ≤ length(v)
 
