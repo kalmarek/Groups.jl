@@ -23,4 +23,12 @@ using LinearAlgebra
    include("FreeGroup-tests.jl")
    include("AutGroup-tests.jl")
    include("FPGroup-tests.jl")
+
+   @testset "New FPGroups" begin
+      using Groups.New
+      using KnuthBendix
+
+      include("free_groups.jl")
+      include("fp_groups.jl")
+   end
 end
