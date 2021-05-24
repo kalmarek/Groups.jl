@@ -41,4 +41,9 @@
     New.normalform!(h)
     @test h == H([5])
 
+    @testset "GroupsCore conformance: H" begin
+        test_Group_interface(H)
+        test_GroupElement_interface(rand(H, 2)...)
+    end
+
 end

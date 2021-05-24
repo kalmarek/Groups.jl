@@ -62,4 +62,9 @@
         @test New.word(last(E8)) == Word([6])^8
     end
 
+    @testset "GroupsCore conformance" begin
+        test_Group_interface(F3)
+        test_GroupElement_interface(rand(F3, 2)...)
+    end
+
 end

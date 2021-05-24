@@ -61,6 +61,8 @@ function Base.rand(rng::Random.AbstractRNG, rs::Random.SamplerTrivial{<:Abstract
     return FPGroupElement(word_type(G)(rand(1:nletters, l)), G)
 end
 
+Base.isfinite(::AbstractFPGroup) = (@warn "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong"; false)
+
 ## FPGroupElement
 
 mutable struct FPGroupElement{G<:AbstractFPGroup,W<:AbstractWord} <: GroupElement
@@ -109,7 +111,7 @@ function Base.:(*)(g::FPGroupElement, h::FPGroupElement)
     return FPGroupElement(word(g) * word(h), parent(g))
 end
 
-GroupsCore.isfiniteorder(g::FPGroupElement) = isone(g) ? true : throw("Not Implemented")
+GroupsCore.isfiniteorder(g::FPGroupElement) = isone(g) ? true : (@warn "using generic isfiniteorder(::FPGroupElement): the returned `false` might be wrong"; false)
 
 # additional methods:
 Base.isone(g::FPGroupElement) = (normalform!(g); isempty(word(g)))
@@ -137,6 +139,12 @@ Base.show(io::IO, F::FreeGroup) = print(io, "free group on $(ngens(F)) generator
 # mandatory methods:
 KnuthBendix.alphabet(F::FreeGroup) = F.alphabet
 relations(F::FreeGroup) = Pair{eltype(F)}[]
+
+# GroupsCore interface:
+# these are mathematically correct
+Base.isfinite(::FreeGroup) = false
+
+GroupsCore.isfiniteorder(g::FPGroupElement{<:FreeGroup}) = isone(g) ? true : false
 
 ## FP Groups
 

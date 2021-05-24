@@ -28,6 +28,9 @@ using LinearAlgebra
       using Groups.New
       using KnuthBendix
 
+      using GroupsCore
+      include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
+
       include("free_groups.jl")
       include("fp_groups.jl")
    end
