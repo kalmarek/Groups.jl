@@ -23,7 +23,7 @@ include("arithmetic.jl")
 include("findreplace.jl")
 
 module New
-using DataStructures
+import OrderedCollections: OrderedSet
 
 include("new_types.jl")
 include("new_hashing.jl")

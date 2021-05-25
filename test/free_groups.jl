@@ -33,11 +33,12 @@
             return w
         end
 
-        k = test_iteration(F3, 10)
+        @time k = test_iteration(F3, 10)
         @test k == a*b^-1
 
-        @time k = test_iteration(F3, 1000)
+        k = test_iteration(F3, 1000)
         @test k == (a^2)*c^2*a^-1
+        @time k = test_iteration(F3, 1000)
     end
 
     @testset "wl_ball" begin
@@ -48,7 +49,7 @@
                 isnothing(res) && break
                 g, state = res
             end
-            elts = collect(first(state).elts)
+            elts = collect(state.seen)
             elts = resize!(elts, length(elts)-1)
             return elts
         end
