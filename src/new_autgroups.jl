@@ -88,6 +88,13 @@ function Base.:(==)(g::A, h::A) where {A<:FPGroupElement{<:AutomorphismGroup}}
     return equal
 end
 
+function Base.isone(g::FPGroupElement{<:AutomorphismGroup})
+    if length(word(g)) > 8
+        normalform!(g)
+    end
+    return evaluate(g) == parent(g).domain
+end
+
 # eye-candy
 
 Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T<:FreeGroup} =
