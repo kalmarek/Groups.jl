@@ -33,12 +33,11 @@
             return w
         end
 
-        @time k = test_iteration(F3, 10)
+        k = test_iteration(F3, 10)
         @test k == a*b^-1
 
-        k = test_iteration(F3, 1000)
-        @test k == (a^2)*c^2*a^-1
         @time k = test_iteration(F3, 1000)
+        @test k == (a^2)*c^2*a^-1
     end
 
     @testset "wl_ball" begin
@@ -58,9 +57,10 @@
         @test length(E4) == 937
         @test New.word(last(E4)) == Word([6])^4
 
-        @time E8 = wl_ball(F3, radius=8)
+        E8, t, _ = @timed wl_ball(F3, radius=8)
         @test length(E8) == 585937
         @test New.word(last(E8)) == Word([6])^8
+        @test t/10^9 < 1
     end
 
     @testset "GroupsCore conformance" begin

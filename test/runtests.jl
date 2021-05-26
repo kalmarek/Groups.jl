@@ -33,5 +33,7 @@ using LinearAlgebra
 
       include("free_groups.jl")
       include("fp_groups.jl")
+      include("automorphisms.jl")
+      include("benchmarks.jl")
    end
 end
