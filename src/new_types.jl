@@ -134,6 +134,18 @@ function FreeGroup(A::Alphabet)
     return FreeGroup(KnuthBendix.letters(A), A)
 end
 
+function FreeGroup(n::Integer)
+    symbols = Symbol[]
+    inverses = Int[]
+    sizehint!(symbols, 2n)
+    sizehint!(inverses, 2n)
+    for i in 1:n
+        push!(symbols, Symbol(:f, i), Symbol(:F, i))
+        push!(inverses, 2i, 2i-1)
+    end
+    return FreeGroup(symbols[1:2:2n], Alphabet(symbols, inverses))
+end
+
 Base.show(io::IO, F::FreeGroup) = print(io, "free group on $(ngens(F)) generators")
 
 # mandatory methods:
