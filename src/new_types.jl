@@ -180,8 +180,8 @@ end
 
 function Base.show(io::IO, G::FPGroup)
     print(io, "⟨")
-    Base.print_array(io, reshape(gens(G), (1, ngens(G))))
+    join(io, gens(G), ", ")
     print(io, " | ")
-    Base.print_array(io, relations(G))
+    join(io, relations(G), ", ")
     print(io, "⟩")
 end

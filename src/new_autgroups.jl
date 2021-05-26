@@ -97,8 +97,10 @@ end
 
 # eye-candy
 
-Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T<:FreeGroup} =
+Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T} =
     print(io, "Automorphism{$T,…}")
+
+Base.show(io::IO, A::AutomorphismGroup) = print(io, "automorphism group of ", object(A))
 
 ## Automorphism Evaluation
 
