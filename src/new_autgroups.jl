@@ -110,10 +110,11 @@ evaluate(f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) = evaluate!(domain
 function evaluate!(
     t::NTuple{N,T},
     f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}},
+    tmp = one(first(t)),
 ) where {T<:FPGroupElement,N}
     A = alphabet(f)
     for idx in word(f)
-        t = @inbounds evaluate!(t, A[idx], alphabet(object(parent(f))))::NTuple{N,T}
+        t = @inbounds evaluate!(t, A[idx], alphabet(object(parent(f))), tmp)::NTuple{N,T}
     end
     return t
 end
