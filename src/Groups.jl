@@ -31,6 +31,7 @@ include("normalform.jl")
 include("new_autgroups.jl")
 
 include("groups/sautFn.jl")
+include("groups/mcg.jl")
 
 end # module New
 
