@@ -197,3 +197,8 @@ function Base.show(io::IO, G::FPGroup)
     join(io, relations(G), ", ")
     print(io, "⟩")
 end
+
+## GSymbol aka letter of alphabet
+
+abstract type GSymbol end
+Base.literal_pow(::typeof(^), t::GSymbol, ::Val{-1}) = inv(t)

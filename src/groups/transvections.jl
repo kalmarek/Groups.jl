@@ -1,6 +1,3 @@
-abstract type GSymbol end
-Base.literal_pow(::typeof(^), t::GSymbol, ::Val{-1}) = inv(t)
-
 struct Transvection <: GSymbol
     id::Symbol
     ij::UInt8

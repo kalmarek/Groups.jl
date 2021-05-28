@@ -28,10 +28,9 @@ import OrderedCollections: OrderedSet
 include("new_types.jl")
 include("new_hashing.jl")
 include("normalform.jl")
-
-include("new_transvections.jl")
-include("gersten_relations.jl")
 include("new_autgroups.jl")
+
+include("groups/sautFn.jl")
 
 end # module New
 
