@@ -18,17 +18,3 @@ function relations(G::AutomorphismGroup{<:FreeGroup})
     n = length(KnuthBendix.alphabet(object(G))) ÷ 2
     return last(gersten_relations(n, commutative = false))
 end
-
-evaluate(f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}) = evaluate!(domain(f), f)
-
-function evaluate!(
-    t::NTuple{N,T},
-    f::FPGroupElement{<:AutomorphismGroup{<:FreeGroup}},
-    tmp = one(first(t)),
-) where {T<:FPGroupElement,N}
-    A = alphabet(f)
-    for idx in word(f)
-        t = @inbounds evaluate!(t, A[idx], alphabet(object(parent(f))), tmp)::NTuple{N,T}
-    end
-    return t
-end
