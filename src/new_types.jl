@@ -36,6 +36,14 @@ Base.@propagate_inbounds function (G::AbstractFPGroup)(word::AbstractVector{<:In
     return FPGroupElement(word_type(G)(word), G)
 end
 
+function Base.show(io::IO, G::AbstractFPGroup)
+    print(io, "⟨")
+    join(io, gens(G), ", ")
+    print(io, " | ")
+    join(io, relations(G), ", ")
+    print(io, "⟩")
+end
+
 ## Group Interface
 
 Base.one(G::AbstractFPGroup) = FPGroupElement(one(word_type(G)), G)
@@ -140,7 +148,7 @@ function FreeGroup(n::Integer)
     sizehint!(symbols, 2n)
     sizehint!(inverses, 2n)
     for i in 1:n
-        push!(symbols, Symbol(:f, i), Symbol(:F, i))
+        push!(symbols, Symbol(:f, subscriptify(i)), Symbol(:F, subscriptify(i)))
         push!(inverses, 2i, 2i-1)
     end
     return FreeGroup(symbols[1:2:2n], Alphabet(symbols, inverses))
@@ -190,15 +198,9 @@ function FPGroup(
     return FPGroup(G.gens, rels, rws)
 end
 
-function Base.show(io::IO, G::FPGroup)
-    print(io, "⟨")
-    join(io, gens(G), ", ")
-    print(io, " | ")
-    join(io, relations(G), ", ")
-    print(io, "⟩")
-end
-
 ## GSymbol aka letter of alphabet
 
 abstract type GSymbol end
 Base.literal_pow(::typeof(^), t::GSymbol, ::Val{-1}) = inv(t)
+
+subscriptify(i::Integer) = join('₀'+d for d in reverse(digits(i)))
