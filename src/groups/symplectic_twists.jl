@@ -1,73 +1,32 @@
-struct SymplecticMappingClass{N, T} <: GSymbol
-    id::Symbol # :A, :B
-    i::UInt
-    j::UInt
-    minus::Bool
-    inv::Bool
-    images::NTuple{N, T}
-    invimages::NTuple{N, T}
-
-    function SymplecticMappingClass{N}(G, id, i, j, minus=false, inv=false) where N
-        @assert i > 0 && j > 0
-        id === :A && @assert i ≠ j
-
-        g = if id === :A
-            Te(G, i, j) *
-            Ta(N, i)^-1 *
-            Tα(N, i) *
-            Ta(N, i) *
-            Te(G, i, j)^-1 *
-            Tα(N,i)^-1 *
-            Ta(N, j)^-1
-        elseif id === :B
-            if !minus
-                if i ≠ j
-                    x = Ta(N, j) * Ta(N, i)^-1 * Tα(N, j) * Te(G,i,j)
-                    δ = x * Tα(N, i) * x^-1
-                    Tα(N, i) * Tα(N, j) * inv(δ)
-                else
-                    Tα(N, i)^-1
-                end
-            else
-                if i ≠ j
-                    Ta(N, i) * Ta(N, j) * Te(G, i, j)^-1
-                else
-                    Ta(N, i)
-                end
-            end
-        else
-            throw("Type not recognized: $id")
-        end
-
-        res = new(id, i, j, minus, inv,
-
-
-        )
-
-        return res
-    end
+struct ΡΛ
+    id::Symbol
+    A::Alphabet
+    N::Int
 end
 
-_indexing(n) = [(i, j) for i = 1:n for j in 1:n if i ≠ j]
-_indexing_increasing(n) = [(i, j) for i = 1:n for j = i+1:n]
+function Base.getindex(rl::ΡΛ, i::Integer, j::Integer)
+    @assert 1 ≤ i ≤ rl.N
+    @assert 1 ≤ j ≤ rl.N
+    @assert i ≠ j
+    @assert rl.id ∈ (:λ, :ϱ)
+    rl.id == :λ && return Word([rl.A[λ(i, j)]])
+    rl.id == :ϱ && return Word([rl.A[ϱ(i, j)]])
+end
 
-_λs(N, A) = [ (i == j ? "aaaarggh..." : Word([A[λ(i, j)]])) for i = 1:N, j = 1:N]
-_ϱs(N, A) = [ (i == j ? "aaaarggh..." : Word([A[ϱ(i, j)]])) for i = 1:N, j = 1:N]
+function Te_diagonal(λ::ΡΛ, ϱ::ΡΛ, i::Integer)
+    @assert λ.N == ϱ.N
+    @assert λ.id == :λ && ϱ.id == :ϱ
 
-function Te_diagonal(G, i::Integer)
-    N = ngens(object(G))
-    # @assert N == size(λ, 1) == size(ϱ, 1)
+    N = λ.N
     @assert iseven(N)
     n = N ÷ 2
     j = i + 1
     @assert 1 <= i < n
 
-    A = KnuthBendix.alphabet(G)
-    λ = _λs(N, A)
-    ϱ = _ϱs(N, A)
+    A = λ.A
 
     # comments are for i,j = 1,2
-    g = one(word_type(G))
+    g = one(Word(Int[]))
     g *= λ[n+j, n+i]                   # β ↦ α*β
     g *= λ[n+i, i] * inv(A, ϱ[n+i, j]) # α ↦ a*α*b^-1
     g *= inv(A, λ[n+j, n+i])           # β ↦ b*α^-1*a^-1*α*β
@@ -75,40 +34,44 @@ function Te_diagonal(G, i::Integer)
     g *= inv(A, λ[j, n+i])             # b ↦ b*α^-1*a^-1*α
     g *= inv(A, ϱ[j, n+i]) * ϱ[j, i]   # b ↦ b*α^-1*a^-1*α*b*α^-1
     g *= ϱ[j, n+i]                     # b ↦ b*α^-1*a^-1*α*b*α^-1*a*α*b^-1
-    return G(g)
+    return g
 end
 
-function Te_lantern(b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a₅::T) where {T}
-    a₀ = (a₁ * a₂ * a₃)^4 * b₀^-1
+function Te_lantern(A::Alphabet, b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a₅::T) where {T}
+    a₀ = (a₁ * a₂ * a₃)^4 * inv(A, b₀)
     X = a₄ * a₅ * a₃ * a₄
-    b₁ = X^-1 * a₀ * X
+    b₁ = inv(A, X) * a₀ * X
     Y = a₂ * a₃ * a₁ * a₂
-    return Y^-1 * b₁ * Y # b₂
+    return inv(A, Y) * b₁ * Y # b₂
 end
 
-Ta(N, i::Integer) = λ[N÷2+i, i]
-Tα(N, i::Integer, λ, A) = inv(A, λ[i, N÷2+i])
+Ta(λ::ΡΛ, i::Integer) = (@assert λ.id == :λ;
+λ[λ.N÷2+i, i])
+Tα(λ::ΡΛ, i::Integer) = (@assert λ.id == :λ;
+inv(λ.A, λ[i, λ.N÷2+i]))
 
-function Te(G, i, j)
+function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     @assert i ≠ j
     i, j = i < j ? (i, j) : (j, i)
 
-    N = ngens(object(G))
+    @assert λ.N == ϱ.N
+    @assert λ.A == ϱ.A
+    @assert λ.id == :λ && ϱ.id == :ϱ
 
-    A = KnuthBendix.alphabet(G)
-    λ = _λs(N, A)
-    ϱ = _ϱs(N, A)
+    @assert 1 ≤ i ≤ λ.N
+    @assert 1 ≤ j ≤ λ.N
 
     if j == i + 1
-        return Te_diagonal(G, i)
+        return Te_diagonal(λ, ϱ, i)
     else
         return Te_lantern(
-            Ta(N, i + 1, λ),
-            Ta(N, i, λ),
-            Tα(N, i, λ, A),
-            Te(N, i, i + 1),
-            Tα(N, i + 1, λ, A),
-            Te(N, i + 1, j),
+            λ.A,
+            Ta(λ, i + 1),
+            Ta(λ, i),
+            Tα(λ, i),
+            Te(λ, ϱ, i, i + 1),
+            Tα(λ, i + 1),
+            Te(λ, ϱ, i + 1, j),
         )
     end
 end
@@ -116,16 +79,136 @@ end
 function mcg_twists(genus::Integer)
     genus < 3 && throw("Not Implemented: genus = $genus < 3")
 
-    G = SpecialAutomorphismGroup(FreeGroup(2genus))
+    G = SpecialAutomorphismGroup(FreeGroup(2genus), maxrules = 1000)
     A = KnuthBendix.alphabet(G)
 
-    λ = _λs(G)
-    ϱ = _ϱs(G)
+    λ = ΡΛ(:λ, A, 2genus)
+    ϱ = ΡΛ(:ϱ, A, 2genus)
 
-    Tas = [Ta(G, i, λ) for i in 1:genus]
-    Tαs = [Tα(G, i, λ, A) for i in 1:genus]
+    Tas = [Ta(λ, i) for i in 1:genus]
+    Tαs = [Tα(λ, i) for i in 1:genus]
 
-    Tes = [Te(G, i, j, λ, ϱ) for (i,j) in _indexing_increasing(genus)]
+    idcs = ((i, j) for i in 1:genus for j in i+1:genus)
+    Tes = [Te(λ, ϱ, i, j) for (i, j) in idcs]
 
     return Tas, Tαs, Tes
+end
+
+struct SymplecticMappingClass{N,T} <: GSymbol
+    id::Symbol # :A, :B
+    i::UInt
+    j::UInt
+    minus::Bool
+    inv::Bool
+    images::NTuple{N,T}
+    invimages::NTuple{N,T}
+end
+
+function SymplecticMappingClass(
+    Σ::SurfaceGroup,
+    sautFn,
+    id::Symbol,
+    i::Integer,
+    j::Integer;
+    minus = false,
+    inverse = false,
+)
+    @assert i > 0 && j > 0
+    id === :A && @assert i ≠ j
+    @assert 2genus(Σ) == ngens(object(sautFn))
+
+    A = KnuthBendix.alphabet(sautFn)
+    λ = ΡΛ(:λ, A, 2genus(Σ))
+    ϱ = ΡΛ(:ϱ, A, 2genus(Σ))
+
+    w = if id === :A
+        Te(λ, ϱ, i, j) *
+        inv(A, Ta(λ, i)) *
+        Tα(λ, i) *
+        Ta(λ, i) *
+        inv(A, Te(λ, ϱ, i, j)) *
+        inv(A, Tα(λ, i)) *
+        inv(A, Ta(λ, j))
+    elseif id === :B
+        if !minus
+            if i ≠ j
+                x = Ta(λ, j) * inv(A, Ta(λ, i)) * Tα(λ, j) * Te(λ, ϱ, i, j)
+                δ = x * Tα(λ, i) * inv(A, x)
+                Tα(λ, i) * Tα(λ, j) * inv(A, δ)
+            else
+                inv(A, Tα(λ, i))
+            end
+        else
+            if i ≠ j
+                Ta(λ, i) * Ta(λ, j) * inv(A, Te(λ, ϱ, i, j))
+            else
+                Ta(λ, i)
+            end
+        end
+    else
+        throw("Type not recognized: $id")
+    end
+
+    g = sautFn(w)
+
+    d = ntuple(i->gens(Σ, i), ngens(Σ))
+
+    img = evaluate!(deepcopy(d), g)
+    invim = evaluate!(d, inv(g))
+
+    img, invim = inverse ? (invim, img) : (img, invim)
+
+    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, img, invim)
+
+    return res
+end
+
+function Base.show(io::IO, smc::SymplecticMappingClass)
+    smc.minus && print(io, 'm')
+    if  smc.i < 10 && smc.j < 10
+        print(io, smc.id, subscriptify(smc.i), subscriptify(smc.j))
+    else
+        print(io, smc.id, subscriptify(smc.i), ".", subscriptify(smc.j))
+    end
+    smc.inv && print(io, "^-1")
+end
+
+function Base.inv(m::SymplecticMappingClass)
+    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, m.invimages, m.images)
+end
+
+function evaluate!(
+    t::NTuple{N,T},
+    smc::SymplecticMappingClass,
+    A::Alphabet,
+    tmp = one(first(t)),
+) where {N,T}
+    img = smc.inv ? smc.invimages : smc.images
+
+    # need a map from generators to letters of the alphabet!
+    # TODO: move to SymplecticMappingClass
+    gens_idcs = let G = parent(first(t))
+        Dict(A[G.gens[i]] => i for i in 1:ngens(G))
+    end
+
+    for elt in t
+        copyto!(tmp, elt)
+        resize!(word(elt), 0)
+        for idx in word(tmp)
+            # @show idx
+            k = if haskey(gens_idcs, idx)
+                img[gens_idcs[idx]]
+            else
+                inv(img[gens_idcs[inv(A, idx)]])
+            end
+            append!(word(elt), word(k))
+        end
+        _setnormalform!(elt, false)
+        _setvalidhash!(elt, false)
+
+        normalform!(tmp, elt)
+        copyto!(elt, tmp)
+    end
+
+    return t
 end
