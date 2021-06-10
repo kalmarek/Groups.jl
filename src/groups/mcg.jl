@@ -1,5 +1,3 @@
-include("symplectic_twists.jl")
-
 struct SurfaceGroup{T, S, R} <: AbstractFPGroup
     genus::Int
     boundaries::Int
@@ -7,6 +5,8 @@ struct SurfaceGroup{T, S, R} <: AbstractFPGroup
     relations::Vector{<:Pair{S,S}}
     rws::R
 end
+
+include("symplectic_twists.jl")
 
 genus(S::SurfaceGroup) = S.genus
 

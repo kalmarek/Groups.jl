@@ -35,6 +35,8 @@ using LinearAlgebra
       include("fp_groups.jl")
 
       include("AutFn.jl")
+      include("AutSigma_41.jl")
+
       include("benchmarks.jl")
    end
 end
