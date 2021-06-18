@@ -37,6 +37,8 @@ using LinearAlgebra
       include("AutFn.jl")
       include("AutSigma_41.jl")
 
-      include("benchmarks.jl")
+      if !haskey(ENV, "CI")
+         include("benchmarks.jl")
+      end
    end
 end
