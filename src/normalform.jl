@@ -42,8 +42,5 @@ Defaults to the rewriting in the free group.
 """
 @inline function normalform!(res::AbstractWord, g::FPGroupElement)
     isone(res) && isnormalform(g) && return append!(res, word(g))
-    if isnormalform(g) && inv(alphabet(g), last(out)) != first(word(g))
-        return append!(res, word(g))
-    end
     return KnuthBendix.rewrite_from_left!(res, word(g), rewriting(parent(g)))
 end
