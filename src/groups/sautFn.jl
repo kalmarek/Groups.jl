@@ -3,7 +3,7 @@ include("gersten_relations.jl")
 
 function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, kwargs...)
 
-    n = length(KnuthBendix.alphabet(F)) ÷ 2
+    n = length(alphabet(F)) ÷ 2
     A, rels = gersten_relations(n, commutative = false)
     S = KnuthBendix.letters(A)[1:2(n^2-n)]
 
@@ -15,6 +15,6 @@ end
 KnuthBendix.alphabet(G::AutomorphismGroup{<:FreeGroup}) = alphabet(rewriting(G))
 
 function relations(G::AutomorphismGroup{<:FreeGroup})
-    n = length(KnuthBendix.alphabet(object(G))) ÷ 2
+    n = length(alphabet(object(G))) ÷ 2
     return last(gersten_relations(n, commutative = false))
 end

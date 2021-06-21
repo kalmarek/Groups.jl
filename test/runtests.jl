@@ -2,7 +2,7 @@ using Test
 import AbstractAlgebra
 using Groups
 
-using KnuthBendix
+import KnuthBendix: Word
 
 using GroupsCore
 include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))

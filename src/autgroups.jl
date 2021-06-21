@@ -105,4 +105,3 @@ function evaluate!(
 end
 
 evaluate!(t::NTuple{N, T}, s::GSymbol, A, tmp=one(first(t))) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
-

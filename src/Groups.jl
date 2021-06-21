@@ -9,7 +9,7 @@ import Random
 
 import OrderedCollections: OrderedSet
 
-export AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup
+export Alphabet, AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup
 export alphabet, evaluate, word
 
 include("types.jl")
