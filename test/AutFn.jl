@@ -23,6 +23,9 @@
         @test New.gersten_alphabet(3) isa Alphabet
         A = New.gersten_alphabet(3)
         @test length(A) == 12
+
+        @test sprint(show, New.ϱ(1, 2)) == "ϱ₁.₂"
+        @test sprint(show, New.λ(3, 2)) == "λ₃.₂"
     end
 
     A4 = Alphabet(
@@ -36,8 +39,6 @@
     )
 
     F4 = New.FreeGroup([:a, :b, :c, :d], A4)
-    A = New.SpecialAutomorphismGroup(F4, maxrules=1000)
-
     a,b,c,d = gens(F4)
     D = ntuple(i->gens(F4, i), 4)
 
@@ -78,12 +79,14 @@
         @test inv(l)(deepcopy(D)) == (a, d^-1*b,c, d)
     end
 
+    A = New.SpecialAutomorphismGroup(F4, maxrules=1000)
+
     @testset "AutomorphismGroup constructors" begin
         @test A isa New.AbstractFPGroup
         @test A isa New.AutomorphismGroup
         @test KnuthBendix.alphabet(A) isa Alphabet
         @test New.relations(A) isa Vector{<:Pair}
-
+        @test sprint(show, A) == "automorphism group of free group on 4 generators"
     end
 
     @testset "Automorphisms: hash and evaluate" begin
@@ -92,6 +95,8 @@
 
         @test New.evaluate(g*h) == New.evaluate(h*g)
         @test (g*h).savedhash == zero(UInt)
+
+        @test sprint(show, typeof(g)) == "Automorphism{Groups.New.FreeGroup{Symbol},…}"
 
         a = g*h
         b = h*g

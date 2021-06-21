@@ -14,6 +14,7 @@
     G = New.FPGroup(F, [a*b=>b*a, a*c=>c*a, b*c=>c*b])
 
     @test G isa New.FPGroup
+    @test sprint(show, G) == "⟨a, b, c | a*b => b*a, a*c => c*a, b*c => c*b⟩"
     @test rand(G) isa New.FPGroupElement
 
     f = a*c*b
@@ -32,6 +33,11 @@
     @test New.word(g) == [1, 5, 3]
     New.normalform!(g)
     @test New.word(g) == [1, 3, 5]
+
+    let g = aG*cG*bG
+        # test that we normalize g before printing
+        @test sprint(show, g) == "a*b*c"
+    end
 
     # quotient of G
     H = New.FPGroup(G, [aG^2=>cG, bG*cG=>aG], maxrules=200)

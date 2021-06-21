@@ -211,3 +211,8 @@ end
 
 abstract type GSymbol end
 Base.literal_pow(::typeof(^), t::GSymbol, ::Val{-1}) = inv(t)
+
+function subscriptify(n::Integer)
+    subscript_0 = Int(0x2080) # Char(0x2080) -> subscript 0
+    return join([Char(subscript_0 + i) for i in reverse(digits(n))], "")
+end
