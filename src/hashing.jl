@@ -1,34 +1,46 @@
-###############################################################################
-#
-#   hashing, deepcopy and ==
-#
+## Hashing
 
-function hash_internal(W::GWord)
-    reduce!(W)
-    h = hasparent(W) ? hash(parent(W)) : zero(UInt)
-    return hash(syllables(W), hash(typeof(W), h))
-end
+equality_data(g::FPGroupElement) = (normalform!(g); word(g))
 
-function hash(W::GWord, h::UInt=UInt(0); kwargs...)
-    if ismodified(W)
-        savehash!(W, hash_internal(W; kwargs...))
-        unsetmodified!(W)
-    end
-    return xor(savedhash(W), h)
-end
+bitget(h::UInt, n::Int) = Bool((h & (1 << n)) >> n)
+bitclear(h::UInt, n::Int) = h & ~(1 << n)
+bitset(h::UInt, n::Int) = h | (1 << n)
+bitset(h::UInt, v::Bool, n::Int) = v ? bitset(h, n) : bitclear(h, n)
 
-# WARNING: Due to specialised (constant) hash function of GWords this one is actually necessary!
-function Base.deepcopy_internal(W::T, dict::IdDict) where T<:GWord
-    G = parent(W)
-    g = T(deepcopy(syllables(W)))
-    setparent!(g, G)
+# We store hash of a word in field `savedhash` to use it as cheap proxy to
+# determine non-equal words. Additionally bits of `savehash` store boolean
+# information as follows
+# * `savedhash & 1` (the first bit): is word in normal form?
+# * `savedhash & 2` (the second bit): is the hash valid?
+const __BITFLAGS_MASK = ~(~(UInt(0)) << 2)
+
+isnormalform(g::FPGroupElement) = bitget(g.savedhash, 0)
+_isvalidhash(g::FPGroupElement) = bitget(g.savedhash, 1)
+
+_setnormalform(h::UInt, v::Bool) = bitset(h, v, 0)
+_setvalidhash(h::UInt, v::Bool) = bitset(h, v, 1)
+
+_setnormalform!(g::FPGroupElement, v::Bool) = g.savedhash = _setnormalform(g.savedhash, v)
+_setvalidhash!(g::FPGroupElement, v::Bool) = g.savedhash = _setvalidhash(g.savedhash, v)
+
+# To update hash use this internal method, possibly only after computing the
+# normal form of `g`:
+function _update_savedhash!(g::FPGroupElement, data)
+    h = hash(data, hash(parent(g)))
+    h = (h << count_ones(__BITFLAGS_MASK)) | (__BITFLAGS_MASK & g.savedhash)
+    g.savedhash = _setvalidhash(h, true)
     return g
 end
 
-function (==)(W::T, Z::T) where T <: GWord
-    hash(W) != hash(Z) && return false # distinguishes parent and parentless words
-    if hasparent(W) && hasparent(Z)
-        parent(W) != parent(Z) && return false
-    end
-    return syllables(W) == syllables(Z)
+function Base.hash(g::FPGroupElement, h::UInt)
+    _isvalidhash(g) || _update_savedhash!(g, equality_data(g))
+    return hash(g.savedhash >> count_ones(__BITFLAGS_MASK), h)
+end
+
+function Base.copyto!(res::FPGroupElement, g::FPGroupElement)
+    @assert parent(res) === parent(g)
+    resize!(word(res), length(word(g)))
+    copyto!(word(res), word(g))
+    res.savedhash = g.savedhash
+    return res
 end
