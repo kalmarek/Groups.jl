@@ -35,6 +35,9 @@ using LinearAlgebra
       include("fp_groups.jl")
 
       include("AutFn.jl")
-      include("benchmarks.jl")
+
+      if !haskey(ENV, "CI")
+         include("benchmarks.jl")
+      end
    end
 end
