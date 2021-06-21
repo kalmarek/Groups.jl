@@ -1,5 +1,5 @@
 # Groups
-[![Build Status](https://travis-ci.org/kalmarek/Groups.jl.svg?branch=master)](https://travis-ci.org/kalmarek/Groups.jl)
+[![CI](https://github.com/kalmarek/Groups.jl/actions/workflows/runtests.yml/badge.svg)](https://github.com/kalmarek/Groups.jl/actions/workflows/runtests.yml)
 [![codecov](https://codecov.io/gh/kalmarek/Groups.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/kalmarek/Groups.jl)
 
 An implementation of finitely-presented groups together with normalization (using Knuth-Bendix procedure).
