@@ -131,7 +131,16 @@ end
 
 function FreeGroup(A::Alphabet)
     @boundscheck @assert all(KnuthBendix.hasinverse(l, A) for l in KnuthBendix.letters(A))
-    return FreeGroup(KnuthBendix.letters(A), A)
+    ltrs = KnuthBendix.letters(A)
+    gens = Vector{eltype(ltrs)}()
+    invs = Vector{eltype(ltrs)}()
+    for l in ltrs
+        l ∈ invs && continue
+        push!(gens, l)
+        push!(invs, inv(A, l))
+    end
+
+    return FreeGroup(gens, A)
 end
 
 function FreeGroup(n::Integer)

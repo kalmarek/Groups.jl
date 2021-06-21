@@ -1,7 +1,11 @@
 @testset "FPGroups" begin
     A = Alphabet([:a, :A, :b, :B, :c, :C], [2,1,4,3,6,5])
 
+    @test New.FreeGroup(A) isa New.FreeGroup
+    @test sprint(show, New.FreeGroup(A)) == "free group on 3 generators"
+
     F = New.FreeGroup([:a, :b, :c], A)
+    @test sprint(show, F) == "free group on 3 generators"
 
     a,b,c = gens(F)
     @test c*b*a isa New.FPGroupElement
