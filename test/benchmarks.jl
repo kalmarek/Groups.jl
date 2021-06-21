@@ -6,7 +6,7 @@ using Groups.New
 
 function wl_ball(F; radius::Integer)
     g, state = iterate(F)
-    while length(New.word(g)) <= radius
+    while length(word(g)) <= radius
         res = iterate(F, state)
         isnothing(res) && break
         g, state = res
@@ -20,7 +20,7 @@ end
     N = 4
 
     @testset "iteration: FreeGroup" begin
-        FN = New.FreeGroup(N)
+        FN = FreeGroup(N)
         R = 8
 
         let G = FN
@@ -46,7 +46,7 @@ end
 
     @testset "iteration: SAut(F_n)" begin
         R = 4
-        FN = New.FreeGroup(N)
+        FN = FreeGroup(N)
         SAutFN = New.SpecialAutomorphismGroup(FN)
 
         let G = SAutFN

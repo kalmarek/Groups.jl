@@ -5,7 +5,8 @@ using ThreadsX
 import KnuthBendix
 import OrderedCollections: OrderedSet
 
-export gens, FreeGroup, Aut, SAut
+export AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup
+export alphabet, evaluate, word
 
 include("new_types.jl")
 include("new_hashing.jl")
