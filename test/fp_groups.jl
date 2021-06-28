@@ -1,44 +1,54 @@
 @testset "FPGroups" begin
     A = Alphabet([:a, :A, :b, :B, :c, :C], [2,1,4,3,6,5])
 
-    F = New.FreeGroup([:a, :b, :c], A)
+    @test FreeGroup(A) isa FreeGroup
+    @test sprint(show, FreeGroup(A)) == "free group on 3 generators"
+
+    F = FreeGroup([:a, :b, :c], A)
+    @test sprint(show, F) == "free group on 3 generators"
 
     a,b,c = gens(F)
-    @test c*b*a isa New.FPGroupElement
+    @test c*b*a isa FPGroupElement
 
     # quotient of F:
-    G = New.FPGroup(F, [a*b=>b*a, a*c=>c*a, b*c=>c*b])
+    G = FPGroup(F, [a*b=>b*a, a*c=>c*a, b*c=>c*b])
 
-    @test G isa New.FPGroup
-    @test rand(G) isa New.FPGroupElement
+    @test G isa FPGroup
+    @test sprint(show, G) == "⟨a, b, c | a*b => b*a, a*c => c*a, b*c => c*b⟩"
+    @test rand(G) isa FPGroupElement
 
     f = a*c*b
-    @test New.word(f) isa Word{UInt8}
+    @test word(f) isa Word{UInt8}
 
     aG,bG,cG = gens(G)
 
-    @test aG isa New.FPGroupElement
+    @test aG isa FPGroupElement
     @test_throws AssertionError aG == a
-    @test New.word(aG) == New.word(a)
+    @test word(aG) == word(a)
 
     g = aG*cG*bG
 
     @test_throws AssertionError f == g
-    @test New.word(f) == New.word(g)
-    @test New.word(g) == [1, 5, 3]
-    New.normalform!(g)
-    @test New.word(g) == [1, 3, 5]
+    @test word(f) == word(g)
+    @test word(g) == [1, 5, 3]
+    Groups.normalform!(g)
+    @test word(g) == [1, 3, 5]
+
+    let g = aG*cG*bG
+        # test that we normalize g before printing
+        @test sprint(show, g) == "a*b*c"
+    end
 
     # quotient of G
-    H = New.FPGroup(G, [aG^2=>cG, bG*cG=>aG], maxrules=200)
+    H = FPGroup(G, [aG^2=>cG, bG*cG=>aG], maxrules=200)
 
-    h = H(New.word(g))
+    h = H(word(g))
 
-    @test h isa New.FPGroupElement
+    @test h isa FPGroupElement
     @test_throws AssertionError h == g
     @test_throws AssertionError h*g
 
-    New.normalform!(h)
+    Groups.normalform!(h)
     @test h == H([5])
 
     @testset "GroupsCore conformance: H" begin

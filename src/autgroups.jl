@@ -84,17 +84,6 @@ Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T} =
 
 Base.show(io::IO, A::AutomorphismGroup) = print(io, "automorphism group of ", object(A))
 
-
-function Base.show(io::IO, ::MIME"text/plain", a::FPGroupElement{<:AutomorphismGroup})
-    println(io, " ┌ $(a):")
-    im = evaluate(a)
-    d = domain(a)
-    for (x, imx) in zip(d, im[1:end-1])
-        println(io, " │   $x ↦ $imx")
-    end
-    print(io, " └   $(last(d)) ↦ $(last(im))")
-end
-
 ## Automorphism Evaluation
 
 domain(f::FPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
@@ -116,4 +105,3 @@ function evaluate!(
 end
 
 evaluate!(t::NTuple{N, T}, s::GSymbol, A, tmp=one(first(t))) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
-

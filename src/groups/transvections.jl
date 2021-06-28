@@ -31,12 +31,11 @@ end
 
 function Base.show(io::IO, t::Transvection)
     id = if t.id === :ϱ
-        "ϱ"
+        'ϱ'
     else # if t.id === :λ
-        "λ"
+        'λ'
     end
-    # print(io, id, Groups.subscriptify(t.i), ".", Groups.subscriptify(t.j))
-    print(io, id, "_", t.i, ",", t.j)
+    print(io, id, subscriptify(t.i), '.', subscriptify(t.j))
     t.inv && print(io, "^-1")
 end
 
