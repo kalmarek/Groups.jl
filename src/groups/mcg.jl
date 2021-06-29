@@ -43,7 +43,7 @@ function SurfaceGroup(genus::Integer, boundaries::Integer)
         comms = Word(word)
         word_rels = [ comms => one(comms) ]
 
-        rws = RewritingSystem(word_rels, KnuthBendix.RecursivePathOrder(Al))
+        rws = KnuthBendix.RewritingSystem(word_rels, KnuthBendix.RecursivePathOrder(Al))
         KnuthBendix.knuthbendix!(rws)
     elseif boundaries == 1
         S = typeof(one(Word(Int[])))

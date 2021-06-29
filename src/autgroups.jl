@@ -14,7 +14,7 @@ end
 object(G::AutomorphismGroup) = G.group
 rewriting(G::AutomorphismGroup) = G.rws
 
-function equality_data(f::FPGroupElement{<:AutomorphismGroup})
+function equality_data(f::AbstractFPGroupElement{<:AutomorphismGroup})
     imf = evaluate(f)
     # return normalform!.(imf)
 
@@ -26,7 +26,7 @@ function equality_data(f::FPGroupElement{<:AutomorphismGroup})
     return imf
 end
 
-function Base.:(==)(g::A, h::A) where {A<:FPGroupElement{<:AutomorphismGroup}}
+function Base.:(==)(g::A, h::A) where {A<:AbstractFPGroupElement{<:AutomorphismGroup}}
     @assert parent(g) === parent(h)
 
     if _isvalidhash(g) && _isvalidhash(h)
@@ -70,7 +70,7 @@ function Base.:(==)(g::A, h::A) where {A<:FPGroupElement{<:AutomorphismGroup}}
     return equal
 end
 
-function Base.isone(g::FPGroupElement{<:AutomorphismGroup})
+function Base.isone(g::AbstractFPGroupElement{<:AutomorphismGroup})
     if length(word(g)) > 8
         normalform!(g)
     end
@@ -79,21 +79,21 @@ end
 
 # eye-candy
 
-Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T} =
+Base.show(io::IO, ::Type{<:AbstractFPGroupElement{<:AutomorphismGroup{T}}}) where {T} =
     print(io, "Automorphism{$T,…}")
 
 Base.show(io::IO, A::AutomorphismGroup) = print(io, "automorphism group of ", object(A))
 
 ## Automorphism Evaluation
 
-domain(f::FPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
+domain(f::AbstractFPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
 # tuple(gens(object(parent(f)))...)
 
-evaluate(f::FPGroupElement{<:AutomorphismGroup}) = evaluate!(domain(f), f)
+evaluate(f::AbstractFPGroupElement{<:AutomorphismGroup}) = evaluate!(domain(f), f)
 
 function evaluate!(
     t::NTuple{N,T},
-    f::FPGroupElement{<:AutomorphismGroup{<:Group}},
+    f::AbstractFPGroupElement{<:AutomorphismGroup{<:Group}},
     tmp = one(first(t)),
 ) where {N, T}
     A = alphabet(f)
