@@ -64,11 +64,11 @@ mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <: AbstractFP
     savedhash::UInt
     parent::Gr
 
-    FPGroupElement(word::W, G::AbstractFPGroup) where {W<:AbstractWord} =
-        new{typeof(G),W}(word, UInt(0), G)
-
-    FPGroupElement(word::W, hash::UInt, G::AbstractFPGroup) where {W<:AbstractWord} =
+    FPGroupElement(word::W, G::AbstractFPGroup, hash::UInt=UInt(0)) where {W<:AbstractWord} =
         new{typeof(G),W}(word, hash, G)
+
+    FPGroupElement{Gr, W}(word::AbstractWord, G::Gr) where {Gr, W} =
+        new{Gr, W}(word, UInt(0), G)
 end
 
 word(f::AbstractFPGroupElement) = f.word
@@ -95,7 +95,7 @@ function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
-    return FPGroupElement(copy(word(g)), g.savedhash, parent(g))
+    return FPGroupElement(copy(word(g)), parent(g), g.savedhash)
 end
 
 function Base.inv(g::GEl) where GEl <: AbstractFPGroupElement
