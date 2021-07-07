@@ -76,10 +76,13 @@ function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     end
 end
 
-function mcg_twists(genus::Integer)
+function mcg_twists(G::AutomorphismGroup{<:FreeGroup})
+
+    @assert iseven(ngens(object(G)))
+    genus = ngens(object(G)) ÷ 2
+
     genus < 3 && throw("Not Implemented: genus = $genus < 3")
 
-    G = SpecialAutomorphismGroup(FreeGroup(2genus), maxrules = 1000)
     A = KnuthBendix.alphabet(G)
 
     λ = ΡΛ(:λ, A, 2genus)
