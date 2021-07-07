@@ -105,6 +105,7 @@ struct SymplecticMappingClass{N,T} <: GSymbol
     inv::Bool
     images::NTuple{N,T}
     invimages::NTuple{N,T}
+    gens_idcs::Dict{Int, Int}
 end
 
 function SymplecticMappingClass(
@@ -161,7 +162,9 @@ function SymplecticMappingClass(
 
     img, invim = inverse ? (invim, img) : (img, invim)
 
-    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, img, invim)
+    gens_idcs = Dict(alphabet(Σ)[Σ.gens[i]] => i for i in 1:ngens(Σ))
+
+    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, img, invim, gens_idcs)
 
     return res
 end
@@ -177,7 +180,7 @@ function Base.show(io::IO, smc::SymplecticMappingClass)
 end
 
 function Base.inv(m::SymplecticMappingClass)
-    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, m.invimages, m.images)
+    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, m.invimages, m.images, m.gens_idcs)
 end
 
 function evaluate!(
@@ -186,23 +189,17 @@ function evaluate!(
     A::Alphabet,
     tmp = one(first(t)),
 ) where {N,T}
-    img = smc.inv ? smc.invimages : smc.images
-
-    # need a map from generators to letters of the alphabet!
-    # TODO: move to SymplecticMappingClass
-    gens_idcs = let G = parent(first(t))
-        Dict(A[G.gens[i]] => i for i in 1:ngens(G))
-    end
+    img = smc.images
 
     for elt in t
         copyto!(tmp, elt)
         resize!(word(elt), 0)
         for idx in word(tmp)
             # @show idx
-            k = if haskey(gens_idcs, idx)
-                img[gens_idcs[idx]]
+            k = if haskey(smc.gens_idcs, idx)
+                img[smc.gens_idcs[idx]]
             else
-                inv(img[gens_idcs[inv(A, idx)]])
+                inv(img[smc.gens_idcs[inv(A, idx)]])
             end
             append!(word(elt), word(k))
         end
