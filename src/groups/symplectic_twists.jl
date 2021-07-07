@@ -217,3 +217,54 @@ function evaluate!(
 
     return t
 end
+
+struct PermLeftAut <: GSymbol
+    perm::Vector{UInt8}
+
+    function PermLeftAut(p::AbstractVector{<:Integer})
+        @assert sort(p) == 1:length(p)
+        return new(p)
+    end
+end
+
+function Base.show(io::IO, p::PermLeftAut)
+    print(io, "σˡ")
+    join(io, (subscriptify(Int(i)) for i in p.perm))
+end
+
+Base.inv(p::PermLeftAut) = PermLeftAut(invperm(p.perm))
+
+Base.:(==)(p::PermLeftAut, q::PermLeftAut) = p.perm == q.perm
+Base.hash(p::PermLeftAut, h::UInt) = hash(p.perm, hash(PermLeftAut, h))
+
+function evaluate!(v::NTuple{T, N}, p::PermLeftAut, ::Alphabet, tmp=one(first(v))) where {T, N}
+
+    G = parent(first(v))
+    A = alphabet(G)
+    img = gens(G)[p.perm]
+    gens_idcs = Dict(A[A[first(word(im))]] => img[i] for (i,im) in enumerate(gens(G)))
+
+    for elt in v
+        copyto!(tmp, elt)
+        resize!(word(elt), 0)
+        for idx in word(tmp)
+            # @show idx
+            if haskey(gens_idcs, idx)
+                k = gens_idcs[idx]
+                append!(word(elt), word(k))
+            elseif haskey(gens_idcs, inv(A, idx))
+                k = inv(gens_idcs[inv(A, idx)])
+                append!(word(elt), word(k))
+            else
+                push!(word(elt), idx)
+            end
+        end
+        _setnormalform!(elt, false)
+        _setvalidhash!(elt, false)
+
+        normalform!(tmp, elt)
+        copyto!(elt, tmp)
+    end
+
+    return v
+end

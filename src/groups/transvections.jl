@@ -82,25 +82,25 @@ Base.@propagate_inbounds function evaluate!(v::NTuple{T, N}, t::Transvection, A:
     return v
 end
 
-struct PermAut <: GSymbol
+struct PermRightAut <: GSymbol
     perm::Vector{UInt8}
 
-    function PermAut(p::AbstractVector{<:Integer})
+    function PermRightAut(p::AbstractVector{<:Integer})
         @assert sort(p) == 1:length(p)
         return new(p)
     end
 end
 
-function Base.show(io::IO, p::PermAut)
+function Base.show(io::IO, p::PermRightAut)
     print(io, 'σ')
     join(io, (subscriptify(Int(i)) for i in p.perm))
 end
 
-Base.inv(p::PermAut) = PermAut(invperm(p.perm))
+Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
 
-Base.:(==)(p::PermAut, q::PermAut) = p.perm == q.perm
-Base.hash(p::PermAut, h::UInt) = hash(p.perm, hash(PermAut, h))
+Base.:(==)(p::PermRightAut, q::PermRightAut) = p.perm == q.perm
+Base.hash(p::PermRightAut, h::UInt) = hash(p.perm, hash(PermRightAut, h))
 
-Base.@propagate_inbounds function evaluate!(v::NTuple{T, N}, p::PermAut, ::Alphabet, tmp=one(first(v))) where {T, N}
+function evaluate!(v::NTuple{T, N}, p::PermRightAut, ::Alphabet, tmp=one(first(v))) where {T, N}
     return v[p.perm]
 end
