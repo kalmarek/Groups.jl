@@ -155,10 +155,15 @@ function SymplecticMappingClass(
 
     g = sautFn(w)
 
-    d = ntuple(i->gens(Σ, i), ngens(Σ))
+    perm = let g = genus(Σ)
+        [reverse(1+1:2:2g); reverse(1:2:2g)]
+    end
 
-    img = evaluate!(deepcopy(d), g)
-    invim = evaluate!(d, inv(g))
+    d = ntuple(i->gens(Σ, i), ngens(Σ))[perm]
+
+
+    img = evaluate!(deepcopy(d), g)[invperm(perm)]
+    invim = evaluate!(d, inv(g))[invperm(perm)]
 
     img, invim = inverse ? (invim, img) : (img, invim)
 
