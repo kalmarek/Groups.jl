@@ -115,3 +115,61 @@ function evaluate!(
 end
 
 evaluate!(t::NTuple{N, T}, s::GSymbol, A, tmp=one(first(t))) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
+
+# forward evaluate by substitution
+
+struct LettersMap{T, A}
+    indices_map::Dict{Int, T}
+    A::A
+end
+
+function LettersMap(a::FPGroupElement{<:AutomorphismGroup})
+    dom = domain(a)
+    @assert all(isone ∘ length ∘ word, dom)
+    A = alphabet(first(dom))
+    first_letters = first.(word.(dom))
+    img = evaluate!(dom, a)
+
+    # (dom[i] → img[i] is a map from domain to images)
+    # we need a map from alphabet indices → (gens, gens⁻¹) → images
+    # here we do it for elements of the domai
+    # (trusting it's a set of generators that define a)
+    @assert length(dom) == length(img)
+
+    indices_map = Dict(A[A[fl]] => word(im) for (fl, im) in zip(first_letters, img))
+    # inverses of generators are dealt lazily in getindex
+
+    return LettersMap(indices_map, A)
+end
+
+
+function Base.getindex(lm::LettersMap, i::Integer)
+    # here i is an index of an alphabet
+    @boundscheck 1 ≤ i ≤ length(KnuthBendix.letters(lm.A))
+
+    if !haskey(lm.indices_map, i)
+        img = if haskey(lm.indices_map, inv(lm.A, i))
+            inv(lm.A, lm.indices_map[inv(lm.A, i)])
+        else
+            @warn "LetterMap: neither $i nor its inverse has assigned value"
+            one(valtype(lm.indices_map))
+        end
+        lm.indices_map[i] = img
+    end
+    return lm.indices_map[i]
+end
+
+function (a::FPGroupElement{<:AutomorphismGroup})(g::FPGroupElement)
+    @assert object(parent(a)) === parent(g)
+    img_w = evaluate(word(g), LettersMap(a))
+    return parent(g)(img_w)
+end
+
+evaluate(w::AbstractWord, lm::LettersMap) = evaluate!(one(w), w, lm)
+
+function evaluate!(res::AbstractWord, w::AbstractWord, lm::LettersMap)
+    for i in w
+        append!(res, lm[i])
+    end
+    return res
+end
