@@ -97,16 +97,20 @@ function mcg_twists(G::AutomorphismGroup{<:FreeGroup})
     return Tas, Tαs, Tes
 end
 
-struct SymplecticMappingClass{N,T} <: GSymbol
+struct SymplecticMappingClass{T, F} <: GSymbol
     id::Symbol # :A, :B
     i::UInt
     j::UInt
     minus::Bool
     inv::Bool
-    images::NTuple{N,T}
-    invimages::NTuple{N,T}
-    gens_idcs::Dict{Int, Int}
+    autFn_word::T
+    perm::Vector{Int}
+    f::F
 end
+
+Base.:(==)(a::SymplecticMappingClass, b::SymplecticMappingClass) = a.autFn_word == b.autFn_word
+
+Base.hash(a::SymplecticMappingClass, h::UInt) = hash(a.autFn_word, h)
 
 function SymplecticMappingClass(
     Σ::SurfaceGroup,
@@ -153,23 +157,13 @@ function SymplecticMappingClass(
         throw("Type not recognized: $id")
     end
 
-    g = sautFn(w)
+    a = sautFn(w)
+    g = genus(Σ)
+    perm = [2g:-2:1; (2g-1):-2:1]
 
-    perm = let g = genus(Σ)
-        [reverse(1+1:2:2g); reverse(1:2:2g)]
-    end
+    f(t) = evaluate!(t, a)
 
-    d = ntuple(i->gens(Σ, i), ngens(Σ))[perm]
-
-
-    img = evaluate!(deepcopy(d), g)[invperm(perm)]
-    invim = evaluate!(d, inv(g))[invperm(perm)]
-
-    img, invim = inverse ? (invim, img) : (img, invim)
-
-    gens_idcs = Dict(alphabet(Σ)[Σ.gens[i]] => i for i in 1:ngens(Σ))
-
-    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, img, invim, gens_idcs)
+    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, perm, f)
 
     return res
 end
@@ -185,7 +179,9 @@ function Base.show(io::IO, smc::SymplecticMappingClass)
 end
 
 function Base.inv(m::SymplecticMappingClass)
-    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, m.invimages, m.images, m.gens_idcs)
+    inv_w = inv(m.autFn_word)
+    f(t) = evaluate!(t, inv_w)
+    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, m.perm, f)
 end
 
 function evaluate!(
@@ -194,27 +190,10 @@ function evaluate!(
     A::Alphabet,
     tmp = one(first(t)),
 ) where {N,T}
-    img = smc.images
 
-    for elt in t
-        copyto!(tmp, elt)
-        resize!(word(elt), 0)
-        for idx in word(tmp)
-            # @show idx
-            k = if haskey(smc.gens_idcs, idx)
-                img[smc.gens_idcs[idx]]
-            else
-                inv(img[smc.gens_idcs[inv(A, idx)]])
-            end
-            append!(word(elt), word(k))
-        end
-        _setnormalform!(elt, false)
-        _setvalidhash!(elt, false)
-
-        normalform!(tmp, elt)
-        copyto!(elt, tmp)
-    end
-
+    t = smc.f(t[smc.perm])[invperm(smc.perm)]
+    # t = evaluate!(t[smc.perm], smc.autFn_word, tmp)
+    # t = t[invperm(smc.perm)]
     return t
 end
 

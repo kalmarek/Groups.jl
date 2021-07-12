@@ -7,8 +7,7 @@ using Groups.KnuthBendix
 
     G = SpecialAutomorphismGroup(FreeGroup(2genus))
 
-    # symplectic pairing goes like this:
-    # in the free Group:
+    # symplectic pairing in the free Group goes like this:
     # f1 ↔ f5
     # f2 ↔ f6
     # f3 ↔ f7
@@ -267,9 +266,6 @@ using Groups.KnuthBendix
 
         # τ^genus is trivial but only in autπ₁Σ₄
         # here we check its centrality
-
-
-
 
         τᵍ = τ^genus
         @test_broken all(a * τᵍ == τᵍ * a for a in Groups.gens(G))
