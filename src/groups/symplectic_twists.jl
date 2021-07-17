@@ -161,7 +161,8 @@ function SymplecticMappingClass(
     g = genus(Σ)
     perm = [2g:-2:1; (2g-1):-2:1]
 
-    f(t) = evaluate!(t, a)
+    f = compiled(a)
+    # f = t -> evaluate!(t, a)
 
     res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, perm, f)
 
@@ -180,7 +181,8 @@ end
 
 function Base.inv(m::SymplecticMappingClass)
     inv_w = inv(m.autFn_word)
-    f(t) = evaluate!(t, inv_w)
+    # f(t) = evaluate!(t, inv_w)
+    f = compiled(inv_w)
     return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, m.perm, f)
 end
 
@@ -192,8 +194,6 @@ function evaluate!(
 ) where {N,T}
 
     t = smc.f(t[smc.perm])[invperm(smc.perm)]
-    # t = evaluate!(t[smc.perm], smc.autFn_word, tmp)
-    # t = t[invperm(smc.perm)]
     return t
 end
 

@@ -173,3 +173,64 @@ function evaluate!(res::AbstractWord, w::AbstractWord, lm::LettersMap)
     end
     return res
 end
+
+# compile automorphisms
+
+compiled(a) = eval(generated_evaluate(a))
+
+function generated_evaluate(a::FPGroupElement{<:AutomorphismGroup})
+    lm = Groups.LettersMap(a)
+    d = Groups.domain(a)
+    @assert all(length.(word.(d)) .== 1)
+    A = alphabet(first(d))
+    first_ltrs = first.(word.(d))
+
+    args = [Expr(:call, :*) for _ in first_ltrs]
+
+    for (idx, letter) in enumerate(first_ltrs)
+        for l in lm[letter]
+            k = findfirst(==(l), first_ltrs)
+            if k !== nothing
+                push!(args[idx].args, :(d[$k]))
+                continue
+            end
+            k = findfirst(==(inv(A, l)), first_ltrs)
+            if k !== nothing
+                push!(args[idx].args, :(inv(d[$k])))
+                continue
+            end
+            throw("Letter $l doesn't seem to be mapped anywhere!")
+        end
+    end
+    locals = Dict{Expr, Symbol}()
+    locals_counter = 0
+    for (i,v) in enumerate(args)
+        @assert length(v.args) >= 2
+        if length(v.args) > 2
+            for (j, a) in pairs(v.args)
+                if a isa Expr &&  a.head == :call "$a"
+                    @assert a.args[1] == :inv
+                    if !(a in keys(locals))
+                        locals[a] = Symbol("var_#$locals_counter")
+                        locals_counter += 1
+                    end
+                    v.args[j] = locals[a]
+                end
+            end
+        else
+            args[i] = v.args[2]
+        end
+    end
+
+    q = quote
+        $([:(local $v = $k) for (k,v) in locals]...)
+    end
+
+    # return args, locals
+
+    return :(d -> begin
+        @boundscheck @assert length(d) == $(length(d))
+        $q
+        @inbounds tuple($(args...))
+    end)
+end
