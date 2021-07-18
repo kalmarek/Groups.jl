@@ -262,7 +262,7 @@ using Groups.KnuthBendix
             G(Ta(λ, i) * inv(A, Ta(λ, j) * Tα(λ, j))^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c)
         end
 
-        τ = (G(Ta(λ, 1) * Tα(λ, 1))^6) * prod(halftwists, init = one(G))
+        τ = (G(Ta(λ, 1) * Tα(λ, 1))^6) * prod(halftwists)
 
         # τ^genus is trivial but only in autπ₁Σ₄
         # here we check its centrality
