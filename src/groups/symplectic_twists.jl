@@ -105,6 +105,7 @@ struct SymplecticMappingClass{T, F} <: GSymbol
     inv::Bool
     autFn_word::T
     perm::Vector{Int}
+    invperm::Vector{Int}
     f::F
 end
 
@@ -164,7 +165,7 @@ function SymplecticMappingClass(
     f = compiled(a)
     # f = t -> evaluate!(t, a)
 
-    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, perm, f)
+    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, perm, invperm(perm), f)
 
     return res
 end
@@ -183,7 +184,7 @@ function Base.inv(m::SymplecticMappingClass)
     inv_w = inv(m.autFn_word)
     # f(t) = evaluate!(t, inv_w)
     f = compiled(inv_w)
-    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, m.perm, f)
+    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, m.perm, m.invperm, f)
 end
 
 function evaluate!(
@@ -193,7 +194,7 @@ function evaluate!(
     tmp = one(first(t)),
 ) where {N,T}
 
-    t = smc.f(t[smc.perm])[invperm(smc.perm)]
+    t = smc.f(t[smc.perm])[smc.invperm]
     return t
 end
 
