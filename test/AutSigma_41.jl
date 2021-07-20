@@ -44,32 +44,9 @@ using Groups.KnuthBendix
         F = Groups.object(G)
 
         R = prod(commutator(gens(F, i), gens(F, i+genus)) for i in 1:genus)
-
-        ## TODO: how to evaluate automorphisms properly??!!!
-
+        
         for g in T
-            w = one(word(g))
-
-            dg = Groups.domain(g)
-            gens_idcs = first.(word.(dg))
-            img = evaluate(g)
-            A = alphabet(first(dg))
-
-            ltrs_map = Vector{eltype(dg)}(undef, length(KnuthBendix.letters(A)))
-
-            for i in 1:length(KnuthBendix.letters(A))
-                if i in gens_idcs
-                    ltrs_map[i] = img[findfirst(==(i), gens_idcs)]
-                else
-                    ltrs_map[i] = inv(img[findfirst(==(inv(A, i)), gens_idcs)])
-                end
-            end
-
-            for l in word(R)
-                append!(w, word(ltrs_map[l]))
-            end
-
-            @test F(w) == R
+            @test g(R) == R
         end
     end
 
