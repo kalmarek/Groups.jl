@@ -99,6 +99,11 @@ using Groups.KnuthBendix
         @test a0 * a4 * a0 == a4 * a0 * a4 # here, a0 and a4 are as before
     end
 
+    @testset "3-chain relation" begin
+        x = a4*a3*a2*a1*a1*a2*a3*a4 # auxillary; does not have a name in the Primer
+        @test b0 == x*a0*x^-1
+    end
+
     @testset "Lantern relation" begin
 
         @testset "b2 definition" begin
@@ -268,6 +273,14 @@ using Groups.KnuthBendix
         # here we check its centrality
 
         τᵍ = τ^genus
-        @test_broken all(a * τᵍ == τᵍ * a for a in Groups.gens(G))
+
+        symplectic_gens = let genus = genus, G = G
+            π₁Σ = Groups.SurfaceGroup(genus, 0)
+            autπ₁Σ = AutomorphismGroup(π₁Σ)
+            letters = alphabet(autπ₁Σ).letters
+            G.(word(l.autFn_word) for l in letters)
+        end
+
+        @test all(sg * τᵍ == τᵍ * sg for sg in symplectic_gens)
     end
 end
