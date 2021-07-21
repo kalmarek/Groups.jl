@@ -7,6 +7,8 @@ using Groups.KnuthBendix
 
     G = SpecialAutomorphismGroup(FreeGroup(2genus))
 
+    T = Groups.mcg_twists(autF)
+
     # symplectic pairing in the free Group goes like this:
     # f1 ↔ f5
     # f2 ↔ f6
@@ -43,8 +45,8 @@ using Groups.KnuthBendix
     @testset "preserving relator" begin
         F = Groups.object(G)
 
-        R = prod(commutator(gens(F, i), gens(F, i+genus)) for i in 1:genus)
-        
+        R = prod(commutator(gens(F,2i+1), gens(F,2i+2)) for i in 0:genus-1)
+
         for g in T
             @test g(R) == R
         end
@@ -88,19 +90,17 @@ using Groups.KnuthBendix
 
             # some additional tests, checking what explicitly happens to the generators of the π₁ under b2
             d = Groups.domain(b2)
-            im = evaluate(b2)
-            z = im[7] * d[7]^-1
+            img = evaluate(b2)
+            z = img[3] * d[3]^-1
 
-            @test im[1] == d[1]
-            @test im[2] == z * d[2] * z^-1
-            @test im[3] == z * d[3] * z^-1
-            @test im[4] == d[4]
-
-            @test im[5] == d[5] * z^-1
-            @test im[6] == z * d[6] * z^-1
-            @test im[7] == z * d[7]
-            @test im[8] == d[8]
-
+            @test img[1] == d[1]
+            @test img[2] == d[2]
+            @test img[3] == z * d[3]
+            @test img[4] == z * d[4] * z^-1
+            @test img[5] == z * d[5] * z^-1
+            @test img[6] == z * d[6] * z^-1
+            @test img[7] == d[7] * z^-1
+            @test img[8] == d[8]
         end
 
         @testset "b2: commutation relations" begin
@@ -128,54 +128,6 @@ using Groups.KnuthBendix
         end
     end
 
-
-    @testset "Te₁₂ definition" begin
-        G = parent(first(T))
-        F₈ = Groups.object(G)
-        (a, b, c, d, α, β, γ, δ) = Groups.gens(F₈)
-
-        A = alphabet(G)
-
-        λ = [i == j ? one(G) : G([A[Groups.λ(i, j)]]) for i in 1:8, j in 1:8]
-        ϱ = [i == j ? one(G) : G([A[Groups.ϱ(i, j)]]) for i in 1:8, j in 1:8]
-
-        g = one(G)
-
-        # β ↦ α*β
-        g *= λ[6, 5]
-        @test evaluate(g)[6] == α * β
-
-        # α ↦ a*α*b^-1
-        g *= λ[5, 1] * inv(ϱ[5, 2])
-        @test evaluate(g)[5] == a * α * b^-1
-
-        # β ↦ b*α^-1*a^-1*α*β
-        g *= inv(λ[6, 5])
-        @test evaluate(g)[6] == b * α^-1 * a^-1 * α * β
-
-        # b ↦ α
-        g *= λ[2, 5] * inv(λ[2, 1])
-        @test evaluate(g)[2] == α
-
-        # b ↦ b*α^-1*a^-1*α
-        g *= inv(λ[2, 5])
-        @test evaluate(g)[2] == b * α^-1 * a^-1 * α
-
-        # b ↦ b*α^-1*a^-1*α*b*α^-1
-        g *= inv(ϱ[2, 5]) * ϱ[2, 1]
-        @test evaluate(g)[2] == b * α^-1 * a^-1 * α * b * α^-1
-
-        # b ↦ b*α^-1*a^-1*α*b*α^-1*a*α*b^-1
-        g *= ϱ[2, 5]
-        @test evaluate(g)[2] == b * α^-1 * a^-1 * α * b * α^-1 * a * α * b^-1
-
-        x = b * α^-1 * a^-1 * α
-        @test evaluate(g) ==
-              (a, x * b * x^-1, c, d, α * x^-1, x * β, γ, δ)
-            # (a, b,            c, d, α,        β,     γ, δ)
-        @test g == T[9]
-    end
-
     Base.conj(t::Groups.Transvection, p::Perm) =
         Groups.Transvection(t.id, t.i^p, t.j^p, t.inv)
 
@@ -189,13 +141,15 @@ using Groups.KnuthBendix
         Te₁₂, Te₂₃ = T[9], T[12]
         G = parent(Te₁₂)
         F₈ = Groups.object(G)
-        (a, b, c, d, α, β, γ, δ) = Groups.gens(F₈)
+        (δ, d, γ, c, β, b, α, a) = Groups.gens(F₈)
+
+        Groups.domain(Te₁₂)
 
         img_Te₂₃ = evaluate(Te₂₃)
         y = c * β^-1 * b^-1 * β
-        @test img_Te₂₃ == (a, b, y * c * y^-1, d, α, β * y^-1, y * γ, δ)
+        @test img_Te₂₃ == (δ, d, y * γ, y * c * y^-1, β * y^-1, b, α, a)
 
-        σ = perm"(1,2,3)(5,6,7)(8)"
+        σ = perm"(7,5,3)(8,6,4)"
         Te₂₃_σ = conj(Te₁₂, σ)
         # @test word(Te₂₃_σ) == word(Te₂₃)
 
@@ -207,9 +161,9 @@ using Groups.KnuthBendix
         Te₁₂, Te₃₄ = T[9], T[14]
         G = parent(Te₁₂)
         F₈ = Groups.object(G)
-        (a, b, c, d, α, β, γ, δ) = Groups.gens(F₈)
+        (δ, d, γ, c, β, b, α, a) = Groups.gens(F₈)
 
-        σ = perm"(1,3)(2,4)(5,7)(6,8)"
+        σ = perm"(7,3)(8,4)(5,1)(6,2)"
         Te₃₄_σ = conj(Te₁₂, σ)
         @test Te₃₄ == Te₃₄_σ
     end

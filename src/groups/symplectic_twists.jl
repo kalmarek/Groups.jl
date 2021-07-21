@@ -13,7 +13,7 @@ function Base.getindex(rl::ΡΛ, i::Integer, j::Integer)
     rl.id == :ϱ && return Word([rl.A[ϱ(i, j)]])
 end
 
-function Te_diagonal(λ::ΡΛ, ϱ::ΡΛ, i::Integer)
+function Te_diagonal(λ::Groups.ΡΛ, ϱ::Groups.ΡΛ, i::Integer)
     @assert λ.N == ϱ.N
     @assert λ.id == :λ && ϱ.id == :ϱ
 
@@ -25,15 +25,20 @@ function Te_diagonal(λ::ΡΛ, ϱ::ΡΛ, i::Integer)
 
     A = λ.A
 
-    # comments are for i,j = 1,2
+    NI = (2n - 2i) + 1
+    NJ = (2n - 2j) + 1
+    I = (2n - 2i) + 2
+    J = (2n - 2j) + 2
+
     g = one(Word(Int[]))
-    g *= λ[n+j, n+i]                   # β ↦ α*β
-    g *= λ[n+i, i] * inv(A, ϱ[n+i, j]) # α ↦ a*α*b^-1
-    g *= inv(A, λ[n+j, n+i])           # β ↦ b*α^-1*a^-1*α*β
-    g *= λ[j, n+i] * inv(A, λ[j, i])   # b ↦ α
-    g *= inv(A, λ[j, n+i])             # b ↦ b*α^-1*a^-1*α
-    g *= inv(A, ϱ[j, n+i]) * ϱ[j, i]   # b ↦ b*α^-1*a^-1*α*b*α^-1
-    g *= ϱ[j, n+i]                     # b ↦ b*α^-1*a^-1*α*b*α^-1*a*α*b^-1
+    g *= λ[NJ, NI]                    # β ↦ α*β
+    g *= λ[NI, I] * inv(A, ϱ[NI, J])  # α ↦ a*α*b^-1
+    g *= inv(A, λ[NJ, NI])            # β ↦ b*α^-1*a^-1*α*β
+    g *= λ[J, NI] * inv(A, λ[J, I])   # b ↦ α
+    g *= inv(A, λ[J, NI])             # b ↦ b*α^-1*a^-1*α
+    g *= inv(A, ϱ[J, NI]) * ϱ[J, I]   # b ↦ b*α^-1*a^-1*α*b*α^-1
+    g *= ϱ[J, NI]                     # b ↦ b*α^-1*a^-1*α*b*α^-1*a*α*b^-1
+
     return g
 end
 
@@ -45,10 +50,10 @@ function Te_lantern(A::Alphabet, b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a�
     return inv(A, Y) * b₁ * Y # b₂
 end
 
-Ta(λ::ΡΛ, i::Integer) = (@assert λ.id == :λ;
-λ[λ.N÷2+i, i])
-Tα(λ::ΡΛ, i::Integer) = (@assert λ.id == :λ;
-inv(λ.A, λ[i, λ.N÷2+i]))
+Ta(λ::Groups.ΡΛ, i::Integer) = (@assert  λ.id == :λ; λ[λ.N-2i+1, λ.N-2i+2])
+
+Tα(λ::Groups.ΡΛ, i::Integer) = (@assert  λ.id == :λ; inv(λ.A, λ[λ.N-2i+2, λ.N-2i+1]))
+
 
 function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     @assert i ≠ j
