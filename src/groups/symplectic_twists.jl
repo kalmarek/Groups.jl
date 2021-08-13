@@ -175,8 +175,6 @@ struct SymplecticMappingClass{T, F} <: GSymbol
     minus::Bool
     inv::Bool
     autFn_word::T
-    perm::Vector{Int}
-    invperm::Vector{Int}
     f::F
 end
 
@@ -185,8 +183,7 @@ Base.:(==)(a::SymplecticMappingClass, b::SymplecticMappingClass) = a.autFn_word 
 Base.hash(a::SymplecticMappingClass, h::UInt) = hash(a.autFn_word, h)
 
 function SymplecticMappingClass(
-    Σ::SurfaceGroup,
-    sautFn,
+    sautFn::AutomorphismGroup{<:FreeGroup},
     id::Symbol,
     i::Integer,
     j::Integer;
@@ -195,11 +192,12 @@ function SymplecticMappingClass(
 )
     @assert i > 0 && j > 0
     id === :A && @assert i ≠ j
-    @assert 2genus(Σ) == ngens(object(sautFn))
+    @assert iseven(ngens(object(sautFn)))
+    genus = ngens(object(sautFn))÷2
 
-    A = KnuthBendix.alphabet(sautFn)
-    λ = ΡΛ(:λ, A, 2genus(Σ))
-    ϱ = ΡΛ(:ϱ, A, 2genus(Σ))
+    A = alphabet(sautFn)
+    λ = ΡΛ(:λ, A, 2genus)
+    ϱ = ΡΛ(:ϱ, A, 2genus)
 
     w = if id === :A
         Te(λ, ϱ, i, j) *
@@ -229,14 +227,14 @@ function SymplecticMappingClass(
         throw("Type not recognized: $id")
     end
 
+    # w is a word defined in the context of A (= alphabet(sautFn))
+    # so this "coercion" is correct
     a = sautFn(w)
-    g = genus(Σ)
-    perm = [2g:-2:1; (2g-1):-2:1]
 
     f = compiled(a)
     # f = t -> evaluate!(t, a)
 
-    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, perm, invperm(perm), f)
+    res = SymplecticMappingClass(id, UInt(i), UInt(j), minus, inverse, a, f)
 
     return res
 end
@@ -255,7 +253,7 @@ function Base.inv(m::SymplecticMappingClass)
     inv_w = inv(m.autFn_word)
     # f(t) = evaluate!(t, inv_w)
     f = compiled(inv_w)
-    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, m.perm, m.invperm, f)
+    return SymplecticMappingClass(m.id, m.i, m.j, m.minus, !m.inv, inv_w, f)
 end
 
 function evaluate!(
@@ -263,9 +261,9 @@ function evaluate!(
     smc::SymplecticMappingClass,
     tmp=nothing,
 ) where {N,T}
-
-    t = smc.f(t[smc.perm])[smc.invperm]
-    return t
-end
+    t = smc.f(t)
+    for i in 1:N
+        normalform!(t[i])
     end
+    return t
 end

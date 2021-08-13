@@ -20,10 +20,18 @@ end
 function SurfaceGroup(genus::Integer, boundaries::Integer)
     @assert genus > 1
 
+    # The (confluent) rewriting systems comes from
+    # S. Hermiller, Rewriting systems for Coxeter groups
+    # Journal of Pure and Applied Algebra
+    # Volume 92, Issue 2, 7 March 1994, Pages 137-148
+    # https://doi.org/10.1016/0022-4049(94)90019-1
+    # Note: the notation is "inverted":
+    # a_g of the article becomes A_g here.
+
     ltrs = String[]
     for i in 1:genus
         subscript = join('₀'+d for d in reverse(digits(i)))
-        append!(ltrs, ["a" * subscript, "A" * subscript, "b" * subscript, "B" * subscript])
+        append!(ltrs, ["A" * subscript, "a" * subscript, "B" * subscript, "b" * subscript])
     end
     Al = Alphabet(reverse!(ltrs))
 
@@ -66,17 +74,17 @@ relations(S::SurfaceGroup) = S.relations
 function symplectic_twists(π₁Σ::SurfaceGroup)
     g = genus(π₁Σ)
 
-    saut = SpecialAutomorphismGroup(FreeGroup(2g))
+    saut = SpecialAutomorphismGroup(FreeGroup(2g), maxrules=100)
 
-    Aij  = [SymplecticMappingClass(π₁Σ, saut, :A, i, j) for i in 1:g for j in 1:g if i≠j]
+    Aij  = [SymplecticMappingClass(saut, :A, i, j) for i in 1:g for j in 1:g if i≠j]
 
-    Bij  = [SymplecticMappingClass(π₁Σ, saut, :B, i, j) for i in 1:g for j in i+1:g]
+    Bij  = [SymplecticMappingClass(saut, :B, i, j) for i in 1:g for j in 1:g if i≠j]
 
-    mBij = [SymplecticMappingClass(π₁Σ, saut, :B, i, j, minus=true) for i in 1:g for j in i+1:g]
+    mBij = [SymplecticMappingClass(saut, :B, i, j, minus=true) for i in 1:g for j in 1:g if i≠j]
 
-    Bii  = [SymplecticMappingClass(π₁Σ, saut, :B, i, i) for i in 1:g]
+    Bii  = [SymplecticMappingClass(saut, :B, i, i) for i in 1:g]
 
-    mBii = [SymplecticMappingClass(π₁Σ, saut, :B, i, i, minus=true) for i in 1:g]
+    mBii = [SymplecticMappingClass(saut, :B, i, i, minus=true) for i in 1:g]
 
     return [Aij; Bij; mBij; Bii; mBii]
 end
@@ -86,5 +94,10 @@ KnuthBendix.alphabet(G::AutomorphismGroup{<:SurfaceGroup}) = rewriting(G)
 function AutomorphismGroup(π₁Σ::SurfaceGroup; kwargs...)
     S = vcat(symplectic_twists(π₁Σ)...)
     A = Alphabet(S)
-    return AutomorphismGroup(π₁Σ, S, A, ntuple(i->gens(π₁Σ, i), 2genus(π₁Σ)))
+
+    # this is to fix the definitions of symplectic twists:
+    # with i->gens(π₁Σ, i) the corresponding automorphisms return
+    # reversed words
+    domain = ntuple(i->inv(gens(π₁Σ, i)), 2genus(π₁Σ))
+    return AutomorphismGroup(π₁Σ, S, A, domain)
 end
