@@ -5,8 +5,8 @@ struct ΡΛ
 end
 
 function Base.getindex(rl::ΡΛ, i::Integer, j::Integer)
-    @assert 1 ≤ i ≤ rl.N
-    @assert 1 ≤ j ≤ rl.N
+    @assert 1 ≤ i ≤ rl.N "Got $i > $(rl.N)"
+    @assert 1 ≤ j ≤ rl.N "Got $j > $(rl.N)"
     @assert i ≠ j
     @assert rl.id ∈ (:λ, :ϱ)
     rl.id == :λ && return Word([rl.A[λ(i, j)]])
@@ -19,11 +19,16 @@ function Te_diagonal(λ::Groups.ΡΛ, ϱ::Groups.ΡΛ, i::Integer)
 
     N = λ.N
     @assert iseven(N)
+    A = λ.A
     n = N ÷ 2
     j = i + 1
-    @assert 1 <= i < n
 
-    A = λ.A
+    if i == n
+        τ = rotation_element(λ, ϱ)
+        return inv(A, τ) * Te_diagonal(λ, ϱ, 1) * τ
+    end
+
+    @assert 1 <= i < n
 
     NI = (2n - 2i) + 1
     NJ = (2n - 2j) + 1
@@ -44,41 +49,102 @@ end
 
 function Te_lantern(A::Alphabet, b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a₅::T) where {T}
     a₀ = (a₁ * a₂ * a₃)^4 * inv(A, b₀)
-    X = a₄ * a₅ * a₃ * a₄
-    b₁ = inv(A, X) * a₀ * X
+    X = a₄ * a₅ * a₃ * a₄ # from Primer
+    b₁ = inv(A, X) * a₀ * X # from Primer
     Y = a₂ * a₃ * a₁ * a₂
-    return inv(A, Y) * b₁ * Y # b₂
+    return inv(A, Y) * b₁ * Y # b₂ from Primer
 end
 
-Ta(λ::Groups.ΡΛ, i::Integer) = (@assert  λ.id == :λ; λ[λ.N-2i+1, λ.N-2i+2])
+function Ta(λ::Groups.ΡΛ, i::Integer)
+    @assert λ.id == :λ;
+    return λ[mod1(λ.N-2i+1, λ.N), mod1(λ.N-2i+2, λ.N)]
+end
 
-Tα(λ::Groups.ΡΛ, i::Integer) = (@assert  λ.id == :λ; inv(λ.A, λ[λ.N-2i+2, λ.N-2i+1]))
-
+function Tα(λ::Groups.ΡΛ, i::Integer)
+    @assert λ.id == :λ;
+    return inv(λ.A, λ[mod1(λ.N-2i+2, λ.N), mod1(λ.N-2i+1, λ.N)])
+end
 
 function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     @assert i ≠ j
-    i, j = i < j ? (i, j) : (j, i)
 
     @assert λ.N == ϱ.N
     @assert λ.A == ϱ.A
     @assert λ.id == :λ && ϱ.id == :ϱ
 
+    @assert iseven(λ.N)
+    genus = λ.N÷2
+    i = mod1(i, genus)
+    j = mod1(j, genus)
+
     @assert 1 ≤ i ≤ λ.N
     @assert 1 ≤ j ≤ λ.N
 
-    if j == i + 1
+    A = λ.A
+
+    if mod(j - (i + 1), genus) == 0
         return Te_diagonal(λ, ϱ, i)
     else
-        return Te_lantern(
-            λ.A,
-            Ta(λ, i + 1),
-            Ta(λ, i),
-            Tα(λ, i),
-            Te(λ, ϱ, i, i + 1),
-            Tα(λ, i + 1),
-            Te(λ, ϱ, i + 1, j),
-        )
+        return inv(A, Te_lantern(
+            A,
+            # Our notation:               # Primer notation:
+            inv(A, Ta(λ, i + 1)),         # b₀
+            inv(A, Ta(λ, i)),             # a₁
+            inv(A, Tα(λ, i)),             # a₂
+            inv(A, Te_diagonal(λ, ϱ, i)), # a₃
+            inv(A, Tα(λ, i + 1)),         # a₄
+            inv(A, Te(λ, ϱ, i + 1, j)),   # a₅
+        ))
     end
+end
+
+"""
+    rotation_element(G::AutomorphismGroup{<:FreeGroup})
+Return the element of `G` which corresponds to shifting generators of the free group.
+
+In the corresponding mapping class group this element acts by rotation of the surface anti-clockwise.
+"""
+function rotation_element(G::AutomorphismGroup{<:FreeGroup})
+
+    A = alphabet(G)
+    @assert iseven(ngens(object(G)))
+    genus = ngens(object(G)) ÷ 2
+
+    λ = ΡΛ(:λ, A, 2genus)
+    ϱ = ΡΛ(:ϱ, A, 2genus)
+
+    return G(rotation_element(λ, ϱ))
+end
+
+function rotation_element(λ::ΡΛ, ϱ::ΡΛ)
+    @assert iseven(λ.N)
+    genus = λ.N÷2
+    A = λ.A
+
+    halftwists = map(1:genus-1) do i
+        j = i + 1
+        x = Ta(λ, j) * inv(A, Ta(λ, i)) * Tα(λ, j) * Te_diagonal(λ, ϱ, i)
+        δ = x * Tα(λ, i) * inv(A, x)
+        c =
+            inv(A, Ta(λ, j)) *
+            Te(λ, ϱ, i, j) *
+            Tα(λ, i)^2 *
+            inv(A, δ) *
+            inv(A, Ta(λ, j)) *
+            Ta(λ, i) *
+            δ
+        z =
+            Te_diagonal(λ, ϱ, i) *
+            inv(A, Ta(λ, i)) *
+            Tα(λ, i) *
+            Ta(λ, i) *
+            inv(A, Te_diagonal(λ, ϱ, i))
+
+        Ta(λ, i) * inv(A, Ta(λ, j) * Tα(λ, j))^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c
+    end
+
+    τ = (Ta(λ, 1) * Tα(λ, 1))^6 * prod(halftwists)
+    return τ
 end
 
 function mcg_twists(G::AutomorphismGroup{<:FreeGroup})
