@@ -1,27 +1,17 @@
 struct Transvection <: GSymbol
     id::Symbol
-    ij::UInt8
+    i::UInt16
+    j::UInt16
     inv::Bool
 
     function Transvection(id::Symbol, i::Integer, j::Integer, inv = false)
         @assert id in (:ϱ, :λ)
-        @boundscheck @assert 0 < i <= (typemax(UInt8) >> 4)
-        @boundscheck @assert 0 < j <= (typemax(UInt8) >> 4)
-        return new(id, (convert(UInt8, i) << 4) + convert(UInt8, j), inv)
+        return new(id, i, j, inv)
     end
 end
 
 ϱ(i, j) = Transvection(:ϱ, i, j)
 λ(i, j) = Transvection(:λ, i, j)
-
-_tophalf(ij::UInt8) = (ij & 0xf0) >> 4
-_bothalf(ij::UInt8) = (ij & 0x0f)
-
-function Base.getproperty(t::Transvection, s::Symbol)
-    s === :i && return _tophalf(t.ij)
-    s === :j && return _bothalf(t.ij)
-    return Core.getfield(t, s)
-end
 
 function Base.show(io::IO, t::Transvection)
     id = if t.id === :ϱ
@@ -33,18 +23,18 @@ function Base.show(io::IO, t::Transvection)
     t.inv && print(io, "^-1")
 end
 
-Base.inv(t::Transvection) =
-    Transvection(t.id, _tophalf(t.ij), _bothalf(t.ij), !t.inv)
+Base.inv(t::Transvection) = Transvection(t.id, t.i, t.j, !t.inv)
 
 Base.:(==)(t::Transvection, s::Transvection) =
-    t.id === s.id && t.ij == s.ij && t.inv == s.inv
-Base.hash(t::Transvection, h::UInt) = hash(t.id, hash(t.ij, hash(t.inv, h)))
+    t.id === s.id && t.i == s.i && t.j == s.j && t.inv == s.inv
+
+Base.hash(t::Transvection, h::UInt) = hash(hash(t.id, hash(t.i)), hash(t.j, hash(t.inv, h)))
 
 Base.@propagate_inbounds @inline function evaluate!(
-    v::NTuple{T, N},
+    v::NTuple{T,N},
     t::Transvection,
-    tmp=one(first(v))
-) where {T, N}
+    tmp = one(first(v)),
+) where {T,N}
     i, j = t.i, t.j
     @assert 1 ≤ i ≤ length(v) && 1 ≤ j ≤ length(v)
 
@@ -102,5 +92,4 @@ Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
 Base.:(==)(p::PermRightAut, q::PermRightAut) = p.perm == q.perm
 Base.hash(p::PermRightAut, h::UInt) = hash(p.perm, hash(PermRightAut, h))
 
-evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp=nothing) where {T,N} = v[p.perm]
-end
+evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp = nothing) where {T,N} = v[p.perm]
