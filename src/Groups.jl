@@ -10,7 +10,7 @@ import Random
 import OrderedCollections: OrderedSet
 
 export Alphabet, AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup
-export alphabet, evaluate, word
+export alphabet, evaluate, word, gens
 
 include("types.jl")
 include("hashing.jl")
