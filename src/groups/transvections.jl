@@ -5,27 +5,21 @@ struct Transvection <: GSymbol
 
     function Transvection(id::Symbol, i::Integer, j::Integer, inv = false)
         @assert id in (:ϱ, :λ)
-        return new(id, _indices(UInt8(i), UInt8(j)), inv)
+        @boundscheck @assert 0 < i <= (typemax(UInt8) >> 4)
+        @boundscheck @assert 0 < j <= (typemax(UInt8) >> 4)
+        return new(id, (convert(UInt8, i) << 4) + convert(UInt8, j), inv)
     end
 end
 
 ϱ(i, j) = Transvection(:ϱ, i, j)
 λ(i, j) = Transvection(:λ, i, j)
 
-_indices(ij::UInt8) = (ij & 0xf0) >> 4, (ij & 0x0f)
-
-function _indices(i::UInt8, j::UInt8)
-    @boundscheck @assert i < typemax(i) ÷ 2
-    @boundscheck @assert j < typemax(j) ÷ 2
-    sizeof
-    return (i << 4) + j
-end
-
-indices(t::Transvection) = Int.(_indices(t.ij))
+_tophalf(ij::UInt8) = (ij & 0xf0) >> 4
+_bothalf(ij::UInt8) = (ij & 0x0f)
 
 function Base.getproperty(t::Transvection, s::Symbol)
-    s === :i && return first(indices(t))
-    s === :j && return last(indices(t))
+    s === :i && return _tophalf(t.ij)
+    s === :j && return _bothalf(t.ij)
     return Core.getfield(t, s)
 end
 
@@ -39,7 +33,8 @@ function Base.show(io::IO, t::Transvection)
     t.inv && print(io, "^-1")
 end
 
-Base.inv(t::Transvection) = Transvection(t.id, _indices(t.ij)..., !t.inv)
+Base.inv(t::Transvection) =
+    Transvection(t.id, _tophalf(t.ij), _bothalf(t.ij), !t.inv)
 
 Base.:(==)(t::Transvection, s::Transvection) =
     t.id === s.id && t.ij == s.ij && t.inv == s.inv
@@ -50,7 +45,7 @@ Base.@propagate_inbounds @inline function evaluate!(
     t::Transvection,
     tmp=one(first(v))
 ) where {T, N}
-    i, j = indices(t)
+    i, j = t.i, t.j
     @assert 1 ≤ i ≤ length(v) && 1 ≤ j ≤ length(v)
 
     A = alphabet(parent(first(v)))
