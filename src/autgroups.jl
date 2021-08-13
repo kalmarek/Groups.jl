@@ -105,16 +105,15 @@ function evaluate!(
     t::NTuple{N,T},
     f::AbstractFPGroupElement{<:AutomorphismGroup{<:Group}},
     tmp = one(first(t)),
-) where {N, T}
+) where {N, T<:FPGroupElement}
     A = alphabet(f)
-    AF = alphabet(object(parent(f)))
     for idx in word(f)
-        t = @inbounds evaluate!(t, A[idx], AF, tmp)::NTuple{N,T}
+        t = @inbounds evaluate!(t, A[idx], tmp)::NTuple{N,T}
     end
     return t
 end
 
-evaluate!(t::NTuple{N, T}, s::GSymbol, A, tmp=one(first(t))) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
+evaluate!(t::NTuple{N, T}, s::GSymbol, tmp=nothing) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
 
 # forward evaluate by substitution
 
@@ -132,7 +131,7 @@ function LettersMap(a::FPGroupElement{<:AutomorphismGroup})
 
     # (dom[i] → img[i] is a map from domain to images)
     # we need a map from alphabet indices → (gens, gens⁻¹) → images
-    # here we do it for elements of the domai
+    # here we do it for elements of the domain
     # (trusting it's a set of generators that define a)
     @assert length(dom) == length(img)
 

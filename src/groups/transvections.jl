@@ -45,9 +45,15 @@ Base.:(==)(t::Transvection, s::Transvection) =
     t.id === s.id && t.ij == s.ij && t.inv == s.inv
 Base.hash(t::Transvection, h::UInt) = hash(t.id, hash(t.ij, hash(t.inv, h)))
 
-Base.@propagate_inbounds function evaluate!(v::NTuple{T, N}, t::Transvection, A::Alphabet, tmp=one(first(v))) where {T, N}
+Base.@propagate_inbounds @inline function evaluate!(
+    v::NTuple{T, N},
+    t::Transvection,
+    tmp=one(first(v))
+) where {T, N}
     i, j = indices(t)
-    @assert i ≤ length(v) && j ≤ length(v)
+    @assert 1 ≤ i ≤ length(v) && 1 ≤ j ≤ length(v)
+
+    A = alphabet(parent(first(v)))
 
     @inbounds begin
         if t.id === :ϱ
@@ -101,6 +107,5 @@ Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
 Base.:(==)(p::PermRightAut, q::PermRightAut) = p.perm == q.perm
 Base.hash(p::PermRightAut, h::UInt) = hash(p.perm, hash(PermRightAut, h))
 
-function evaluate!(v::NTuple{T, N}, p::PermRightAut, ::Alphabet, tmp=one(first(v))) where {T, N}
-    return v[p.perm]
+evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp=nothing) where {T,N} = v[p.perm]
 end

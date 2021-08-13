@@ -47,7 +47,7 @@
         r = Groups.Transvection(:ϱ,i,j)
         l = Groups.Transvection(:λ,i,j)
 
-        (t::Groups.Transvection)(v::Tuple) = Groups.evaluate!(v, t, A4)
+        (t::Groups.Transvection)(v::Tuple) = Groups.evaluate!(v, t)
 
         @test      r(deepcopy(D)) == (a*b,   b, c, d)
         @test inv(r)(deepcopy(D)) == (a*b^-1,b, c, d)

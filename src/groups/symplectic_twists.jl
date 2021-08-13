@@ -195,8 +195,7 @@ end
 function evaluate!(
     t::NTuple{N,T},
     smc::SymplecticMappingClass,
-    A::Alphabet,
-    tmp = one(first(t)),
+    tmp=nothing,
 ) where {N,T}
 
     t = smc.f(t[smc.perm])[smc.invperm]
