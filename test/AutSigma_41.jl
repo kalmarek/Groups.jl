@@ -5,9 +5,10 @@ using Groups.KnuthBendix
 
     genus = 4
 
-    G = SpecialAutomorphismGroup(FreeGroup(2genus))
+    Fn = FreeGroup(2genus)
+    G = SpecialAutomorphismGroup(Fn)
 
-    T = Groups.mcg_twists(autF)
+    T = Groups.mcg_twists(G)
 
     # symplectic pairing in the free Group goes like this:
     # f1 ↔ f5
@@ -40,7 +41,6 @@ using Groups.KnuthBendix
     b2 = T[10]^-1 # Te₁₃
 
     As = T[[1, 5, 9, 6, 12, 7, 14, 8]] # the inverses of the elements a
-
 
     @testset "preserving relator" begin
         F = Groups.object(G)
@@ -123,7 +123,12 @@ using Groups.KnuthBendix
             # x = (a4^-1*a3^-1*a2^-1*a1^-1*u*a2*a3*a4*a5*a6)
             @time evaluate(x)
             b3 = x * a0 * x^-1
-            @time evaluate(b3)
+            b3im = @time evaluate(b3)
+            b3cim = @time let g = b3
+                f = Groups.compiled(g)
+                f(Groups.domain(g))
+            end
+            @test b3im == b3cim
             @test a0 * b2 * b1 == a1 * a3 * a5 * b3
         end
     end
@@ -170,46 +175,13 @@ using Groups.KnuthBendix
 
     @testset "hyperelliptic τ is central" begin
 
-        A = alphabet(G)
-        λ = Groups.ΡΛ(:λ, A, 2genus)
-        ϱ = Groups.ΡΛ(:ϱ, A, 2genus)
-
-        import Groups: Ta, Tα, Te
-
-        halftwists = map(1:genus-1) do i
-            j = i + 1
-            x = Ta(λ, j) * inv(A, Ta(λ, i)) * Tα(λ, j) * Te(λ, ϱ, i, j)
-            δ = x * Tα(λ, i) * inv(A, x)
-            c =
-                inv(A, Ta(λ, j)) *
-                Te(λ, ϱ, i, j) *
-                Tα(λ, i)^2 *
-                inv(A, δ) *
-                inv(A, Ta(λ, j)) *
-                Ta(λ, i) *
-                δ
-            z =
-                Te(λ, ϱ, j, i) *
-                inv(A, Ta(λ, i)) *
-                Tα(λ, i) *
-                Ta(λ, i) *
-                inv(A, Te(λ, ϱ, j, i))
-
-            G(Ta(λ, i) * inv(A, Ta(λ, j) * Tα(λ, j))^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c)
-        end
-
-        τ = (G(Ta(λ, 1) * Tα(λ, 1))^6) * prod(halftwists)
-
-        # τ^genus is trivial but only in autπ₁Σ₄
-        # here we check its centrality
-
+        τ = Groups.rotation_element(G)
         τᵍ = τ^genus
 
         symplectic_gens = let genus = genus, G = G
             π₁Σ = Groups.SurfaceGroup(genus, 0)
-            autπ₁Σ = AutomorphismGroup(π₁Σ)
-            letters = alphabet(autπ₁Σ).letters
-            G.(word(l.autFn_word) for l in letters)
+            s_twists = Groups.symplectic_twists(π₁Σ)
+            G.(word(t.autFn_word) for t in s_twists)
         end
 
         @test all(sg * τᵍ == τᵍ * sg for sg in symplectic_gens)
