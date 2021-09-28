@@ -84,7 +84,6 @@ end
 ## GroupElement Interface for FPGroupElement
 
 Base.parent(f::AbstractFPGroupElement) = f.parent
-GroupsCore.parent_type(::Type{<:AbstractFPGroupElement{G}}) where {G} = G
 
 function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
     @boundscheck @assert parent(g) === parent(h)

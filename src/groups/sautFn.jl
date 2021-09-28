@@ -10,7 +10,7 @@ function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, k
     maxrules = 1000*n
 
     rws = KnuthBendix.RewritingSystem(rels, ordering(A))
-    @time KnuthBendix.knuthbendix!(rws; maxrules=maxrules, kwargs...)
+    KnuthBendix.knuthbendix!(rws; maxrules=maxrules, kwargs...)
     return AutomorphismGroup(F, S, rws, ntuple(i -> gens(F, i), n))
 end
 
