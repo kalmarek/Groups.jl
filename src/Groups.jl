@@ -10,7 +10,7 @@ import Random
 import OrderedCollections: OrderedSet
 
 export Alphabet, AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup
-export alphabet, evaluate, word
+export alphabet, evaluate, word, gens
 
 include("types.jl")
 include("hashing.jl")
@@ -18,6 +18,7 @@ include("normalform.jl")
 include("autgroups.jl")
 
 include("groups/sautFn.jl")
+include("groups/mcg.jl")
 
 include("wl_ball.jl")
 end # of module Groups

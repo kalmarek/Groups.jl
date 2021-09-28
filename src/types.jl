@@ -57,34 +57,35 @@ Base.isfinite(::AbstractFPGroup) = (@warn "using generic isfinite(::AbstractFPGr
 
 ## FPGroupElement
 
-mutable struct FPGroupElement{G<:AbstractFPGroup,W<:AbstractWord} <: GroupElement
+abstract type AbstractFPGroupElement{Gr} <: GroupElement end
+
+mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <: AbstractFPGroupElement{Gr}
     word::W
     savedhash::UInt
-    parent::G
+    parent::Gr
 
-    FPGroupElement(word::W, G::AbstractFPGroup) where {W<:AbstractWord} =
-        new{typeof(G),W}(word, UInt(0), G)
-
-    FPGroupElement(word::W, hash::UInt, G::AbstractFPGroup) where {W<:AbstractWord} =
+    FPGroupElement(word::W, G::AbstractFPGroup, hash::UInt=UInt(0)) where {W<:AbstractWord} =
         new{typeof(G),W}(word, hash, G)
+
+    FPGroupElement{Gr, W}(word::AbstractWord, G::Gr) where {Gr, W} =
+        new{Gr, W}(word, UInt(0), G)
 end
 
-word(f::FPGroupElement) = f.word
+word(f::AbstractFPGroupElement) = f.word
 
 #convenience
-KnuthBendix.alphabet(g::FPGroupElement) = alphabet(parent(g))
+KnuthBendix.alphabet(g::AbstractFPGroupElement) = alphabet(parent(g))
 
-function Base.show(io::IO, f::FPGroupElement)
+function Base.show(io::IO, f::AbstractFPGroupElement)
     f = normalform!(f)
     KnuthBendix.print_repr(io, word(f), alphabet(f))
 end
 
 ## GroupElement Interface for FPGroupElement
 
-Base.parent(f::FPGroupElement) = f.parent
-GroupsCore.parent_type(::Type{<:FPGroupElement{G}}) where {G} = G
+Base.parent(f::AbstractFPGroupElement) = f.parent
 
-function Base.:(==)(g::FPGroupElement, h::FPGroupElement)
+function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
     @boundscheck @assert parent(g) === parent(h)
     normalform!(g)
     normalform!(h)
@@ -93,20 +94,23 @@ function Base.:(==)(g::FPGroupElement, h::FPGroupElement)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
-    return FPGroupElement(copy(word(g)), g.savedhash, parent(g))
+    return FPGroupElement(copy(word(g)), parent(g), g.savedhash)
 end
 
-Base.inv(g::FPGroupElement) = (G = parent(g); FPGroupElement(inv(alphabet(G), word(g)), G))
+function Base.inv(g::GEl) where GEl <: AbstractFPGroupElement
+    G = parent(g)
+    return GEl(inv(alphabet(G), word(g)), G)
+end
 
-function Base.:(*)(g::FPGroupElement, h::FPGroupElement)
+function Base.:(*)(g::GEl, h::GEl) where GEl<:AbstractFPGroupElement
     @boundscheck @assert parent(g) === parent(h)
-    return FPGroupElement(word(g) * word(h), parent(g))
+    return GEl(word(g) * word(h), parent(g))
 end
 
-GroupsCore.isfiniteorder(g::FPGroupElement) = isone(g) ? true : (@warn "using generic isfiniteorder(::FPGroupElement): the returned `false` might be wrong"; false)
+GroupsCore.isfiniteorder(g::AbstractFPGroupElement) = isone(g) ? true : (@warn "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong"; false)
 
 # additional methods:
-Base.isone(g::FPGroupElement) = (normalform!(g); isempty(word(g)))
+Base.isone(g::AbstractFPGroupElement) = (normalform!(g); isempty(word(g)))
 
 ## Free Groups
 
@@ -157,7 +161,7 @@ relations(F::FreeGroup) = Pair{eltype(F)}[]
 # these are mathematically correct
 Base.isfinite(::FreeGroup) = false
 
-GroupsCore.isfiniteorder(g::FPGroupElement{<:FreeGroup}) = isone(g) ? true : false
+GroupsCore.isfiniteorder(g::AbstractFPGroupElement{<:FreeGroup}) = isone(g) ? true : false
 
 ## FP Groups
 
