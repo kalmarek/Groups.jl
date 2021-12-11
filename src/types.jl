@@ -90,7 +90,7 @@ function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
     normalform!(g)
     normalform!(h)
     hash(g) != hash(h) && return false
-    return word(g) == word(h)
+    return equality_data(g) == equality_data(h)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
