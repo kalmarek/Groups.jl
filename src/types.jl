@@ -71,6 +71,9 @@ mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <: AbstractFP
         new{Gr, W}(word, UInt(0), G)
 end
 
+Base.show(io::IO, ::Type{<:FPGroupElement{Gr}}) where {Gr} =
+    print(io, FPGroupElement, "{$Gr, …}")
+
 word(f::AbstractFPGroupElement) = f.word
 
 #convenience
@@ -202,6 +205,9 @@ function Base.show(io::IO, G::FPGroup)
     join(io, relations(G), ", ")
     print(io, "⟩")
 end
+
+Base.show(io::IO, ::Type{<:FPGroup{T}}) where {T} =
+    print(io, FPGroup, "{$T, …}")
 
 ## GSymbol aka letter of alphabet
 
