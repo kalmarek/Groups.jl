@@ -14,7 +14,7 @@
     G = FPGroup(F, [a*b=>b*a, a*c=>c*a, b*c=>c*b])
 
     @test G isa FPGroup
-    @test sprint(show, G) == "⟨a, b, c | a*b => b*a, a*c => c*a, b*c => c*b⟩"
+    @test sprint(show, G) == "⟨ a  b  c | \n\t  a*b => b*a  a*c => c*a  b*c => c*b ⟩"
     @test rand(G) isa FPGroupElement
 
     f = a*c*b
