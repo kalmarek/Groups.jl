@@ -20,8 +20,18 @@ word_type(G::AbstractFPGroup) = word_type(typeof(G))
 # the default:
 word_type(::Type{<:AbstractFPGroup}) = Word{UInt8}
 
-# the default (results in free rewriting)
-rewriting(G::AbstractFPGroup) = alphabet(G)
+"""
+    rewriting(G::AbstractFPGroup)
+Return a "rewriting object" for elements of `G`. The rewriting object must must implement
+    KnuthBendix.rewrite_from_left!(
+        u::AbstractWord,
+        v::AbstractWord,
+        rewriting(G)
+    )
+
+For example if `G` is a `FreeGroup` then `alphabet(G)` is returned which results in free rewriting. For `FPGroup` a rewriting system is returned which may (or may not) rewrite word `v` to its normal form.
+"""
+function rewriting end
 
 Base.@propagate_inbounds function (G::AbstractFPGroup)(
     word::AbstractVector{<:Integer},
