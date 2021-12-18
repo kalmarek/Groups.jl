@@ -1,7 +1,7 @@
 name = "Groups"
 uuid = "5d8bd718-bd84-11e8-3b40-ad14f4a32557"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.7.1"
+version = "0.7.2"
 
 [deps]
 GroupsCore = "d5909c97-4eac-4ecc-a3dc-fdd0858a4120"
