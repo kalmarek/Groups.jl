@@ -96,7 +96,7 @@
         @test evaluate(g*h) == evaluate(h*g)
         @test (g*h).savedhash == zero(UInt)
 
-        @test sprint(show, typeof(g)) == "Automorphism{FreeGroup{Symbol}, …}"
+        @test sprint(show, typeof(g)) == "Automorphism{FreeGroup{Symbol, KnuthBendix.LenLex{Symbol}}, …}"
 
         a = g*h
         b = h*g
