@@ -137,16 +137,19 @@ Base.isone(g::AbstractFPGroupElement) = (normalform!(g); isempty(word(g)))
 
 ## Free Groups
 
-struct FreeGroup{T} <: AbstractFPGroup
+struct FreeGroup{T,O} <: AbstractFPGroup
     gens::Vector{T}
-    alphabet::KnuthBendix.Alphabet{T}
+    ordering::O
 
-    function FreeGroup(gens, A::KnuthBendix.Alphabet) where {W}
+    function FreeGroup(gens, ordering::KnuthBendix.WordOrdering)
         @assert length(gens) == length(unique(gens))
-        @assert all(l -> l in KnuthBendix.letters(A), gens)
-        return new{eltype(gens)}(gens, A)
+        L = KnuthBendix.letters(alphabet(ordering))
+        @assert all(l -> l in L, gens)
+        return new{eltype(gens),typeof(ordering)}(gens, ordering)
     end
 end
+
+FreeGroup(gens, A::Alphabet) = FreeGroup(gens, KnuthBendix.LenLex(A))
 
 function FreeGroup(A::Alphabet)
     @boundscheck @assert all(
@@ -180,8 +183,10 @@ Base.show(io::IO, F::FreeGroup) =
     print(io, "free group on $(ngens(F)) generators")
 
 # mandatory methods:
-KnuthBendix.alphabet(F::FreeGroup) = F.alphabet
 relations(F::FreeGroup) = Pair{eltype(F)}[]
+KnuthBendix.ordering(F::FreeGroup) = F.ordering
+KnuthBendix.alphabet(F::FreeGroup) = alphabet(KnuthBendix.ordering(F))
+rewriting(F::FreeGroup) = alphabet(F)
 
 # GroupsCore interface:
 # these are mathematically correct
@@ -198,23 +203,22 @@ struct FPGroup{T,R,S} <: AbstractFPGroup
     rws::R
 end
 
-KnuthBendix.alphabet(G::FPGroup) = alphabet(rewriting(G))
-rewriting(G::FPGroup) = G.rws
-
 relations(G::FPGroup) = G.relations
+rewriting(G::FPGroup) = G.rws
+KnuthBendix.ordering(G::FPGroup) = KnuthBendix.ordering(rewriting(G))
+KnuthBendix.alphabet(G::FPGroup) = alphabet(KnuthBendix.ordering(G))
 
 function FPGroup(
     G::AbstractFPGroup,
     rels::AbstractVector{<:Pair{GEl,GEl}};
-    ordering = KnuthBendix.LenLex,
+    ordering = KnuthBendix.ordering(G),
     kwargs...,
 ) where {GEl<:FPGroupElement}
-    O = ordering(alphabet(G))
     for (lhs, rhs) in rels
         @assert parent(lhs) === parent(rhs) === G
     end
     word_rels = [word(lhs) => word(rhs) for (lhs, rhs) in [relations(G); rels]]
-    rws = KnuthBendix.RewritingSystem(word_rels, O)
+    rws = KnuthBendix.RewritingSystem(word_rels, ordering)
 
     KnuthBendix.knuthbendix!(rws; kwargs...)
 
