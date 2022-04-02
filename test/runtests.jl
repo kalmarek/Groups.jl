@@ -26,8 +26,10 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
     include("fp_groups.jl")
 
     include("matrix_groups.jl")
-
     include("AutFn.jl")
+
+    include("homomorphisms.jl")
+
     include("AutSigma_41.jl")
     include("AutSigma3.jl")
 
