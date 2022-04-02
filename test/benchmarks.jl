@@ -2,7 +2,6 @@ using BenchmarkTools
 using Test
 
 using Groups
-using Groups.New
 
 function wl_ball(F; radius::Integer)
     g, state = iterate(F)
@@ -47,7 +46,7 @@ end
     @testset "iteration: SAut(F_n)" begin
         R = 4
         FN = FreeGroup(N)
-        SAutFN = New.SpecialAutomorphismGroup(FN)
+        SAutFN = SpecialAutomorphismGroup(FN)
 
         let G = SAutFN
             S = unique([gens(G); inv.(gens(G))])
