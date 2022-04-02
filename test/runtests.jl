@@ -25,6 +25,8 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
     include("free_groups.jl")
     include("fp_groups.jl")
 
+    include("matrix_groups.jl")
+
     include("AutFn.jl")
     include("AutSigma_41.jl")
     include("AutSigma3.jl")
