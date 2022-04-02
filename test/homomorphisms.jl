@@ -2,8 +2,12 @@ function test_homomorphism(hom)
     F = hom.source
     @test isone(hom(one(F)))
     @test all(inv(hom(g)) == hom(inv(g)) for g in gens(F))
-    @test all(isone(hom(g)*hom(inv(g))) for g in gens(F))
-    @test all(hom(g*h) == hom(g)*hom(h) for g in gens(F) for h in gens(F))
+    @test all(isone(hom(g) * hom(inv(g))) for g in gens(F))
+    @test all(hom(g * h) == hom(g) * hom(h) for g in gens(F) for h in gens(F))
+    @test all(
+        hom(inv(g * h)) == inv(hom(g * h)) == hom(inv(h)) * hom(inv(g)) for
+        g in gens(F) for h in gens(F)
+    )
 end
 
 @testset "Homomorphisms" begin
@@ -43,6 +47,24 @@ end
         @test !isone(g) && !isone(hom(g))
         @test !isone(h) && !isone(hom(h))
         @test !isone(g*h) && isone(hom(g*h))
+
+        test_homomorphism(hom)
+    end
+
+    @testset "Correctness of autπ₁Σ → SpN" begin
+
+        GENUS = 3
+        π₁Σ = Groups.SurfaceGroup(GENUS, 0)
+        autπ₁Σ = AutomorphismGroup(π₁Σ)
+
+        SpN = MatrixGroups.SymplecticGroup{2GENUS}(Int8)
+
+        hom = Groups.Homomorphism(
+            Groups._abelianize,
+            autπ₁Σ,
+            SpN,
+            check = false,
+        )
 
         test_homomorphism(hom)
     end

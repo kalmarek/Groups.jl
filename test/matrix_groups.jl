@@ -33,4 +33,16 @@ using Groups.MatrixGroups
             end
         end
     end
+
+    @testset "Sp(6, ℤ)" begin
+        Sp6 = MatrixGroups.SymplecticGroup{6}(Int8)
+
+        @testset "GroupsCore conformance" begin
+            test_Group_interface(Sp6)
+            g = Sp6(rand(1:length(alphabet(Sp6)), 10))
+            h = Sp6(rand(1:length(alphabet(Sp6)), 10))
+
+            test_GroupElement_interface(g, h)
+        end
+    end
 end

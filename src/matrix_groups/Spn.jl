@@ -28,19 +28,22 @@ function Base.show(
     ::MIME"text/plain",
     sp::Groups.AbstractFPGroupElement{<:SymplecticGroup{N}}
 ) where {N}
+    normalform!(sp)
     print(io, "$N×$N Symplectic matrix: ")
     KnuthBendix.print_repr(io, word(sp), alphabet(sp))
     println(io)
     Base.print_array(io, matrix_repr(sp))
 end
 
+_offdiag_idcs(n) = ((i,j) for i in 1:n for j in 1:n if i ≠ j)
+
 function symplectic_gens(N, T=Int8)
     iseven(N) || throw(ArgumentError("N needs to be even!"))
     n = N÷2
 
-    a_ijs = [ElementarySymplectic{N}(:A, i,j, one(T)) for (i,j) in offdiagonal_indexing(n)]
+    a_ijs = [ElementarySymplectic{N}(:A, i,j, one(T)) for (i,j) in _offdiag_idcs(n)]
     b_is =  [ElementarySymplectic{N}(:B, n+i,i, one(T)) for i in 1:n]
-    c_ijs = [ElementarySymplectic{N}(:B, n+i,j, one(T)) for (i,j) in offdiagonal_indexing(n)]
+    c_ijs = [ElementarySymplectic{N}(:B, n+i,j, one(T)) for (i,j) in _offdiag_idcs(n)]
 
     S = [a_ijs; b_is; c_ijs]
 
