@@ -12,7 +12,6 @@ PermutationGroups = "8bc5a954-2dfc-11e9-10e6-cd969bffa420"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-AbstractAlgebra = "0.22"
 Folds = "0.2.7"
 GroupsCore = "0.4"
 KnuthBendix = "0.3"
@@ -27,4 +26,4 @@ PermutationGroups = "8bc5a954-2dfc-11e9-10e6-cd969bffa420"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "BenchmarkTools", "AbstractAlgebra", "PermutationGroups"]
+test = ["Test", "BenchmarkTools"]
