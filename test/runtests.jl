@@ -2,6 +2,8 @@ using Test
 using Groups
 using PermutationGroups
 
+import Logging
+
 import KnuthBendix: Word
 
 using GroupsCore

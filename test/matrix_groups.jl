@@ -23,12 +23,14 @@ using Groups.MatrixGroups
         _, sizes = Groups.wlmetric_ball_serial(S, radius=4);
         @test sizes == [7, 33, 141, 561]
 
-        @testset "GroupsCore conformance" begin
-            test_Group_interface(SL3Z)
-            g = A(rand(1:length(alphabet(SL3Z)), 10))
-            h = A(rand(1:length(alphabet(SL3Z)), 10))
+        Logging.with_logger(Logging.NullLogger()) do
+            @testset "GroupsCore conformance" begin
+                test_Group_interface(SL3Z)
+                g = SL3Z(rand(1:length(alphabet(SL3Z)), 10))
+                h = SL3Z(rand(1:length(alphabet(SL3Z)), 10))
 
-            test_GroupElement_interface(g, h)
+                test_GroupElement_interface(g, h)
+            end
         end
     end
 end

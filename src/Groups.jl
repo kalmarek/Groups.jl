@@ -1,6 +1,7 @@
 module Groups
 
 import Folds
+import Logging
 
 using GroupsCore
 import GroupsCore.Random

@@ -54,9 +54,14 @@
     Groups.normalform!(h)
     @test h == H([5])
 
-    @testset "GroupsCore conformance: H" begin
-        test_Group_interface(H)
-        test_GroupElement_interface(rand(H, 2)...)
-    end
+    @test_logs (:warn, "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong") isfiniteorder(h)
 
+    @test_logs (:warn, "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong") isfinite(H)
+
+    Logging.with_logger(Logging.NullLogger()) do
+        @testset "GroupsCore conformance: H" begin
+            test_Group_interface(H)
+            test_GroupElement_interface(rand(H, 2)...)
+        end
+    end
 end

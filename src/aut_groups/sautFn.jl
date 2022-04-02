@@ -10,7 +10,10 @@ function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, k
     maxrules = 1000*n
 
     rws = KnuthBendix.RewritingSystem(rels, ordering(A))
-    KnuthBendix.knuthbendix!(rws; maxrules=maxrules, kwargs...)
+    Logging.with_logger(Logging.NullLogger()) do
+        # the rws is not confluent, let's suppress warning about it
+        KnuthBendix.knuthbendix!(rws; maxrules=maxrules, kwargs...)
+    end
     return AutomorphismGroup(F, S, rws, ntuple(i -> gens(F, i), n))
 end
 

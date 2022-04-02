@@ -176,12 +176,13 @@
         )
     end
 
-    @testset "GroupsCore conformance" begin
-        test_Group_interface(A)
-        g = A(rand(1:length(alphabet(A)), 10))
-        h = A(rand(1:length(alphabet(A)), 10))
+    Logging.with_logger(Logging.NullLogger()) do
+        @testset "GroupsCore conformance" begin
+            test_Group_interface(A)
+            g = A(rand(1:length(alphabet(A)), 10))
+            h = A(rand(1:length(alphabet(A)), 10))
 
-        test_GroupElement_interface(g, h)
+            test_GroupElement_interface(g, h)
+        end
     end
-
 end
