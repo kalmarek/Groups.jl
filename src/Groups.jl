@@ -1,7 +1,7 @@
 module Groups
 
 using GroupsCore
-using ThreadsX
+using Folds
 import KnuthBendix
 import KnuthBendix: AbstractWord, Alphabet, Word
 import KnuthBendix: alphabet
