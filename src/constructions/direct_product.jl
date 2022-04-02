@@ -1,6 +1,3 @@
-using Random
-using GroupsCore
-
 struct DirectProduct{Gt,Ht,GEl,HEl} <: GroupsCore.Group
     first::Gt
     last::Ht

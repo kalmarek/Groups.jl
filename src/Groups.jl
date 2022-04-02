@@ -1,13 +1,15 @@
 module Groups
 
+import Folds
+
 using GroupsCore
-using Folds
+import GroupsCore.Random
+
+import OrderedCollections: OrderedSet
+
 import KnuthBendix
 import KnuthBendix: AbstractWord, Alphabet, Word
 import KnuthBendix: alphabet
-import Random
-
-import OrderedCollections: OrderedSet
 
 export MatrixGroups
 
@@ -17,7 +19,7 @@ export alphabet, evaluate, word, gens
 
 # general constructions
 include(joinpath("constructions", "constructions.jl"))
-using .Constructions
+import .Constructions
 
 include("types.jl")
 include("hashing.jl")

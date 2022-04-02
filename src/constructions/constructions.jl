@@ -1,7 +1,7 @@
 module Constructions
 
 using GroupsCore
-using Random
+import GroupsCore.Random
 
 include("direct_product.jl")
 include("direct_power.jl")

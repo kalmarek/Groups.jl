@@ -1,5 +1,6 @@
 using Test
 using Groups
+using PermutationGroups
 
 import KnuthBendix: Word
 
