@@ -1,11 +1,13 @@
 module MatrixGroups
 
+using StaticArrays
+
 using GroupsCore
 using Groups
 using KnuthBendix
 
-using LinearAlgebra # Identity matrix
-using Random # GroupsCore rand
+import LinearAlgebra # Identity matrix
+import Random # GroupsCore rand
 
 export SpecialLinearGroup, SymplecticGroup
 

@@ -33,6 +33,8 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
     include("AutSigma_41.jl")
     include("AutSigma3.jl")
 
+    include("group_constructions.jl")
+
     # if !haskey(ENV, "CI")
     #    include("benchmarks.jl")
     # end

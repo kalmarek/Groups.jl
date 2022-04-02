@@ -1,7 +1,8 @@
 abstract type MatrixGroup{N, T} <: Groups.AbstractFPGroup end
 const MatrixGroupElement{N, T} = Groups.AbstractFPGroupElement{<:MatrixGroup{N, T}}
 
-Base.isone(g::MatrixGroupElement{N, T}) where {N, T} = matrix_repr(g) == I
+Base.isone(g::MatrixGroupElement{N, T}) where {N, T} =
+    isone(word(g)) || matrix_repr(g) == LinearAlgebra.I
 
 function Base.:(==)(m1::M1, m2::M2) where {M1<:MatrixGroupElement, M2<:MatrixGroupElement}
     parent(m1) === parent(m2) || return false
@@ -26,7 +27,9 @@ Base.getindex(sl::MatrixGroupElement, i, j) = matrix_repr(sl)[i,j]
 # Base.iterate(sl::MatrixGroupElement, state) = iterate(sl.elts, state)
 
 function matrix_repr(m::MatrixGroupElement{N, T}) where {N, T}
-    isempty(word(m)) && return StaticArrays.SMatrix{N, N, T}(I)
+    if isone(word(m))
+        return StaticArrays.SMatrix{N, N, T}(LinearAlgebra.I)
+    end
     A = alphabet(parent(m))
     return prod(matrix_repr(A[l]) for l in word(m))
 end

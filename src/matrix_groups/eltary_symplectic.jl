@@ -1,6 +1,3 @@
-using Groups
-using StaticArrays
-
 struct ElementarySymplectic{N, T} <: Groups.GSymbol
     symbol::Symbol
     i::Int
@@ -69,7 +66,7 @@ Base.inv(s::ElementarySymplectic{N}) where N =
 function matrix_repr(s::ElementarySymplectic{N, T}) where {N, T}
     @assert iseven(N)
     n = div(N, 2)
-    m = StaticArrays.MMatrix{N, N, T}(I)
+    m = StaticArrays.MMatrix{N, N, T}(LinearAlgebra.I)
     i,j = _ind(s)
     m[i,j] = s.val
     if s.symbol === :A

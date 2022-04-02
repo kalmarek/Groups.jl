@@ -15,6 +15,10 @@ export Alphabet, AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElemen
 
 export alphabet, evaluate, word, gens
 
+# general constructions
+include(joinpath("constructions", "constructions.jl"))
+using .Constructions
+
 include("types.jl")
 include("hashing.jl")
 include("normalform.jl")
