@@ -17,8 +17,9 @@ include("hashing.jl")
 include("normalform.jl")
 include("autgroups.jl")
 
-include("groups/sautFn.jl")
-include("groups/mcg.jl")
+include("aut_groups/sautFn.jl")
+include("aut_groups/mcg.jl")
+
 
 include("wl_ball.jl")
 end # of module Groups
