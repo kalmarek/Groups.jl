@@ -1,6 +1,8 @@
 using Test
-import AbstractAlgebra
 using Groups
+using PermutationGroups
+
+import Logging
 
 import KnuthBendix: Word
 
@@ -9,27 +11,30 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
 
 @testset "Groups" begin
 
-    @testset "wlmetric_ball" begin
-        M = AbstractAlgebra.MatrixAlgebra(AbstractAlgebra.zz, 3)
-        w = one(M); w[1,2] = 1;
-        r = one(M); r[2,3] = -3;
-        s = one(M); s[1,3] = 2; s[3,2] = -1;
+    _, t = @timed include("free_groups.jl")
+    @info "free_groups.jl took $(round(t, digits=2))s"
+    _, t = @timed include("fp_groups.jl")
+    @info "fp_groups.jl took $(round(t, digits=2))s"
 
-        S = [w,r,s]; S = unique([S; inv.(S)]);
-        _, sizes = Groups.wlmetric_ball(S, radius=4);
-        @test sizes == [7, 33, 141, 561]
-        _, sizes = Groups.wlmetric_ball_serial(S, radius=4);
-        @test sizes == [7, 33, 141, 561]
+    _, t = @timed include("matrix_groups.jl")
+    @info "matrix_groups.jl took $(round(t, digits=2))s"
+    _, t = @timed include("AutFn.jl")
+    @info "AutFn.jl took $(round(t, digits=2))s"
+
+    _, t = @timed include("homomorphisms.jl")
+    @info "homomorphisms.jl took $(round(t, digits=2))s"
+
+    if haskey(ENV, "CI")
+        _, t = @timed include("AutSigma_41.jl")
+        @info "AutSigma_41 took $(round(t, digits=2))s"
+        _, t = @timed include("AutSigma3.jl")
+        @info "AutSigma3 took $(round(t, digits=2))s"
     end
 
-    include("free_groups.jl")
-    include("fp_groups.jl")
+    _, t = @timed include("group_constructions.jl")
+    @info "Constructions took $(round(t, digits=2))s"
+end
 
-    include("AutFn.jl")
-    include("AutSigma_41.jl")
-    include("AutSigma3.jl")
-
-    # if !haskey(ENV, "CI")
-    #    include("benchmarks.jl")
-    # end
+if !haskey(ENV, "CI")
+   include("benchmarks.jl")
 end

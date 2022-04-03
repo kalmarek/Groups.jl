@@ -8,14 +8,14 @@ radius and multiplication operation to be used.
 """
 function wlmetric_ball_serial(S::AbstractVector{T}, center::T=one(first(S)); radius = 2, op = *) where {T}
     @assert radius >= 1
-    old = unique!([center, [center*s for s in S]...])
+    old = union!([center], [center*s for s in S])
     return _wlmetric_ball(S, old, radius, op, collect, unique!)
 end
 
 function wlmetric_ball_thr(S::AbstractVector{T}, center::T=one(first(S)); radius = 2, op = *) where {T}
     @assert radius >= 1
-    old = unique!([center, [center*s for s in S]...])
-    return _wlmetric_ball(S, old, radius, op, ThreadsX.collect, ThreadsX.unique)
+    old = union!([center], [center*s for s in S])
+    return _wlmetric_ball(S, old, radius, op, Folds.collect, Folds.unique)
 end
 
 function _wlmetric_ball(S, old, radius, op, collect, unique)

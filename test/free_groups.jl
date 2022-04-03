@@ -37,6 +37,8 @@
         @test k == a*b^-1
 
         @time k = test_iteration(F3, 1000)
+
+        @time test_iteration(F3, 1000)
         @test k == (a^2)*c^2*a^-1
     end
 
@@ -67,5 +69,4 @@
         test_Group_interface(F3)
         test_GroupElement_interface(rand(F3, 2)...)
     end
-
 end

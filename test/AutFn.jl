@@ -96,9 +96,7 @@
         @test evaluate(g*h) == evaluate(h*g)
         @test (g*h).savedhash == zero(UInt)
 
-        if VERSION >= v"1.6.0"
-            @test sprint(show, typeof(g)) == "Automorphism{FreeGroup{Symbol, KnuthBendix.LenLex{Symbol}}, …}"
-        end
+        @test sprint(show, typeof(g)) == "Automorphism{FreeGroup{Symbol, KnuthBendix.LenLex{Symbol}}, …}"
 
         a = g*h
         b = h*g
@@ -176,12 +174,13 @@
         )
     end
 
-    @testset "GroupsCore conformance" begin
-        test_Group_interface(A)
-        g = A(rand(1:length(alphabet(A)), 10))
-        h = A(rand(1:length(alphabet(A)), 10))
+    Logging.with_logger(Logging.NullLogger()) do
+        @testset "GroupsCore conformance" begin
+            test_Group_interface(A)
+            g = A(rand(1:length(alphabet(A)), 10))
+            h = A(rand(1:length(alphabet(A)), 10))
 
-        test_GroupElement_interface(g, h)
+            test_GroupElement_interface(g, h)
+        end
     end
-
 end

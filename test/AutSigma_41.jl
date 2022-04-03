@@ -121,15 +121,22 @@ using Groups.KnuthBendix
             u = (a6 * a5)^-1 * b1 * (a6 * a5)
             x = (a6 * a5 * a4 * a3 * a2 * u * a1^-1 * a2^-1 * a3^-1 * a4^-1) # yet another auxillary
             # x = (a4^-1*a3^-1*a2^-1*a1^-1*u*a2*a3*a4*a5*a6)
-            @time evaluate(x)
+
             b3 = x * a0 * x^-1
-            b3im = @time evaluate(b3)
-            b3cim = @time let g = b3
+            b3im = evaluate(b3)
+            b3cim = let g = b3
                 f = Groups.compiled(g)
                 f(Groups.domain(g))
             end
             @test b3im == b3cim
             @test a0 * b2 * b1 == a1 * a3 * a5 * b3
+
+            @time evaluate(x)
+            let g = b3
+                f = Groups.compiled(g)
+                f(Groups.domain(g))
+                @time f(Groups.domain(g))
+            end
         end
     end
 
