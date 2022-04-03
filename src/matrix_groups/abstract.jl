@@ -22,10 +22,6 @@ Groups.rewriting(M::MatrixGroup) = alphabet(M)
 Base.hash(sl::MatrixGroupElement, h::UInt) =
     hash(matrix_repr(sl), hash(parent(sl), h))
 
-Base.getindex(sl::MatrixGroupElement, i, j) = matrix_repr(sl)[i,j]
-# Base.iterate(sl::MatrixGroupElement) = iterate(sl.elts)
-# Base.iterate(sl::MatrixGroupElement, state) = iterate(sl.elts, state)
-
 function matrix_repr(m::MatrixGroupElement{N, T}) where {N, T}
     if isone(word(m))
         return StaticArrays.SMatrix{N, N, T}(LinearAlgebra.I)

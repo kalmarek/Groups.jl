@@ -32,6 +32,19 @@ using Groups.MatrixGroups
                 test_GroupElement_interface(g, h)
             end
         end
+
+
+        x = w*inv(w)*r
+
+        @test length(word(x)) == 5
+        @test size(x) == (3,3)
+        @test eltype(x) == Int8
+
+        @test contains(sprint(print, SL3Z), "special linear group of 3×3")
+        @test contains(sprint(show, MIME"text/plain"(), x), "SL{3,Int8} matrix:")
+        @test sprint(print, x) isa String
+
+        @test length(word(x)) == 3
     end
 
     @testset "Sp(6, ℤ)" begin
@@ -44,5 +57,19 @@ using Groups.MatrixGroups
 
             test_GroupElement_interface(g, h)
         end
+
+        @test contains(sprint(print, Sp6), "group of 6×6 symplectic matrices")
+
+        x = gens(Sp6, 1)
+        x *= inv(x) * gens(Sp6, 2)
+
+        @test length(word(x)) == 3
+        @test size(x) == (6,6)
+        @test eltype(x) == Int8
+
+        @test contains(sprint(show, MIME"text/plain"(), x), "6×6 symplectic matrix:")
+        @test sprint(print, x) isa String
+
+        @test length(word(x)) == 1
     end
 end

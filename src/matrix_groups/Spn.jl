@@ -28,8 +28,8 @@ function Base.show(
     ::MIME"text/plain",
     sp::Groups.AbstractFPGroupElement{<:SymplecticGroup{N}}
 ) where {N}
-    normalform!(sp)
-    print(io, "$N×$N Symplectic matrix: ")
+    Groups.normalform!(sp)
+    print(io, "$N×$N symplectic matrix: ")
     KnuthBendix.print_repr(io, word(sp), alphabet(sp))
     println(io)
     Base.print_array(io, matrix_repr(sp))

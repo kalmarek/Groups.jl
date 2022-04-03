@@ -22,12 +22,6 @@ function Base.show(io::IO, s::ElementarySymplectic)
     !isone(s.val) && print(io, "^$(s.val)")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", s::ElementarySymplectic)
-    print(io, s)
-    print(io, " →  corresponding root: ")
-    print(io, Roots.Root(s))
-end
-
 _ind(s::ElementarySymplectic{N}) where N = (s.i, s.j)
 _local_ind(N_half::Integer, i::Integer) = ifelse(i<=N_half, i, i-N_half)
 function _dual_ind(s::ElementarySymplectic{N}) where N
