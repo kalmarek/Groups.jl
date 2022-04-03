@@ -58,14 +58,13 @@ function _std_symplectic_form(m::AbstractMatrix)
     iseven(r) || return false
 
     n = r÷2
-    Ω = zero(m)
-    for i in 1:n
-        Ω[2i-1:2i, 2i-1:2i] .= [0 -1; 1 0]
-    end
+    𝕆 = zeros(eltype(m), n, n)
+    𝕀 = one(eltype(m))*LinearAlgebra.I
+    Ω = [𝕆 -𝕀
+         𝕀  𝕆]
     return Ω
 end
 
 function issymplectic(mat::M, Ω = _std_symplectic_form(mat)) where M <: AbstractMatrix
-    r, c = size(mat)
     return Ω == transpose(mat) * Ω * mat
 end

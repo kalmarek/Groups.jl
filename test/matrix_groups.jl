@@ -71,5 +71,9 @@ using Groups.MatrixGroups
         @test sprint(print, x) isa String
 
         @test length(word(x)) == 1
+
+        for g in gens(Sp6)
+            @test MatrixGroups.issymplectic(MatrixGroups.matrix_repr(g))
+        end
     end
 end
