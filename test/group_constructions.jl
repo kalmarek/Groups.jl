@@ -40,4 +40,20 @@
         @test contains(sprint(print, W), "Wreath product")
         @test sprint(print, rand(W)) isa String
     end
+
+    @testset "AbstractSubgroup" begin
+        G = PermutationGroups.SymmetricGroup(3)
+        @test parent(G(perm"(1,2)")) == G # wrong coerce
+        @test parent(G([2,1,3])) == G
+        H = Groups.Constructions.Subgroup(G, [G([2,1,3])])
+        test_Group_interface(H)
+        test_GroupElement_interface(rand(H, 2)...)
+        @test order(H) == 2
+        K = Groups.Constructions.Subgroup(G, rand(G,1))
+        @test order(K) <= order(G)
+        # collect(K)
+        # ERROR: AssertionError: isdefined(G, :elts)
+        L = Groups.Constructions.Subgroup(G, [one(G), G([2,1,3])]; full_set=true)
+        @test L == H
+    end
 end
