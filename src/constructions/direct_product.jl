@@ -100,3 +100,7 @@ Base.show(io::IO, G::DirectProduct) =
     print(io, "Direct product of $(G.first) and $(G.last)")
 Base.show(io::IO, g::DirectProductElement) =
     print(io, "( $(join(g.elts, ",")) )")
+
+# Convenience methods
+Base.first(g::DirectProductElement) = first(g.elts)
+Base.last(g::DirectProductElement) = last(g.elts)
