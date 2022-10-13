@@ -3,6 +3,8 @@
 
     π₁Σ = Groups.SurfaceGroup(genus, 0)
 
+    @test contains(sprint(print, π₁Σ), "surface")
+
     Groups.PermRightAut(p::Perm) = Groups.PermRightAut(p.d)
     # Groups.PermLeftAut(p::Perm) = Groups.PermLeftAut(p.d)
     autπ₁Σ = let autπ₁Σ = AutomorphismGroup(π₁Σ)
@@ -18,7 +20,7 @@
             π₁Σ,
             autπ₁Σ.gens,
             A,
-            ntuple(i->inv(gens(π₁Σ, i)), 2Groups.genus(π₁Σ))
+            ntuple(i -> inv(gens(π₁Σ, i)), 2Groups.genus(π₁Σ))
         )
 
         autG
@@ -36,7 +38,7 @@
         λ = Groups.ΡΛ(:λ, A, 2genus)
         ϱ = Groups.ΡΛ(:ϱ, A, 2genus)
         @test sautFn(Groups.Te_diagonal(λ, ϱ, 1)) ==
-            conj(sautFn(Groups.Te_diagonal(λ, ϱ, 2)), τ)
+              conj(sautFn(Groups.Te_diagonal(λ, ϱ, 2)), τ)
 
         @test sautFn(Groups.Te_diagonal(λ, ϱ, 3)) == sautFn(Groups.Te(λ, ϱ, 3, 1))
     end

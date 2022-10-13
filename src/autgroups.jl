@@ -104,8 +104,8 @@ evaluate(f::AbstractFPGroupElement{<:AutomorphismGroup}) = evaluate!(domain(f), 
 function evaluate!(
     t::NTuple{N,T},
     f::AbstractFPGroupElement{<:AutomorphismGroup{<:Group}},
-    tmp = one(first(t)),
-) where {N, T<:FPGroupElement}
+    tmp=one(first(t)),
+) where {N,T<:FPGroupElement}
     A = alphabet(f)
     for idx in word(f)
         t = @inbounds evaluate!(t, A[idx], tmp)::NTuple{N,T}
@@ -113,12 +113,12 @@ function evaluate!(
     return t
 end
 
-evaluate!(t::NTuple{N, T}, s::GSymbol, tmp=nothing) where {N, T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
+evaluate!(t::NTuple{N,T}, s::GSymbol, tmp=nothing) where {N,T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
 
 # forward evaluate by substitution
 
-struct LettersMap{T, A}
-    indices_map::Dict{Int, T}
+struct LettersMap{T,A}
+    indices_map::Dict{Int,T}
     A::A
 end
 
@@ -201,13 +201,14 @@ function generated_evaluate(a::FPGroupElement{<:AutomorphismGroup})
             throw("Letter $l doesn't seem to be mapped anywhere!")
         end
     end
-    locals = Dict{Expr, Symbol}()
+    locals = Dict{Expr,Symbol}()
     locals_counter = 0
-    for (i,v) in enumerate(args)
+    for (i, v) in enumerate(args)
         @assert length(v.args) >= 2
         if length(v.args) > 2
             for (j, a) in pairs(v.args)
-                if a isa Expr &&  a.head == :call "$a"
+                if a isa Expr && a.head == :call
+                    "$a"
                     @assert a.args[1] == :inv
                     if !(a in keys(locals))
                         locals[a] = Symbol("var_#$locals_counter")
@@ -222,7 +223,7 @@ function generated_evaluate(a::FPGroupElement{<:AutomorphismGroup})
     end
 
     q = quote
-        $([:(local $v = $k) for (k,v) in locals]...)
+        $([:(local $v = $k) for (k, v) in locals]...)
     end
 
     # return args, locals

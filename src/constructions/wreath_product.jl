@@ -52,7 +52,7 @@ function Base.iterate(G::WreathProduct)
     res = iterate(itr)
     @assert res !== nothing
     elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.iterate(G::WreathProduct, state)
@@ -60,7 +60,7 @@ function Base.iterate(G::WreathProduct, state)
     res = iterate(itr, st)
     res === nothing && return nothing
     elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.IteratorSize(::Type{<:WreathProduct{DP,PGr}}) where {DP,PGr}

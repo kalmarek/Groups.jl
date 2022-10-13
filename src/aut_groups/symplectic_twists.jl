@@ -73,7 +73,7 @@ function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     @assert λ.id == :λ && ϱ.id == :ϱ
 
     @assert iseven(λ.N)
-    genus = λ.N÷2
+    genus = λ.N ÷ 2
     i = mod1(i, genus)
     j = mod1(j, genus)
 
@@ -118,7 +118,7 @@ end
 
 function rotation_element(λ::ΡΛ, ϱ::ΡΛ)
     @assert iseven(λ.N)
-    genus = λ.N÷2
+    genus = λ.N ÷ 2
     A = λ.A
 
     halftwists = map(1:genus-1) do i
@@ -168,7 +168,7 @@ function mcg_twists(G::AutomorphismGroup{<:FreeGroup})
     return Tas, Tαs, Tes
 end
 
-struct SymplecticMappingClass{T, F} <: GSymbol
+struct SymplecticMappingClass{T,F} <: GSymbol
     id::Symbol # :A, :B
     i::UInt
     j::UInt
@@ -187,13 +187,13 @@ function SymplecticMappingClass(
     id::Symbol,
     i::Integer,
     j::Integer;
-    minus = false,
-    inverse = false,
+    minus=false,
+    inverse=false
 )
     @assert i > 0 && j > 0
     id === :A && @assert i ≠ j
     @assert iseven(ngens(object(sautFn)))
-    genus = ngens(object(sautFn))÷2
+    genus = ngens(object(sautFn)) ÷ 2
 
     A = alphabet(sautFn)
     λ = ΡΛ(:λ, A, 2genus)
@@ -241,7 +241,7 @@ end
 
 function Base.show(io::IO, smc::SymplecticMappingClass)
     smc.minus && print(io, 'm')
-    if  smc.i < 10 && smc.j < 10
+    if smc.i < 10 && smc.j < 10
         print(io, smc.id, subscriptify(smc.i), subscriptify(smc.j))
     else
         print(io, smc.id, subscriptify(smc.i), ".", subscriptify(smc.j))

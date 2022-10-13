@@ -1,7 +1,7 @@
 include("transvections.jl")
 include("gersten_relations.jl")
 
-function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, kwargs...)
+function SpecialAutomorphismGroup(F::FreeGroup; ordering=KnuthBendix.LenLex, kwargs...)
 
     n = length(alphabet(F)) ÷ 2
     A, rels = gersten_relations(n, commutative=false)
@@ -21,5 +21,5 @@ end
 
 function relations(G::AutomorphismGroup{<:FreeGroup})
     n = length(alphabet(object(G))) ÷ 2
-    return last(gersten_relations(n, commutative = false))
+    return last(gersten_relations(n, commutative=false))
 end

@@ -96,7 +96,7 @@ mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <:
     FPGroupElement(
         word::W,
         G::AbstractFPGroup,
-        hash::UInt = UInt(0),
+        hash::UInt=UInt(0),
     ) where {W<:AbstractWord} = new{typeof(G),W}(word, hash, G)
 
     FPGroupElement{Gr,W}(word::AbstractWord, G::Gr) where {Gr,W} =
@@ -222,8 +222,8 @@ rewriting(G::FPGroup) = G.rw
 function FPGroup(
     G::AbstractFPGroup,
     rels::AbstractVector{<:Pair{GEl,GEl}};
-    ordering = KnuthBendix.ordering(G),
-    kwargs...,
+    ordering=KnuthBendix.ordering(G),
+    kwargs...
 ) where {GEl<:FPGroupElement}
     for (lhs, rhs) in rels
         @assert parent(lhs) === parent(rhs) === G

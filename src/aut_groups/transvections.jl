@@ -4,7 +4,7 @@ struct Transvection <: GSymbol
     j::UInt16
     inv::Bool
 
-    function Transvection(id::Symbol, i::Integer, j::Integer, inv = false)
+    function Transvection(id::Symbol, i::Integer, j::Integer, inv=false)
         @assert id in (:ϱ, :λ)
         return new(id, i, j, inv)
     end
@@ -33,7 +33,7 @@ Base.hash(t::Transvection, h::UInt) = hash(hash(t.id, hash(t.i)), hash(t.j, hash
 Base.@propagate_inbounds @inline function evaluate!(
     v::NTuple{T,N},
     t::Transvection,
-    tmp = one(first(v)),
+    tmp=one(first(v)),
 ) where {T,N}
     i, j = t.i, t.j
     @assert 1 ≤ i ≤ length(v) && 1 ≤ j ≤ length(v)
@@ -92,4 +92,4 @@ Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
 Base.:(==)(p::PermRightAut, q::PermRightAut) = p.perm == q.perm
 Base.hash(p::PermRightAut, h::UInt) = hash(p.perm, hash(PermRightAut, h))
 
-evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp = nothing) where {T,N} = v[p.perm]
+evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp=nothing) where {T,N} = v[p.perm]
