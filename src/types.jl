@@ -231,7 +231,7 @@ function FPGroup(
 
     rws = KnuthBendix.knuthbendix(rws, KnuthBendix.Settings(; kwargs...))
 
-    return FPGroup(G.gens, rels, rws)
+    return FPGroup(G.gens, rels, KnuthBendix.IndexAutomaton(rws))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", G::FPGroup)

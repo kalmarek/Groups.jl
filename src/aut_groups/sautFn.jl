@@ -14,7 +14,9 @@ function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, k
         # the rws is not confluent, let's suppress warning about it
         KnuthBendix.knuthbendix(rws, KnuthBendix.Settings(; max_rules=max_rules, kwargs...))
     end
-    return AutomorphismGroup(F, S, rws, ntuple(i -> gens(F, i), n))
+
+    idxA = KnuthBendix.IndexAutomaton(rws)
+    return AutomorphismGroup(F, S, idxA, ntuple(i -> gens(F, i), n))
 end
 
 KnuthBendix.alphabet(G::AutomorphismGroup{<:FreeGroup}) = alphabet(rewriting(G))

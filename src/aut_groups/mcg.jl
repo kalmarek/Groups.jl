@@ -51,12 +51,14 @@ function SurfaceGroup(genus::Integer, boundaries::Integer)
         comms = Word(word)
         word_rels = [ comms => one(comms) ]
 
-        rws = KnuthBendix.RewritingSystem(word_rels, KnuthBendix.RecursivePathOrder(Al))
-        KnuthBendix.knuthbendix!(rws)
+        rws = let R = KnuthBendix.RewritingSystem(word_rels, KnuthBendix.Recursive(Al))
+            KnuthBendix.IndexAutomaton(KnuthBendix.knuthbendix(R))
+        end
     elseif boundaries == 1
-        S = typeof(one(Word(Int[])))
-        word_rels = Pair{S, S}[]
-        rws = RewritingSystem(word_rels, KnuthBendix.LenLex(Al))
+        word_rels = Pair{W,W}[]
+        rws = let R = RewritingSystem(word_rels, KnuthBendix.LenLex(Al))
+            KnuthBendix.IndexAutomaton(KnuthBendix.knuthbendix(R))
+        end
     else
         throw("Not Implemented")
     end
