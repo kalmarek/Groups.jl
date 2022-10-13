@@ -3,15 +3,16 @@
 """
     AbstractFPGroup
 
-An Abstract type representing finitely presented groups. Every instance `` must implement
+An Abstract type representing finitely presented groups. Every instance must implement
  * `KnuthBendix.alphabet(G::MyFPGroup)`
  * `rewriting(G::MyFPGroup)` : return the rewriting object which must implement
- > `KnuthBendix.rewrite_from_left!(u, v, rewriting(G))`.
+ > `KnuthBendix.rewrite!(u, v, rewriting(G))`.
 By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
  * `relations(G::MyFPGroup)` : return a set of defining relations.
 
-AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt16}`,
-which controls the word type used for group elements. If a group has more than `255` generators you need to define e.g.
+AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt8}`,
+which controls the word type used for group elements.
+If a group has more than `255` generators you need to define e.g.
 > `word_type(::Type{MyFPGroup}) = Word{UInt16}`
 """
 abstract type AbstractFPGroup <: GroupsCore.Group end
@@ -22,14 +23,14 @@ word_type(::Type{<:AbstractFPGroup}) = Word{UInt8}
 
 """
     rewriting(G::AbstractFPGroup)
-Return a "rewriting object" for elements of `G`. The rewriting object must must implement
-    KnuthBendix.rewrite_from_left!(
-        u::AbstractWord,
-        v::AbstractWord,
-        rewriting(G)
-    )
+Return a "rewriting object" for elements of `G`.
 
-For example if `G` is a `FreeGroup` then `alphabet(G)` is returned which results in free rewriting. For `FPGroup` a rewriting system is returned which may (or may not) rewrite word `v` to its normal form.
+The rewriting object must must implement
+    KnuthBendix.rewrite!(u::AbstractWord, v::AbstractWord, rewriting(G))
+
+For example if `G` is a `FreeGroup` then `alphabet(G)` is returned which results
+in free rewriting. For `FPGroup` a rewriting system is returned which may
+(or may not) rewrite word `v` to its normal form (depending on e.g. its confluence).
 """
 function rewriting end
 
