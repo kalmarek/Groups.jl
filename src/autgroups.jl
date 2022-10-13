@@ -144,7 +144,7 @@ end
 
 function Base.getindex(lm::LettersMap, i::Integer)
     # here i is an index of an alphabet
-    @boundscheck 1 ≤ i ≤ length(KnuthBendix.letters(lm.A))
+    @boundscheck 1 ≤ i ≤ length(lm.A)
 
     if !haskey(lm.indices_map, i)
         img = if haskey(lm.indices_map, inv(lm.A, i))

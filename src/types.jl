@@ -153,8 +153,7 @@ struct FreeGroup{T,O} <: AbstractFPGroup
 
     function FreeGroup(gens, ordering::KnuthBendix.WordOrdering)
         @assert length(gens) == length(unique(gens))
-        L = KnuthBendix.letters(alphabet(ordering))
-        @assert all(l -> l in L, gens)
+        @assert all(l -> l in alphabet(ordering), gens)
         return new{eltype(gens),typeof(ordering)}(gens, ordering)
     end
 end
@@ -163,12 +162,11 @@ FreeGroup(gens, A::Alphabet) = FreeGroup(gens, KnuthBendix.LenLex(A))
 
 function FreeGroup(A::Alphabet)
     @boundscheck @assert all(
-        KnuthBendix.hasinverse(l, A) for l in KnuthBendix.letters(A)
+        KnuthBendix.hasinverse(l, A) for l in A
     )
-    ltrs = KnuthBendix.letters(A)
-    gens = Vector{eltype(ltrs)}()
-    invs = Vector{eltype(ltrs)}()
-    for l in ltrs
+    gens = Vector{eltype(A)}()
+    invs = Vector{eltype(A)}()
+    for l in A
         l ∈ invs && continue
         push!(gens, l)
         push!(invs, inv(A, l))

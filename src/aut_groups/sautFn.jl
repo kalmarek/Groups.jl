@@ -4,8 +4,8 @@ include("gersten_relations.jl")
 function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, kwargs...)
 
     n = length(alphabet(F)) ÷ 2
-    A, rels = gersten_relations(n, commutative = false)
-    S = KnuthBendix.letters(A)[1:2(n^2-n)]
+    A, rels = gersten_relations(n, commutative=false)
+    S = [A[i] for i in 1:2:length(A)]
 
     maxrules = 1000*n
 

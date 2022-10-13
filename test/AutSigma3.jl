@@ -9,10 +9,10 @@
         pauts = let p = perm"(1,3,5)(2,4,6)"
             [Groups.PermRightAut(p^i) for i in 0:2]
         end
-        T = eltype(KnuthBendix.letters(alphabet(autπ₁Σ)))
+        T = eltype(alphabet(autπ₁Σ))
         S = eltype(pauts)
 
-        A = Alphabet(Union{T,S}[KnuthBendix.letters(alphabet(autπ₁Σ)); pauts])
+        A = Alphabet(Union{T,S}[alphabet(autπ₁Σ)...; pauts])
 
         autG = AutomorphismGroup(
             π₁Σ,
@@ -27,9 +27,7 @@
     Al = alphabet(autπ₁Σ)
     S = [gens(autπ₁Σ); inv.(gens(autπ₁Σ))]
 
-    sautFn = let ltrs = KnuthBendix.letters(Al)
-        parent(first(ltrs).autFn_word)
-    end
+    sautFn = parent(Al[1].autFn_word)
 
     τ = Groups.rotation_element(sautFn)
 

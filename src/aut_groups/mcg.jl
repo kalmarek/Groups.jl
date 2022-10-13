@@ -64,7 +64,7 @@ function SurfaceGroup(genus::Integer, boundaries::Integer)
     F = FreeGroup(alphabet(rws))
     rels = [F(lhs)=>F(rhs) for (lhs,rhs) in word_rels]
 
-    return SurfaceGroup(genus, boundaries, KnuthBendix.letters(Al)[2:2:end], rels, rws)
+    return SurfaceGroup(genus, boundaries, [Al[i] for i in 2:2:length(Al)], rels, rws)
 end
 
 rewriting(S::SurfaceGroup) = S.rws
