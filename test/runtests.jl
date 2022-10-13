@@ -24,7 +24,7 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
     _, t = @timed include("homomorphisms.jl")
     @info "homomorphisms.jl took $(round(t, digits=2))s"
 
-    if haskey(ENV, "CI")
+    if !haskey(ENV, "CI")
         _, t = @timed include("AutSigma_41.jl")
         @info "AutSigma_41 took $(round(t, digits=2))s"
         _, t = @timed include("AutSigma3.jl")
@@ -36,5 +36,5 @@ include(joinpath(pathof(GroupsCore), "..", "..", "test", "conformance_test.jl"))
 end
 
 if !haskey(ENV, "CI")
-   include("benchmarks.jl")
+    include("benchmarks.jl")
 end
