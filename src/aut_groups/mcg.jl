@@ -74,7 +74,7 @@ relations(S::SurfaceGroup) = S.relations
 function symplectic_twists(π₁Σ::SurfaceGroup)
     g = genus(π₁Σ)
 
-    saut = SpecialAutomorphismGroup(FreeGroup(2g), maxrules=100)
+    saut = SpecialAutomorphismGroup(FreeGroup(2g), max_rules=1000)
 
     Aij  = [SymplecticMappingClass(saut, :A, i, j) for i in 1:g for j in 1:g if i≠j]
 

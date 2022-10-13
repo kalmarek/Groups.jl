@@ -7,12 +7,12 @@ function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, k
     A, rels = gersten_relations(n, commutative=false)
     S = [A[i] for i in 1:2:length(A)]
 
-    maxrules = 1000*n
+    max_rules = 1000 * n
 
-    rws = KnuthBendix.RewritingSystem(rels, ordering(A))
-    Logging.with_logger(Logging.NullLogger()) do
+    rws = Logging.with_logger(Logging.NullLogger()) do
+        rws = KnuthBendix.RewritingSystem(rels, ordering(A))
         # the rws is not confluent, let's suppress warning about it
-        KnuthBendix.knuthbendix!(rws; maxrules=maxrules, kwargs...)
+        KnuthBendix.knuthbendix(rws, KnuthBendix.Settings(; max_rules=max_rules, kwargs...))
     end
     return AutomorphismGroup(F, S, rws, ntuple(i -> gens(F, i), n))
 end

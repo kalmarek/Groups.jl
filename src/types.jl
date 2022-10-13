@@ -229,7 +229,7 @@ function FPGroup(
     word_rels = [word(lhs) => word(rhs) for (lhs, rhs) in [relations(G); rels]]
     rws = KnuthBendix.RewritingSystem(word_rels, ordering)
 
-    KnuthBendix.knuthbendix!(rws; kwargs...)
+    rws = KnuthBendix.knuthbendix(rws, KnuthBendix.Settings(; kwargs...))
 
     return FPGroup(G.gens, rels, rws)
 end

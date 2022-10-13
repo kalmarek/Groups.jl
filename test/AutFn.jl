@@ -79,7 +79,7 @@
         @test inv(l)(deepcopy(D)) == (a, d^-1*b,c, d)
     end
 
-    A = SpecialAutomorphismGroup(F4, maxrules=1000)
+    A = SpecialAutomorphismGroup(F4, max_rules=1000)
 
     @testset "AutomorphismGroup constructors" begin
         @test A isa Groups.AbstractFPGroup

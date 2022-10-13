@@ -40,7 +40,7 @@
     end
 
     # quotient of G
-    H = FPGroup(G, [aG^2=>cG, bG*cG=>aG], maxrules=200)
+    H = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
 
     h = H(word(g))
 
@@ -48,7 +48,7 @@
     @test_throws AssertionError h == g
     @test_throws MethodError h*g
 
-    H′ = FPGroup(G, [aG^2=>cG, bG*cG=>aG], maxrules=200)
+    H′ = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
     @test_throws AssertionError one(H) == one(H′)
 
     Groups.normalform!(h)
