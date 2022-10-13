@@ -25,7 +25,7 @@ function Te_diagonal(λ::Groups.ΡΛ, ϱ::Groups.ΡΛ, i::Integer)
 
     if i == n
         τ = rotation_element(λ, ϱ)
-        return inv(A, τ) * Te_diagonal(λ, ϱ, 1) * τ
+        return inv(τ, A) * Te_diagonal(λ, ϱ, 1) * τ
     end
 
     @assert 1 <= i < n
@@ -37,32 +37,32 @@ function Te_diagonal(λ::Groups.ΡΛ, ϱ::Groups.ΡΛ, i::Integer)
 
     g = one(Word(Int[]))
     g *= λ[NJ, NI]                    # β ↦ α*β
-    g *= λ[NI, I] * inv(A, ϱ[NI, J])  # α ↦ a*α*b^-1
-    g *= inv(A, λ[NJ, NI])            # β ↦ b*α^-1*a^-1*α*β
-    g *= λ[J, NI] * inv(A, λ[J, I])   # b ↦ α
-    g *= inv(A, λ[J, NI])             # b ↦ b*α^-1*a^-1*α
-    g *= inv(A, ϱ[J, NI]) * ϱ[J, I]   # b ↦ b*α^-1*a^-1*α*b*α^-1
+    g *= λ[NI, I] * inv(ϱ[NI, J], A)  # α ↦ a*α*b^-1
+    g *= inv(λ[NJ, NI], A)            # β ↦ b*α^-1*a^-1*α*β
+    g *= λ[J, NI] * inv(λ[J, I], A)   # b ↦ α
+    g *= inv(λ[J, NI], A)             # b ↦ b*α^-1*a^-1*α
+    g *= inv(ϱ[J, NI], A) * ϱ[J, I]   # b ↦ b*α^-1*a^-1*α*b*α^-1
     g *= ϱ[J, NI]                     # b ↦ b*α^-1*a^-1*α*b*α^-1*a*α*b^-1
 
     return g
 end
 
 function Te_lantern(A::Alphabet, b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a₅::T) where {T}
-    a₀ = (a₁ * a₂ * a₃)^4 * inv(A, b₀)
+    a₀ = (a₁ * a₂ * a₃)^4 * inv(b₀, A)
     X = a₄ * a₅ * a₃ * a₄ # from Primer
-    b₁ = inv(A, X) * a₀ * X # from Primer
+    b₁ = inv(X, A) * a₀ * X # from Primer
     Y = a₂ * a₃ * a₁ * a₂
-    return inv(A, Y) * b₁ * Y # b₂ from Primer
+    return inv(Y, A) * b₁ * Y # b₂ from Primer
 end
 
 function Ta(λ::Groups.ΡΛ, i::Integer)
-    @assert λ.id == :λ;
-    return λ[mod1(λ.N-2i+1, λ.N), mod1(λ.N-2i+2, λ.N)]
+    @assert λ.id == :λ
+    return λ[mod1(λ.N - 2i + 1, λ.N), mod1(λ.N - 2i + 2, λ.N)]
 end
 
 function Tα(λ::Groups.ΡΛ, i::Integer)
-    @assert λ.id == :λ;
-    return inv(λ.A, λ[mod1(λ.N-2i+2, λ.N), mod1(λ.N-2i+1, λ.N)])
+    @assert λ.id == :λ
+    return inv(λ[mod1(λ.N - 2i + 2, λ.N), mod1(λ.N - 2i + 1, λ.N)], λ.A)
 end
 
 function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
@@ -85,16 +85,16 @@ function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     if mod(j - (i + 1), genus) == 0
         return Te_diagonal(λ, ϱ, i)
     else
-        return inv(A, Te_lantern(
-            A,
-            # Our notation:               # Primer notation:
-            inv(A, Ta(λ, i + 1)),         # b₀
-            inv(A, Ta(λ, i)),             # a₁
-            inv(A, Tα(λ, i)),             # a₂
-            inv(A, Te_diagonal(λ, ϱ, i)), # a₃
-            inv(A, Tα(λ, i + 1)),         # a₄
-            inv(A, Te(λ, ϱ, i + 1, j)),   # a₅
-        ))
+        return inv(Te_lantern(
+                A,
+                # Our notation:               # Primer notation:
+                inv(Ta(λ, i + 1), A),         # b₀
+                inv(Ta(λ, i), A),             # a₁
+                inv(Tα(λ, i), A),             # a₂
+                inv(Te_diagonal(λ, ϱ, i), A), # a₃
+                inv(Tα(λ, i + 1), A),         # a₄
+                inv(Te(λ, ϱ, i + 1, j), A),   # a₅
+            ), A)
     end
 end
 
@@ -123,24 +123,24 @@ function rotation_element(λ::ΡΛ, ϱ::ΡΛ)
 
     halftwists = map(1:genus-1) do i
         j = i + 1
-        x = Ta(λ, j) * inv(A, Ta(λ, i)) * Tα(λ, j) * Te_diagonal(λ, ϱ, i)
-        δ = x * Tα(λ, i) * inv(A, x)
+        x = Ta(λ, j) * inv(Ta(λ, i), A) * Tα(λ, j) * Te_diagonal(λ, ϱ, i)
+        δ = x * Tα(λ, i) * inv(x, A)
         c =
-            inv(A, Ta(λ, j)) *
+            inv(Ta(λ, j), A) *
             Te(λ, ϱ, i, j) *
             Tα(λ, i)^2 *
-            inv(A, δ) *
-            inv(A, Ta(λ, j)) *
+            inv(δ, A) *
+            inv(Ta(λ, j), A) *
             Ta(λ, i) *
             δ
         z =
             Te_diagonal(λ, ϱ, i) *
-            inv(A, Ta(λ, i)) *
+            inv(Ta(λ, i), A) *
             Tα(λ, i) *
             Ta(λ, i) *
-            inv(A, Te_diagonal(λ, ϱ, i))
+            inv(Te_diagonal(λ, ϱ, i), A)
 
-        Ta(λ, i) * inv(A, Ta(λ, j) * Tα(λ, j))^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c
+        Ta(λ, i) * inv(Ta(λ, j) * Tα(λ, j), A)^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c
     end
 
     τ = (Ta(λ, 1) * Tα(λ, 1))^6 * prod(halftwists)
@@ -201,24 +201,24 @@ function SymplecticMappingClass(
 
     w = if id === :A
         Te(λ, ϱ, i, j) *
-        inv(A, Ta(λ, i)) *
+        inv(Ta(λ, i), A) *
         Tα(λ, i) *
         Ta(λ, i) *
-        inv(A, Te(λ, ϱ, i, j)) *
-        inv(A, Tα(λ, i)) *
-        inv(A, Ta(λ, j))
+        inv(Te(λ, ϱ, i, j), A) *
+        inv(Tα(λ, i), A) *
+        inv(Ta(λ, j), A)
     elseif id === :B
         if !minus
             if i ≠ j
-                x = Ta(λ, j) * inv(A, Ta(λ, i)) * Tα(λ, j) * Te(λ, ϱ, i, j)
-                δ = x * Tα(λ, i) * inv(A, x)
-                Tα(λ, i) * Tα(λ, j) * inv(A, δ)
+                x = Ta(λ, j) * inv(Ta(λ, i), A) * Tα(λ, j) * Te(λ, ϱ, i, j)
+                δ = x * Tα(λ, i) * inv(x, A)
+                Tα(λ, i) * Tα(λ, j) * inv(δ, A)
             else
-                inv(A, Tα(λ, i))
+                inv(Tα(λ, i), A)
             end
         else
             if i ≠ j
-                Ta(λ, i) * Ta(λ, j) * inv(A, Te(λ, ϱ, i, j))
+                Ta(λ, i) * Ta(λ, j) * inv(Te(λ, ϱ, i, j), A)
             else
                 Ta(λ, i)
             end

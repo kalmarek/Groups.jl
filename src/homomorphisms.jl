@@ -88,7 +88,7 @@ struct Homomorphism{Gr1, Gr2, I, W}
                 end
             end
             for (lhs, rhs) in relations(source)
-                relator = lhs*inv(alphabet(source), rhs)
+                relator = lhs * inv(rhs, alphabet(source))
                 im_r = hom.target(hom(relator))
                 @assert isone(im_r) "Map does not define a homomorphism: h($relator) = $(im_r) ≠ $(one(target))."
             end

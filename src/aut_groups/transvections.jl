@@ -45,9 +45,9 @@ Base.@propagate_inbounds @inline function evaluate!(
             if !t.inv
                 append!(word(v[i]), word(v[j]))
             else
-                # append!(word(v[i]), inv(A, word(v[j])))
+                # append!(word(v[i]), inv(word(v[j]), A))
                 for l in Iterators.reverse(word(v[j]))
-                    push!(word(v[i]), inv(A, l))
+                    push!(word(v[i]), inv(l, A))
                 end
             end
         else # if t.id === :λ
@@ -57,9 +57,9 @@ Base.@propagate_inbounds @inline function evaluate!(
                     pushfirst!(word(v[i]), l)
                 end
             else
-                # prepend!(word(v[i]), inv(A, word(v[j])))
+                # prepend!(word(v[i]), inv(word(v[j]), A))
                 for l in word(v[j])
-                    pushfirst!(word(v[i]), inv(A, l))
+                    pushfirst!(word(v[i]), inv(l, A))
                 end
             end
         end

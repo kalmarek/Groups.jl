@@ -128,7 +128,7 @@ end
 
 function Base.inv(g::GEl) where {GEl<:AbstractFPGroupElement}
     G = parent(g)
-    return GEl(inv(alphabet(G), word(g)), G)
+    return GEl(inv(word(g), alphabet(G)), G)
 end
 
 function Base.:(*)(g::GEl, h::GEl) where {GEl<:AbstractFPGroupElement}
@@ -169,7 +169,7 @@ function FreeGroup(A::Alphabet)
     for l in A
         l ∈ invs && continue
         push!(gens, l)
-        push!(invs, inv(A, l))
+        push!(invs, inv(l, A))
     end
 
     return FreeGroup(gens, A)

@@ -147,8 +147,8 @@ function Base.getindex(lm::LettersMap, i::Integer)
     @boundscheck 1 ≤ i ≤ length(lm.A)
 
     if !haskey(lm.indices_map, i)
-        img = if haskey(lm.indices_map, inv(lm.A, i))
-            inv(lm.A, lm.indices_map[inv(lm.A, i)])
+        img = if haskey(lm.indices_map, inv(i, lm.A))
+            inv(lm.indices_map[inv(i, lm.A)], lm.A)
         else
             @warn "LetterMap: neither $i nor its inverse has assigned value"
             one(valtype(lm.indices_map))
@@ -193,7 +193,7 @@ function generated_evaluate(a::FPGroupElement{<:AutomorphismGroup})
                 push!(args[idx].args, :(d[$k]))
                 continue
             end
-            k = findfirst(==(inv(A, l)), first_ltrs)
+            k = findfirst(==(inv(l, A)), first_ltrs)
             if k !== nothing
                 push!(args[idx].args, :(inv(d[$k])))
                 continue

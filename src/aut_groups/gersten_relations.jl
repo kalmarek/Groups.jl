@@ -96,7 +96,7 @@ function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:Abstrac
             if i ≠ j
                 push!(rels, _hexagonal_rule(W, A, ϱ(i, j), ϱ(j, i), λ(i, j), λ(j, i)))
                 w = W([A[ϱ(i, j)], A[ϱ(j, i)^-1], A[λ(i, j)]])
-                push!(rels, w^2 => inv(A, w)^2)
+                push!(rels, w^2 => inv(w, A)^2)
             end
         end
     end
