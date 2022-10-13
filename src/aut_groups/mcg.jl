@@ -1,9 +1,9 @@
-struct SurfaceGroup{T, S, R} <: AbstractFPGroup
+struct SurfaceGroup{T,S,RW} <: AbstractFPGroup
     genus::Int
     boundaries::Int
     gens::Vector{T}
     relations::Vector{<:Pair{S,S}}
-    rws::R
+    rw::RW
 end
 
 include("symplectic_twists.jl")
@@ -69,8 +69,7 @@ function SurfaceGroup(genus::Integer, boundaries::Integer)
     return SurfaceGroup(genus, boundaries, [Al[i] for i in 2:2:length(Al)], rels, rws)
 end
 
-rewriting(S::SurfaceGroup) = S.rws
-KnuthBendix.alphabet(S::SurfaceGroup) = alphabet(rewriting(S))
+rewriting(S::SurfaceGroup) = S.rw
 relations(S::SurfaceGroup) = S.relations
 
 function symplectic_twists(π₁Σ::SurfaceGroup)

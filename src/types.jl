@@ -7,7 +7,9 @@ An Abstract type representing finitely presented groups. Every instance must imp
  * `KnuthBendix.alphabet(G::MyFPGroup)`
  * `rewriting(G::MyFPGroup)` : return the rewriting object which must implement
  > `KnuthBendix.rewrite!(u, v, rewriting(G))`.
-By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
+ E.g. for `G::FreeGroup` `alphabet(G)` is returned, which amounts to free rewriting.
+ * `ordering(G::MyFPGroup)[ = KnuthBendix.ordering(rewriting(G))]` : return the
+ (implicit) ordering for the alphabet of `G`.
  * `relations(G::MyFPGroup)` : return a set of defining relations.
 
 AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt8}`,
@@ -34,11 +36,14 @@ in free rewriting. For `FPGroup` a rewriting system is returned which may
 """
 function rewriting end
 
+KnuthBendix.ordering(G::AbstractFPGroup) = ordering(rewriting(G))
+KnuthBendix.alphabet(G::AbstractFPGroup) = alphabet(ordering(G))
+
 Base.@propagate_inbounds function (G::AbstractFPGroup)(
     word::AbstractVector{<:Integer},
 )
     @boundscheck @assert all(
-        l -> 1 <= l <= length(KnuthBendix.alphabet(G)),
+        l -> 1 <= l <= length(alphabet(G)),
         word,
     )
     return FPGroupElement(word_type(G)(word), G)
@@ -192,10 +197,9 @@ Base.show(io::IO, F::FreeGroup) =
     print(io, "free group on $(ngens(F)) generators")
 
 # mandatory methods:
-relations(F::FreeGroup) = Pair{eltype(F)}[]
 KnuthBendix.ordering(F::FreeGroup) = F.ordering
-KnuthBendix.alphabet(F::FreeGroup) = alphabet(KnuthBendix.ordering(F))
-rewriting(F::FreeGroup) = alphabet(F)
+rewriting(F::FreeGroup) = alphabet(F) # alphabet(F) = alphabet(ordering(F))
+relations(F::FreeGroup) = Pair{eltype(F),eltype(F)}[]
 
 # GroupsCore interface:
 # these are mathematically correct
@@ -206,16 +210,14 @@ GroupsCore.isfiniteorder(g::AbstractFPGroupElement{<:FreeGroup}) =
 
 ## FP Groups
 
-struct FPGroup{T,R,S} <: AbstractFPGroup
+struct FPGroup{T,RW,S} <: AbstractFPGroup
     gens::Vector{T}
     relations::Vector{Pair{S,S}}
-    rws::R
+    rw::RW
 end
 
 relations(G::FPGroup) = G.relations
-rewriting(G::FPGroup) = G.rws
-KnuthBendix.ordering(G::FPGroup) = KnuthBendix.ordering(rewriting(G))
-KnuthBendix.alphabet(G::FPGroup) = alphabet(KnuthBendix.ordering(G))
+rewriting(G::FPGroup) = G.rw
 
 function FPGroup(
     G::AbstractFPGroup,

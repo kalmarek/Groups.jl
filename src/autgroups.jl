@@ -4,15 +4,15 @@ function KnuthBendix.Alphabet(S::AbstractVector{<:GSymbol})
     return Alphabet(S, inversions)
 end
 
-struct AutomorphismGroup{G<:Group,T,R,S} <: AbstractFPGroup
+struct AutomorphismGroup{G<:Group,T,RW,S} <: AbstractFPGroup
     group::G
     gens::Vector{T}
-    rws::R
+    rw::RW
     domain::S
 end
 
 object(G::AutomorphismGroup) = G.group
-rewriting(G::AutomorphismGroup) = G.rws
+rewriting(G::AutomorphismGroup) = G.rw
 
 function equality_data(f::AbstractFPGroupElement{<:AutomorphismGroup})
     imf = evaluate(f)

@@ -19,8 +19,6 @@ function SpecialAutomorphismGroup(F::FreeGroup; ordering = KnuthBendix.LenLex, k
     return AutomorphismGroup(F, S, idxA, ntuple(i -> gens(F, i), n))
 end
 
-KnuthBendix.alphabet(G::AutomorphismGroup{<:FreeGroup}) = alphabet(rewriting(G))
-
 function relations(G::AutomorphismGroup{<:FreeGroup})
     n = length(alphabet(object(G))) ÷ 2
     return last(gersten_relations(n, commutative = false))
