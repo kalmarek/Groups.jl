@@ -30,7 +30,7 @@ function Base.iterate(G::DirectPower)
     res = iterate(itr)
     @assert res !== nothing
     elt = DirectPowerElement(first(res), G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.iterate(G::DirectPower, state)
@@ -38,7 +38,7 @@ function Base.iterate(G::DirectPower, state)
     res = iterate(itr, st)
     res === nothing && return nothing
     elt = DirectPowerElement(first(res), G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.IteratorSize(::Type{<:DirectPower{Gr,N}}) where {Gr,N}
@@ -52,7 +52,7 @@ Base.size(G::DirectPower) = ntuple(_ -> length(G.group), _nfold(G))
 GroupsCore.order(::Type{I}, G::DirectPower) where {I<:Integer} =
     convert(I, order(I, G.group)^_nfold(G))
 
-GroupsCore.ngens(G::DirectPower) = _nfold(G)*ngens(G.group)
+GroupsCore.ngens(G::DirectPower) = _nfold(G) * ngens(G.group)
 
 function GroupsCore.gens(G::DirectPower, i::Integer)
     k = ngens(G.group)
@@ -66,7 +66,7 @@ end
 function GroupsCore.gens(G::DirectPower)
     N = _nfold(G)
     S = gens(G.group)
-    tups = [ntuple(j->(i == j ? s : one(s)), N) for i in 1:N for s in S]
+    tups = [ntuple(j -> (i == j ? s : one(s)), N) for i in 1:N for s in S]
 
     return [DirectPowerElement(elts, G) for elts in tups]
 end
@@ -99,7 +99,7 @@ function Base.:(*)(g::DirectPowerElement, h::DirectPowerElement)
 end
 
 GroupsCore.order(::Type{I}, g::DirectPowerElement) where {I<:Integer} =
-    convert(I, reduce(lcm, (order(I, h) for h in g.elts), init = one(I)))
+    convert(I, reduce(lcm, (order(I, h) for h in g.elts), init=one(I)))
 
 Base.isone(g::DirectPowerElement) = all(isone, g.elts)
 

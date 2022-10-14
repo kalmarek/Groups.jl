@@ -1,7 +1,7 @@
 function _abelianize(
     i::Integer,
     source::AutomorphismGroup{<:FreeGroup},
-    target::MatrixGroups.SpecialLinearGroup{N, T}) where {N, T}
+    target::MatrixGroups.SpecialLinearGroup{N,T}) where {N,T}
     n = ngens(object(source))
     @assert n == N
     aut = alphabet(source)[i]
@@ -10,10 +10,10 @@ function _abelianize(
         # Automorphisms act on the right which corresponds to action on
         # the columns in the matrix case
         eij = MatrixGroups.ElementaryMatrix{N}(
-                aut.j,
-                aut.i,
-                ifelse(aut.inv, -one(T), one(T))
-            )
+            aut.j,
+            aut.i,
+            ifelse(aut.inv, -one(T), one(T))
+        )
         k = alphabet(target)[eij]
         return word_type(target)([k])
     else
@@ -24,7 +24,7 @@ end
 function _abelianize(
     i::Integer,
     source::AutomorphismGroup{<:Groups.SurfaceGroup},
-    target::MatrixGroups.SpecialLinearGroup{N, T}) where {N, T}
+    target::MatrixGroups.SpecialLinearGroup{N,T}) where {N,T}
     n = ngens(Groups.object(source))
     @assert n == N
     g = alphabet(source)[i].autFn_word
@@ -39,8 +39,8 @@ end
 function Groups._abelianize(
     i::Integer,
     source::AutomorphismGroup{<:Groups.SurfaceGroup},
-    target::MatrixGroups.SymplecticGroup{N, T}
-) where {N, T}
+    target::MatrixGroups.SymplecticGroup{N,T}
+) where {N,T}
     @assert iseven(N)
     As = alphabet(source)
     At = alphabet(target)
@@ -53,7 +53,7 @@ function Groups._abelianize(
     ab = Groups.Homomorphism(Groups._abelianize, source, SlN, check=false)
 
     matrix_spn_map = let S = gens(target)
-        Dict(MatrixGroups.matrix_repr(g)=> word(g) for g in union(S, inv.(S)))
+        Dict(MatrixGroups.matrix_repr(g) => word(g) for g in union(S, inv.(S)))
     end
 
     # renumeration:
@@ -63,7 +63,7 @@ function Groups._abelianize(
     p = [reverse(2:2:N); reverse(1:2:N)]
 
     g = source([i])
-    Mg = MatrixGroups.matrix_repr(ab(g))[p,p]
+    Mg = MatrixGroups.matrix_repr(ab(g))[p, p]
 
     return matrix_spn_map[Mg]
 end

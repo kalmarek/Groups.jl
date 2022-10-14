@@ -10,7 +10,7 @@ import OrderedCollections: OrderedSet
 
 import KnuthBendix
 import KnuthBendix: AbstractWord, Alphabet, Word
-import KnuthBendix: alphabet
+import KnuthBendix: alphabet, ordering
 
 export MatrixGroups
 

@@ -1,4 +1,4 @@
-mutable struct FPGroupIter{S, T, GEl}
+mutable struct FPGroupIter{S,T,GEl}
     seen::S
     seen_iter_state::T
     current::GEl

@@ -58,8 +58,8 @@ true
 ```
 
 """
-struct Homomorphism{Gr1, Gr2, I, W}
-    gens_images::Dict{I, W}
+struct Homomorphism{Gr1,Gr2,I,W}
+    gens_images::Dict{I,W}
     source::Gr1
     target::Gr2
 
@@ -70,11 +70,11 @@ struct Homomorphism{Gr1, Gr2, I, W}
         check=true
     )
         A = alphabet(source)
-        dct = Dict(i=>convert(word_type(target), f(i, source, target))
-            for i in 1:length(A))
+        dct = Dict(i => convert(word_type(target), f(i, source, target))
+                   for i in 1:length(A))
         I = eltype(word_type(source))
         W = word_type(target)
-        hom = new{typeof(source), typeof(target), I, W}(dct, source, target)
+        hom = new{typeof(source),typeof(target),I,W}(dct, source, target)
 
         if check
             @assert hom(one(source)) == one(target)
@@ -83,12 +83,12 @@ struct Homomorphism{Gr1, Gr2, I, W}
                 @assert hom(x^-1) == hom(x)^-1
 
                 for y in gens(source)
-                    @assert hom(x*y) == hom(x)*hom(y)
-                    @assert hom(x*y)^-1 == hom(y^-1)*hom(x^-1)
+                    @assert hom(x * y) == hom(x) * hom(y)
+                    @assert hom(x * y)^-1 == hom(y^-1) * hom(x^-1)
                 end
             end
             for (lhs, rhs) in relations(source)
-                relator = lhs*inv(alphabet(source), rhs)
+                relator = lhs * inv(rhs, alphabet(source))
                 im_r = hom.target(hom(relator))
                 @assert isone(im_r) "Map does not define a homomorphism: h($relator) = $(im_r) ≠ $(one(target))."
             end

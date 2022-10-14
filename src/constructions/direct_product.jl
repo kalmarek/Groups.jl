@@ -25,7 +25,7 @@ function Base.iterate(G::DirectProduct)
     res = iterate(itr)
     @assert res !== nothing
     elt = DirectProductElement(first(res), G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.iterate(G::DirectProduct, state)
@@ -33,7 +33,7 @@ function Base.iterate(G::DirectProduct, state)
     res = iterate(itr, st)
     res === nothing && return nothing
     elt = DirectProductElement(first(res), G)
-    return elt, (iterator = itr, state = last(res))
+    return elt, (iterator=itr, state=last(res))
 end
 
 function Base.IteratorSize(::Type{<:DirectProduct{Gt,Ht}}) where {Gt,Ht}

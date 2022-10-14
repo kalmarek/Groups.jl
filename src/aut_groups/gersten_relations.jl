@@ -1,4 +1,4 @@
-function gersten_alphabet(n::Integer; commutative::Bool = true)
+function gersten_alphabet(n::Integer; commutative::Bool=true)
     indexing = [(i, j) for i in 1:n for j in 1:n if i ≠ j]
     S = [ϱ(i, j) for (i, j) in indexing]
 
@@ -6,7 +6,7 @@ function gersten_alphabet(n::Integer; commutative::Bool = true)
         append!(S, [λ(i, j) for (i, j) in indexing])
     end
 
-    return Alphabet(S)
+    return Alphabet(mapreduce(x -> [x, inv(x)], union, S))
 end
 
 function _commutation_rule(
@@ -41,12 +41,12 @@ function _hexagonal_rule(
 end
 
 gersten_relations(n::Integer; commutative) =
-    gersten_relations(Word{UInt8}, n, commutative = commutative)
+    gersten_relations(Word{UInt8}, n, commutative=commutative)
 
 function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:AbstractWord}
     @assert n > 1 "Gersten relations are defined only for n>1, got n=$n"
-    A = gersten_alphabet(n, commutative = commutative)
-    @assert length(A) <= KnuthBendix._max_alphabet_length(W) "Type $W can not represent words over alphabet with $(length(A)) letters."
+    A = gersten_alphabet(n, commutative=commutative)
+    @assert length(A) <= typemax(eltype(W)) "Type $W can not represent words over alphabet with $(length(A)) letters."
 
     rels = Pair{W,W}[]
 
@@ -96,7 +96,7 @@ function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:Abstrac
             if i ≠ j
                 push!(rels, _hexagonal_rule(W, A, ϱ(i, j), ϱ(j, i), λ(i, j), λ(j, i)))
                 w = W([A[ϱ(i, j)], A[ϱ(j, i)^-1], A[λ(i, j)]])
-                push!(rels, w^2 => inv(A, w)^2)
+                push!(rels, w^2 => inv(w, A)^2)
             end
         end
     end

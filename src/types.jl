@@ -3,15 +3,18 @@
 """
     AbstractFPGroup
 
-An Abstract type representing finitely presented groups. Every instance `` must implement
+An Abstract type representing finitely presented groups. Every instance must implement
  * `KnuthBendix.alphabet(G::MyFPGroup)`
  * `rewriting(G::MyFPGroup)` : return the rewriting object which must implement
- > `KnuthBendix.rewrite_from_left!(u, v, rewriting(G))`.
-By default `alphabet(G)` is returned, which amounts to free rewriting in `G`.
+ > `KnuthBendix.rewrite!(u, v, rewriting(G))`.
+ E.g. for `G::FreeGroup` `alphabet(G)` is returned, which amounts to free rewriting.
+ * `ordering(G::MyFPGroup)[ = KnuthBendix.ordering(rewriting(G))]` : return the
+ (implicit) ordering for the alphabet of `G`.
  * `relations(G::MyFPGroup)` : return a set of defining relations.
 
-AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt16}`,
-which controls the word type used for group elements. If a group has more than `255` generators you need to define e.g.
+AbstractFPGroup may also override `word_type(::Type{MyFPGroup}) = Word{UInt8}`,
+which controls the word type used for group elements.
+If a group has more than `255` generators you need to define e.g.
 > `word_type(::Type{MyFPGroup}) = Word{UInt16}`
 """
 abstract type AbstractFPGroup <: GroupsCore.Group end
@@ -22,22 +25,25 @@ word_type(::Type{<:AbstractFPGroup}) = Word{UInt8}
 
 """
     rewriting(G::AbstractFPGroup)
-Return a "rewriting object" for elements of `G`. The rewriting object must must implement
-    KnuthBendix.rewrite_from_left!(
-        u::AbstractWord,
-        v::AbstractWord,
-        rewriting(G)
-    )
+Return a "rewriting object" for elements of `G`.
 
-For example if `G` is a `FreeGroup` then `alphabet(G)` is returned which results in free rewriting. For `FPGroup` a rewriting system is returned which may (or may not) rewrite word `v` to its normal form.
+The rewriting object must must implement
+    KnuthBendix.rewrite!(u::AbstractWord, v::AbstractWord, rewriting(G))
+
+For example if `G` is a `FreeGroup` then `alphabet(G)` is returned which results
+in free rewriting. For `FPGroup` a rewriting system is returned which may
+(or may not) rewrite word `v` to its normal form (depending on e.g. its confluence).
 """
 function rewriting end
+
+KnuthBendix.ordering(G::AbstractFPGroup) = ordering(rewriting(G))
+KnuthBendix.alphabet(G::AbstractFPGroup) = alphabet(ordering(G))
 
 Base.@propagate_inbounds function (G::AbstractFPGroup)(
     word::AbstractVector{<:Integer},
 )
     @boundscheck @assert all(
-        l -> 1 <= l <= length(KnuthBendix.alphabet(G)),
+        l -> 1 <= l <= length(alphabet(G)),
         word,
     )
     return FPGroupElement(word_type(G)(word), G)
@@ -90,7 +96,7 @@ mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <:
     FPGroupElement(
         word::W,
         G::AbstractFPGroup,
-        hash::UInt = UInt(0),
+        hash::UInt=UInt(0),
     ) where {W<:AbstractWord} = new{typeof(G),W}(word, hash, G)
 
     FPGroupElement{Gr,W}(word::AbstractWord, G::Gr) where {Gr,W} =
@@ -128,7 +134,7 @@ end
 
 function Base.inv(g::GEl) where {GEl<:AbstractFPGroupElement}
     G = parent(g)
-    return GEl(inv(alphabet(G), word(g)), G)
+    return GEl(inv(word(g), alphabet(G)), G)
 end
 
 function Base.:(*)(g::GEl, h::GEl) where {GEl<:AbstractFPGroupElement}
@@ -153,8 +159,7 @@ struct FreeGroup{T,O} <: AbstractFPGroup
 
     function FreeGroup(gens, ordering::KnuthBendix.WordOrdering)
         @assert length(gens) == length(unique(gens))
-        L = KnuthBendix.letters(alphabet(ordering))
-        @assert all(l -> l in L, gens)
+        @assert all(l -> l in alphabet(ordering), gens)
         return new{eltype(gens),typeof(ordering)}(gens, ordering)
     end
 end
@@ -163,15 +168,14 @@ FreeGroup(gens, A::Alphabet) = FreeGroup(gens, KnuthBendix.LenLex(A))
 
 function FreeGroup(A::Alphabet)
     @boundscheck @assert all(
-        KnuthBendix.hasinverse(l, A) for l in KnuthBendix.letters(A)
+        KnuthBendix.hasinverse(l, A) for l in A
     )
-    ltrs = KnuthBendix.letters(A)
-    gens = Vector{eltype(ltrs)}()
-    invs = Vector{eltype(ltrs)}()
-    for l in ltrs
+    gens = Vector{eltype(A)}()
+    invs = Vector{eltype(A)}()
+    for l in A
         l ∈ invs && continue
         push!(gens, l)
-        push!(invs, inv(A, l))
+        push!(invs, inv(l, A))
     end
 
     return FreeGroup(gens, A)
@@ -193,10 +197,9 @@ Base.show(io::IO, F::FreeGroup) =
     print(io, "free group on $(ngens(F)) generators")
 
 # mandatory methods:
-relations(F::FreeGroup) = Pair{eltype(F)}[]
 KnuthBendix.ordering(F::FreeGroup) = F.ordering
-KnuthBendix.alphabet(F::FreeGroup) = alphabet(KnuthBendix.ordering(F))
-rewriting(F::FreeGroup) = alphabet(F)
+rewriting(F::FreeGroup) = alphabet(F) # alphabet(F) = alphabet(ordering(F))
+relations(F::FreeGroup) = Pair{eltype(F),eltype(F)}[]
 
 # GroupsCore interface:
 # these are mathematically correct
@@ -207,22 +210,20 @@ GroupsCore.isfiniteorder(g::AbstractFPGroupElement{<:FreeGroup}) =
 
 ## FP Groups
 
-struct FPGroup{T,R,S} <: AbstractFPGroup
+struct FPGroup{T,RW,S} <: AbstractFPGroup
     gens::Vector{T}
     relations::Vector{Pair{S,S}}
-    rws::R
+    rw::RW
 end
 
 relations(G::FPGroup) = G.relations
-rewriting(G::FPGroup) = G.rws
-KnuthBendix.ordering(G::FPGroup) = KnuthBendix.ordering(rewriting(G))
-KnuthBendix.alphabet(G::FPGroup) = alphabet(KnuthBendix.ordering(G))
+rewriting(G::FPGroup) = G.rw
 
 function FPGroup(
     G::AbstractFPGroup,
     rels::AbstractVector{<:Pair{GEl,GEl}};
-    ordering = KnuthBendix.ordering(G),
-    kwargs...,
+    ordering=KnuthBendix.ordering(G),
+    kwargs...
 ) where {GEl<:FPGroupElement}
     for (lhs, rhs) in rels
         @assert parent(lhs) === parent(rhs) === G
@@ -230,9 +231,9 @@ function FPGroup(
     word_rels = [word(lhs) => word(rhs) for (lhs, rhs) in [relations(G); rels]]
     rws = KnuthBendix.RewritingSystem(word_rels, ordering)
 
-    KnuthBendix.knuthbendix!(rws; kwargs...)
+    rws = KnuthBendix.knuthbendix(rws, KnuthBendix.Settings(; kwargs...))
 
-    return FPGroup(G.gens, rels, rws)
+    return FPGroup(G.gens, rels, KnuthBendix.IndexAutomaton(rws))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", G::FPGroup)

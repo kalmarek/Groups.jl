@@ -29,57 +29,57 @@
     end
 
     A4 = Alphabet(
-    [:a,:A,:b,:B,:c,:C,:d,:D],
-    [ 2, 1, 4, 3, 6, 5, 8, 7]
+        [:a, :A, :b, :B, :c, :C, :d, :D],
+        [2, 1, 4, 3, 6, 5, 8, 7]
     )
 
     A5 = Alphabet(
-    [:a,:A,:b,:B,:c,:C,:d,:D,:e,:E],
-    [ 2, 1, 4, 3, 6, 5, 8, 7,10, 9]
+        [:a, :A, :b, :B, :c, :C, :d, :D, :e, :E],
+        [2, 1, 4, 3, 6, 5, 8, 7, 10, 9]
     )
 
     F4 = FreeGroup([:a, :b, :c, :d], A4)
-    a,b,c,d = gens(F4)
-    D = ntuple(i->gens(F4, i), 4)
+    a, b, c, d = gens(F4)
+    D = ntuple(i -> gens(F4, i), 4)
 
     @testset "Transvection action correctness" begin
-        i,j = 1,2
-        r = Groups.Transvection(:ϱ,i,j)
-        l = Groups.Transvection(:λ,i,j)
+        i, j = 1, 2
+        r = Groups.Transvection(:ϱ, i, j)
+        l = Groups.Transvection(:λ, i, j)
 
         (t::Groups.Transvection)(v::Tuple) = Groups.evaluate!(v, t)
 
-        @test      r(deepcopy(D)) == (a*b,   b, c, d)
-        @test inv(r)(deepcopy(D)) == (a*b^-1,b, c, d)
-        @test      l(deepcopy(D)) == (b*a,   b, c, d)
-        @test inv(l)(deepcopy(D)) == (b^-1*a,b, c, d)
+        @test r(deepcopy(D)) == (a * b, b, c, d)
+        @test inv(r)(deepcopy(D)) == (a * b^-1, b, c, d)
+        @test l(deepcopy(D)) == (b * a, b, c, d)
+        @test inv(l)(deepcopy(D)) == (b^-1 * a, b, c, d)
 
-        i,j = 3,1
-        r = Groups.Transvection(:ϱ,i,j)
-        l = Groups.Transvection(:λ,i,j)
-        @test      r(deepcopy(D)) == (a, b, c*a,   d)
-        @test inv(r)(deepcopy(D)) == (a, b, c*a^-1,d)
-        @test      l(deepcopy(D)) == (a, b, a*c,   d)
-        @test inv(l)(deepcopy(D)) == (a, b, a^-1*c,d)
+        i, j = 3, 1
+        r = Groups.Transvection(:ϱ, i, j)
+        l = Groups.Transvection(:λ, i, j)
+        @test r(deepcopy(D)) == (a, b, c * a, d)
+        @test inv(r)(deepcopy(D)) == (a, b, c * a^-1, d)
+        @test l(deepcopy(D)) == (a, b, a * c, d)
+        @test inv(l)(deepcopy(D)) == (a, b, a^-1 * c, d)
 
-        i,j = 4,3
-        r = Groups.Transvection(:ϱ,i,j)
-        l = Groups.Transvection(:λ,i,j)
-        @test      r(deepcopy(D)) == (a, b, c, d*c)
-        @test inv(r)(deepcopy(D)) == (a, b, c, d*c^-1)
-        @test      l(deepcopy(D)) == (a, b, c, c*d)
-        @test inv(l)(deepcopy(D)) == (a, b, c, c^-1*d)
+        i, j = 4, 3
+        r = Groups.Transvection(:ϱ, i, j)
+        l = Groups.Transvection(:λ, i, j)
+        @test r(deepcopy(D)) == (a, b, c, d * c)
+        @test inv(r)(deepcopy(D)) == (a, b, c, d * c^-1)
+        @test l(deepcopy(D)) == (a, b, c, c * d)
+        @test inv(l)(deepcopy(D)) == (a, b, c, c^-1 * d)
 
-        i,j = 2,4
-        r = Groups.Transvection(:ϱ,i,j)
-        l = Groups.Transvection(:λ,i,j)
-        @test      r(deepcopy(D)) == (a, b*d,   c, d)
-        @test inv(r)(deepcopy(D)) == (a, b*d^-1,c, d)
-        @test      l(deepcopy(D)) == (a, d*b,   c, d)
-        @test inv(l)(deepcopy(D)) == (a, d^-1*b,c, d)
+        i, j = 2, 4
+        r = Groups.Transvection(:ϱ, i, j)
+        l = Groups.Transvection(:λ, i, j)
+        @test r(deepcopy(D)) == (a, b * d, c, d)
+        @test inv(r)(deepcopy(D)) == (a, b * d^-1, c, d)
+        @test l(deepcopy(D)) == (a, d * b, c, d)
+        @test inv(l)(deepcopy(D)) == (a, d^-1 * b, c, d)
     end
 
-    A = SpecialAutomorphismGroup(F4, maxrules=1000)
+    A = SpecialAutomorphismGroup(F4, max_rules=1000)
 
     @testset "AutomorphismGroup constructors" begin
         @test A isa Groups.AbstractFPGroup
@@ -91,33 +91,33 @@
 
     @testset "Automorphisms: hash and evaluate" begin
         @test Groups.domain(gens(A, 1)) == D
-        g, h = gens(A, 1), gens(A, 8)
+        g, h = gens(A, 1), gens(A, 8) # (ϱ₁.₂, ϱ₃.₂)
 
-        @test evaluate(g*h) == evaluate(h*g)
-        @test (g*h).savedhash == zero(UInt)
+        @test evaluate(g * h) == evaluate(h * g)
+        @test (g * h).savedhash == zero(UInt)
 
-        @test sprint(show, typeof(g)) == "Automorphism{FreeGroup{Symbol, KnuthBendix.LenLex{Symbol}}, …}"
+        @test contains(sprint(show, typeof(g)), "Automorphism{FreeGroup{Symbol")
 
-        a = g*h
-        b = h*g
+        a = g * h
+        b = h * g
         @test hash(a) != zero(UInt)
         @test hash(a) == hash(b)
         @test a.savedhash == b.savedhash
 
-        @test length(unique([a,b])) == 1
-        @test length(unique([g*h, h*g])) == 1
+        @test length(unique([a, b])) == 1
+        @test length(unique([g * h, h * g])) == 1
 
         # Not so simple arithmetic: applying starting on the left:
         # ϱ₁₂*ϱ₂₁⁻¹*λ₁₂*ε₂ == σ₂₁₃₄
 
         g = gens(A, 1)
         x1, x2, x3, x4 = Groups.domain(g)
-        @test evaluate(g) == (x1*x2, x2, x3, x4)
+        @test evaluate(g) == (x1 * x2, x2, x3, x4)
 
-        g = g*inv(gens(A, 4)) # ϱ₂₁
-        @test evaluate(g) == (x1*x2, x1^-1, x3, x4)
+        g = g * inv(gens(A, 4)) # ϱ₂₁
+        @test evaluate(g) == (x1 * x2, x1^-1, x3, x4)
 
-        g = g*gens(A, 13)
+        g = g * gens(A, 13)
         @test evaluate(g) == (x2, x1^-1, x3, x4)
     end
 
@@ -128,7 +128,7 @@
         S = gens(G)
         @test S isa Vector{<:FPGroupElement{<:AutomorphismGroup{<:FreeGroup}}}
 
-        @test length(S) == 2*N*(N-1)
+        @test length(S) == 2 * N * (N - 1)
         @test length(unique(S)) == length(S)
 
         S_sym = [S; inv.(S)]
@@ -136,12 +136,12 @@
 
         pushfirst!(S_sym, one(G))
 
-        B_2 = [i*j for (i,j) in Base.product(S_sym, S_sym)]
+        B_2 = [i * j for (i, j) in Base.product(S_sym, S_sym)]
         @test length(B_2) == 2401
         @test length(unique(B_2)) == 1777
 
-        @test all(g->isone(inv(g)*g), B_2)
-        @test all(g->isone(g*inv(g)), B_2)
+        @test all(g -> isone(inv(g) * g), B_2)
+        @test all(g -> isone(g * inv(g)), B_2)
     end
 
     @testset "Forward evaluate" begin
@@ -153,7 +153,7 @@
 
         f = gens(F)
 
-        @test a(f[1]) == f[1]*f[2]
+        @test a(f[1]) == f[1] * f[2]
         @test all(a(f[i]) == f[i] for i in 2:length(f))
 
         S = let s = gens(G)
