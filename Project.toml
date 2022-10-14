@@ -1,7 +1,7 @@
 name = "Groups"
 uuid = "5d8bd718-bd84-11e8-3b40-ad14f4a32557"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.7.3"
+version = "0.7.4"
 
 [deps]
 Folds = "41a02a25-b8f0-4f67-bc48-60067656b558"
