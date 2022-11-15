@@ -34,7 +34,8 @@ function _wlmetric_ball(S, old, radius, op, collect, unique)
     for r in 2:radius
         old = let old = old, S = S,
             new = collect(
-                (g = op(o, s); hash(g); g)
+                (g = op(o, s); normalform!(g); hash(g); g)
+                # normalform! and hash are to make assure thread-safety of produced elts
                 for o in @view(old[sizes[end-1]:end]) for s in S
             )
 
