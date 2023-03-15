@@ -4,7 +4,7 @@ struct Transvection <: GSymbol
     j::UInt16
     inv::Bool
 
-    function Transvection(id::Symbol, i::Integer, j::Integer, inv=false)
+    function Transvection(id::Symbol, i::Integer, j::Integer, inv = false)
         @assert id in (:ϱ, :λ)
         return new(id, i, j, inv)
     end
@@ -20,20 +20,23 @@ function Base.show(io::IO, t::Transvection)
         'λ'
     end
     print(io, id, subscriptify(t.i), '.', subscriptify(t.j))
-    t.inv && print(io, "^-1")
+    return t.inv && print(io, "^-1")
 end
 
 Base.inv(t::Transvection) = Transvection(t.id, t.i, t.j, !t.inv)
 
-Base.:(==)(t::Transvection, s::Transvection) =
-    t.id === s.id && t.i == s.i && t.j == s.j && t.inv == s.inv
+function Base.:(==)(t::Transvection, s::Transvection)
+    return t.id === s.id && t.i == s.i && t.j == s.j && t.inv == s.inv
+end
 
-Base.hash(t::Transvection, h::UInt) = hash(hash(t.id, hash(t.i)), hash(t.j, hash(t.inv, h)))
+function Base.hash(t::Transvection, h::UInt)
+    return hash(hash(t.id, hash(t.i)), hash(t.j, hash(t.inv, h)))
+end
 
 Base.@propagate_inbounds @inline function evaluate!(
     v::NTuple{T,N},
     t::Transvection,
-    tmp=one(first(v)),
+    tmp = one(first(v)),
 ) where {T,N}
     i, j = t.i, t.j
     @assert 1 ≤ i ≤ length(v) && 1 ≤ j ≤ length(v)
@@ -84,7 +87,7 @@ end
 
 function Base.show(io::IO, p::PermRightAut)
     print(io, 'σ')
-    join(io, (subscriptify(Int(i)) for i in p.perm))
+    return join(io, (subscriptify(Int(i)) for i in p.perm))
 end
 
 Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
@@ -92,4 +95,6 @@ Base.inv(p::PermRightAut) = PermRightAut(invperm(p.perm))
 Base.:(==)(p::PermRightAut, q::PermRightAut) = p.perm == q.perm
 Base.hash(p::PermRightAut, h::UInt) = hash(p.perm, hash(PermRightAut, h))
 
-evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp=nothing) where {T,N} = v[p.perm]
+function evaluate!(v::NTuple{T,N}, p::PermRightAut, tmp = nothing) where {T,N}
+    return v[p.perm]
+end
