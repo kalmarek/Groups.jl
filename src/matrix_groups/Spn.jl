@@ -1,21 +1,19 @@
 include("eltary_symplectic.jl")
 
-struct SymplecticGroup{N,T,R,A,S} <: AbstractMatrixGroup{N,T}
+struct SymplecticGroup{N,T,R,S} <: AbstractMatrixGroup{N,T}
     base_ring::R
-    alphabet::A
-    gens::S
+    alphabet::Alphabet{S}
+    gens::Vector{S}
 
     function SymplecticGroup{N}(base_ring) where {N}
         S = symplectic_gens(N, eltype(base_ring))
         alphabet = Alphabet(S)
 
-        return new{
-            N,
-            eltype(base_ring),
-            typeof(base_ring),
-            typeof(alphabet),
-            typeof(S)
-        }(base_ring, alphabet, S)
+        T = eltype(base_ring)
+        R = typeof(base_ring)
+        St = eltype(S)
+
+        return new{N,T,R,St}(base_ring, alphabet, S)
     end
 end
 
