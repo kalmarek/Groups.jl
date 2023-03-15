@@ -38,3 +38,29 @@ function Base.rand(
     S = gens(Mgroup)
     return prod(g -> rand(rng, Bool) ? g : inv(g), rand(rng, S, rand(rng, 1:30)))
 end
+
+function Base.show(io::IO, M::AbstractMatrixGroup)
+    g = gens(M, 1)
+    N = size(g, 1)
+    print(io, "H ⩽ GL{$N,$(eltype(g))}")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", M::AbstractMatrixGroup)
+    N = size(gens(M, 1), 1)
+    ng = GroupsCore.ngens(M)
+    print(io, "subgroup of $N×$N invertible matrices with $(ng) generators")
+end
+
+Base.show(io::IO, mat::Groups.AbstractFPGroupElement{<:AbstractMatrixGroup}) =
+    KnuthBendix.print_repr(io, word(mat), alphabet(mat))
+
+function Base.show(
+    io::IO,
+    ::MIME"text/plain",
+    mat::Groups.AbstractFPGroupElement{<:AbstractMatrixGroup{N}}
+) where {N}
+    Groups.normalform!(mat)
+    KnuthBendix.print_repr(io, word(mat), alphabet(mat))
+    println(io, " ∈ ", parent(mat))
+    Base.print_array(io, matrix(mat))
+end

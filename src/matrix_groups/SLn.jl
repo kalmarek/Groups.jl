@@ -21,22 +21,14 @@ end
 
 GroupsCore.ngens(SL::SpecialLinearGroup{N}) where {N} = N^2 - N
 
-Base.show(io::IO, SL::SpecialLinearGroup{N,T}) where {N,T} =
-    print(io, "special linear group of $N×$N matrices over $T")
+function Base.show(io::IO, ::SpecialLinearGroup{N,T}) where {N,T}
+    return print(io, "SL{$N,$T}")
+end
 
 function Base.show(
     io::IO,
     ::MIME"text/plain",
-    sl::Groups.AbstractFPGroupElement{<:SpecialLinearGroup{N}}
-) where {N}
-
-    Groups.normalform!(sl)
-
-    print(io, "SL{$N,$(eltype(sl))} matrix: ")
-    KnuthBendix.print_repr(io, word(sl), alphabet(sl))
-    println(io)
-    Base.print_array(io, matrix_repr(sl))
+    SL::SpecialLinearGroup{N,T},
+) where {N,T}
+    return print(io, "special linear group of $N×$N matrices over $T")
 end
-
-Base.show(io::IO, sl::Groups.AbstractFPGroupElement{<:SpecialLinearGroup}) =
-    KnuthBendix.print_repr(io, word(sl), alphabet(sl))

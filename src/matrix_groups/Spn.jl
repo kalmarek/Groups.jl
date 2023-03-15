@@ -21,20 +21,11 @@ end
 
 GroupsCore.ngens(Sp::SymplecticGroup) = length(Sp.gens)
 
-Base.show(io::IO, ::SymplecticGroup{N}) where {N} = print(io, "group of $N×$N symplectic matrices")
+Base.show(io::IO, ::SymplecticGroup{N,T}) where {N,T} = print(io, "Sp{$N,$T}")
 
-function Base.show(
-    io::IO,
-    ::MIME"text/plain",
-    sp::Groups.AbstractFPGroupElement{<:SymplecticGroup{N}}
-) where {N}
-    Groups.normalform!(sp)
-    print(io, "$N×$N symplectic matrix: ")
-    KnuthBendix.print_repr(io, word(sp), alphabet(sp))
-    println(io)
-    Base.print_array(io, matrix_repr(sp))
+function Base.show(io::IO, ::MIME"text/plain", ::SymplecticGroup{N}) where {N}
+    return print(io, "group of $N×$N symplectic matrices")
 end
-
 _offdiag_idcs(n) = ((i, j) for i in 1:n for j in 1:n if i ≠ j)
 
 function symplectic_gens(N, T=Int8)
