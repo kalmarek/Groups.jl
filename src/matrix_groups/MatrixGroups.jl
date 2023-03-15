@@ -9,10 +9,11 @@ import GroupsCore.Random # GroupsCore rand
 using ..Groups
 using Groups.KnuthBendix
 
-export SpecialLinearGroup, SymplecticGroup
+export MatrixGroup, SpecialLinearGroup, SymplecticGroup
 
 include("abstract.jl")
 
+include("matrix_group.jl")
 include("SLn.jl")
 include("Spn.jl")
 
