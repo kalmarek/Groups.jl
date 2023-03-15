@@ -1,6 +1,6 @@
 include("eltary_matrices.jl")
 
-struct SpecialLinearGroup{N,T,R,A,S} <: MatrixGroup{N,T}
+struct SpecialLinearGroup{N,T,R,A,S} <: AbstractMatrixGroup{N,T}
     base_ring::R
     alphabet::A
     gens::S

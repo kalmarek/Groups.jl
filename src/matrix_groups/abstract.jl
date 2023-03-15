@@ -1,5 +1,5 @@
-abstract type MatrixGroup{N,T} <: Groups.AbstractFPGroup end
-const MatrixGroupElement{N,T} = Groups.AbstractFPGroupElement{<:MatrixGroup{N,T}}
+abstract type AbstractMatrixGroup{N,T} <: Groups.AbstractFPGroup end
+const MatrixGroupElement{N,T} = Groups.AbstractFPGroupElement{<:AbstractMatrixGroup{N,T}}
 
 Base.isone(g::MatrixGroupElement{N,T}) where {N,T} =
     isone(word(g)) || isone(matrix(g))
@@ -32,9 +32,9 @@ end
 
 function Base.rand(
     rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:MatrixGroup},
+    rs::Random.SamplerTrivial{<:AbstractMatrixGroup},
 )
     Mgroup = rs[]
     S = gens(Mgroup)
-    return prod(g -> rand(Bool) ? g : inv(g), rand(S, rand(1:30)))
+    return prod(g -> rand(rng, Bool) ? g : inv(g), rand(rng, S, rand(rng, 1:30)))
 end
