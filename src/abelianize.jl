@@ -1,7 +1,8 @@
 function _abelianize(
     i::Integer,
     source::AutomorphismGroup{<:FreeGroup},
-    target::MatrixGroups.SpecialLinearGroup{N,T}) where {N,T}
+    target::MatrixGroups.SpecialLinearGroup{N,T},
+) where {N,T}
     n = ngens(object(source))
     @assert n == N
     aut = alphabet(source)[i]
@@ -12,7 +13,7 @@ function _abelianize(
         eij = MatrixGroups.ElementaryMatrix{N}(
             aut.j,
             aut.i,
-            ifelse(aut.inv, -one(T), one(T))
+            ifelse(aut.inv, -one(T), one(T)),
         )
         k = alphabet(target)[eij]
         return word_type(target)([k])
@@ -24,7 +25,8 @@ end
 function _abelianize(
     i::Integer,
     source::AutomorphismGroup{<:Groups.SurfaceGroup},
-    target::MatrixGroups.SpecialLinearGroup{N,T}) where {N,T}
+    target::MatrixGroups.SpecialLinearGroup{N,T},
+) where {N,T}
     n = ngens(Groups.object(source))
     @assert n == N
     g = alphabet(source)[i].autFn_word
@@ -39,7 +41,7 @@ end
 function Groups._abelianize(
     i::Integer,
     source::AutomorphismGroup{<:Groups.SurfaceGroup},
-    target::MatrixGroups.SymplecticGroup{N,T}
+    target::MatrixGroups.SymplecticGroup{N,T},
 ) where {N,T}
     @assert iseven(N)
     As = alphabet(source)
@@ -50,7 +52,7 @@ function Groups._abelianize(
         MatrixGroups.SpecialLinearGroup{2genus}(T)
     end
 
-    ab = Groups.Homomorphism(Groups._abelianize, source, SlN, check=false)
+    ab = Groups.Homomorphism(Groups._abelianize, source, SlN; check = false)
 
     matrix_spn_map = let S = gens(target)
         Dict(MatrixGroups.matrix(g) => word(g) for g in union(S, inv.(S)))

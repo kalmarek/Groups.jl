@@ -20,8 +20,12 @@ _isvalidhash(g::AbstractFPGroupElement) = bitget(g.savedhash, 1)
 _setnormalform(h::UInt, v::Bool) = bitset(h, v, 0)
 _setvalidhash(h::UInt, v::Bool) = bitset(h, v, 1)
 
-_setnormalform!(g::AbstractFPGroupElement, v::Bool) = g.savedhash = _setnormalform(g.savedhash, v)
-_setvalidhash!(g::AbstractFPGroupElement, v::Bool) = g.savedhash = _setvalidhash(g.savedhash, v)
+function _setnormalform!(g::AbstractFPGroupElement, v::Bool)
+    return g.savedhash = _setnormalform(g.savedhash, v)
+end
+function _setvalidhash!(g::AbstractFPGroupElement, v::Bool)
+    return g.savedhash = _setvalidhash(g.savedhash, v)
+end
 
 # To update hash use this internal method, possibly only after computing the
 # normal form of `g`:

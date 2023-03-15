@@ -1,5 +1,5 @@
 function KnuthBendix.Alphabet(S::AbstractVector{<:GSymbol})
-    S = unique!([S; inv.(S)])
+    S = union(S, inv.(S))
     inversions = [findfirst(==(inv(s)), S) for s in S]
     return Alphabet(S, inversions)
 end
@@ -26,7 +26,10 @@ function equality_data(f::AbstractFPGroupElement{<:AutomorphismGroup})
     return imf
 end
 
-function Base.:(==)(g::A, h::A) where {A<:AbstractFPGroupElement{<:AutomorphismGroup}}
+function Base.:(==)(
+    g::A,
+    h::A,
+) where {A<:AbstractFPGroupElement{<:AutomorphismGroup}}
     @assert parent(g) === parent(h)
 
     if _isvalidhash(g) && _isvalidhash(h)
@@ -79,32 +82,46 @@ end
 
 # eye-candy
 
-Base.show(io::IO, ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}}) where {T} =
-    print(io, "Automorphism{$T, …}")
+function Base.show(
+    io::IO,
+    ::Type{<:FPGroupElement{<:AutomorphismGroup{T}}},
+) where {T}
+    return print(io, "Automorphism{$T, …}")
+end
 
-Base.show(io::IO, A::AutomorphismGroup) = print(io, "automorphism group of ", object(A))
+function Base.show(io::IO, A::AutomorphismGroup)
+    return print(io, "automorphism group of ", object(A))
+end
 
-function Base.show(io::IO, ::MIME"text/plain", a::AbstractFPGroupElement{<:AutomorphismGroup})
+function Base.show(
+    io::IO,
+    ::MIME"text/plain",
+    a::AbstractFPGroupElement{<:AutomorphismGroup},
+)
     println(io, " ┌ $(a):")
     d = domain(a)
     im = evaluate(a)
     for (x, imx) in zip(d, im[1:end-1])
         println(io, " │   $x ↦ $imx")
     end
-    println(io, " └   $(last(d)) ↦ $(last(im))")
+    return println(io, " └   $(last(d)) ↦ $(last(im))")
 end
 
 ## Automorphism Evaluation
 
-domain(f::AbstractFPGroupElement{<:AutomorphismGroup}) = deepcopy(parent(f).domain)
+function domain(f::AbstractFPGroupElement{<:AutomorphismGroup})
+    return deepcopy(parent(f).domain)
+end
 # tuple(gens(object(parent(f)))...)
 
-evaluate(f::AbstractFPGroupElement{<:AutomorphismGroup}) = evaluate!(domain(f), f)
+function evaluate(f::AbstractFPGroupElement{<:AutomorphismGroup})
+    return evaluate!(domain(f), f)
+end
 
 function evaluate!(
     t::NTuple{N,T},
     f::AbstractFPGroupElement{<:AutomorphismGroup{<:Group}},
-    tmp=one(first(t)),
+    tmp = one(first(t)),
 ) where {N,T<:FPGroupElement}
     A = alphabet(f)
     for idx in word(f)
@@ -113,7 +130,11 @@ function evaluate!(
     return t
 end
 
-evaluate!(t::NTuple{N,T}, s::GSymbol, tmp=nothing) where {N,T} = throw("you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`")
+function evaluate!(t::NTuple{N,T}, s::GSymbol, tmp = nothing) where {N,T}
+    throw(
+        "you need to implement `evaluate!(::$(typeof(t)), ::$(typeof(s)), ::Alphabet, tmp=one(first(t)))`",
+    )
+end
 
 # forward evaluate by substitution
 
@@ -135,12 +156,12 @@ function LettersMap(a::FPGroupElement{<:AutomorphismGroup})
     # (trusting it's a set of generators that define a)
     @assert length(dom) == length(img)
 
-    indices_map = Dict(A[A[fl]] => word(im) for (fl, im) in zip(first_letters, img))
+    indices_map =
+        Dict(A[A[fl]] => word(im) for (fl, im) in zip(first_letters, img))
     # inverses of generators are dealt lazily in getindex
 
     return LettersMap(indices_map, A)
 end
-
 
 function Base.getindex(lm::LettersMap, i::Integer)
     # here i is an index of an alphabet
