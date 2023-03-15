@@ -3,7 +3,12 @@ struct ElementarySymplectic{N,T} <: Groups.GSymbol
     i::Int
     j::Int
     val::T
-    function ElementarySymplectic{N}(s::Symbol, i::Integer, j::Integer, val=1) where {N}
+    function ElementarySymplectic{N}(
+        s::Symbol,
+        i::Integer,
+        j::Integer,
+        val = 1,
+    ) where {N}
         @assert s ∈ (:A, :B)
         @assert iseven(N)
         n = N ÷ 2
@@ -19,7 +24,7 @@ end
 function Base.show(io::IO, s::ElementarySymplectic)
     i, j = Groups.subscriptify(s.i), Groups.subscriptify(s.j)
     print(io, s.symbol, i, j)
-    !isone(s.val) && print(io, "^$(s.val)")
+    return !isone(s.val) && print(io, "^$(s.val)")
 end
 
 _ind(s::ElementarySymplectic{N}) where {N} = (s.i, s.j)
@@ -41,23 +46,29 @@ function _dual_ind(N_half, i, j)
     return i, j
 end
 
-function Base.:(==)(s::ElementarySymplectic{N}, t::ElementarySymplectic{M}) where {N,M}
+function Base.:(==)(
+    s::ElementarySymplectic{N},
+    t::ElementarySymplectic{M},
+) where {N,M}
     N == M || return false
     s.symbol == t.symbol || return false
     s.val == t.val || return false
     return _ind(t) == _ind(s) || _ind(t) == _dual_ind(s)
 end
 
-Base.hash(s::ElementarySymplectic, h::UInt) =
-    hash(Set([_ind(s); _dual_ind(s)]), hash(s.symbol, hash(s.val, h)))
+function Base.hash(s::ElementarySymplectic, h::UInt)
+    return hash(Set([_ind(s); _dual_ind(s)]), hash(s.symbol, hash(s.val, h)))
+end
 
-LinearAlgebra.transpose(s::ElementarySymplectic{N}) where {N} =
-    ElementarySymplectic{N}(s.symbol, s.j, s.i, s.val)
+function LinearAlgebra.transpose(s::ElementarySymplectic{N}) where {N}
+    return ElementarySymplectic{N}(s.symbol, s.j, s.i, s.val)
+end
 
-Base.inv(s::ElementarySymplectic{N}) where {N} =
-    ElementarySymplectic{N}(s.symbol, s.i, s.j, -s.val)
+function Base.inv(s::ElementarySymplectic{N}) where {N}
+    return ElementarySymplectic{N}(s.symbol, s.i, s.j, -s.val)
+end
 
-function matrix_repr(s::ElementarySymplectic{N,T}) where {N,T}
+function matrix(s::ElementarySymplectic{N,T}) where {N,T}
     @assert iseven(N)
     n = div(N, 2)
     m = StaticArrays.MMatrix{N,N,T}(LinearAlgebra.I)

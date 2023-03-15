@@ -7,7 +7,7 @@ using Groups.MatrixGroups
         S = gens(SL3Z)
         union!(S, inv.(S))
 
-        _, sizes = Groups.wlmetric_ball(S, radius=4)
+        _, sizes = Groups.wlmetric_ball(S; radius = 4)
 
         @test sizes == [13, 121, 883, 5455]
 
@@ -20,9 +20,9 @@ using Groups.MatrixGroups
 
         S = [w, r, s]
         S = unique([S; inv.(S)])
-        _, sizes = Groups.wlmetric_ball(S, radius=4)
+        _, sizes = Groups.wlmetric_ball(S; radius = 4)
         @test sizes == [7, 33, 141, 561]
-        _, sizes = Groups.wlmetric_ball_serial(S, radius=4)
+        _, sizes = Groups.wlmetric_ball_serial(S; radius = 4)
         @test sizes == [7, 33, 141, 561]
 
         Logging.with_logger(Logging.NullLogger()) do
@@ -35,15 +35,18 @@ using Groups.MatrixGroups
             end
         end
 
-
         x = w * inv(w) * r
 
         @test length(word(x)) == 5
         @test size(x) == (3, 3)
         @test eltype(x) == Int8
 
-        @test contains(sprint(print, SL3Z), "special linear group of 3×3")
-        @test contains(sprint(show, MIME"text/plain"(), x), "SL{3,Int8} matrix:")
+        @test contains(sprint(show, SL3Z), "SL{3,Int8}")
+        @test contains(
+            sprint(show, MIME"text/plain"(), SL3Z),
+            "special linear group",
+        )
+        @test contains(sprint(show, MIME"text/plain"(), x), "∈ SL{3,Int8}")
         @test sprint(print, x) isa String
 
         @test length(word(x)) == 3
@@ -62,8 +65,6 @@ using Groups.MatrixGroups
             end
         end
 
-        @test contains(sprint(print, Sp6), "group of 6×6 symplectic matrices")
-
         x = gens(Sp6, 1)
         x *= inv(x) * gens(Sp6, 2)
 
@@ -71,13 +72,50 @@ using Groups.MatrixGroups
         @test size(x) == (6, 6)
         @test eltype(x) == Int8
 
-        @test contains(sprint(show, MIME"text/plain"(), x), "6×6 symplectic matrix:")
+        @test contains(sprint(show, Sp6), "Sp{6,Int8}")
+        @test contains(
+            sprint(show, MIME"text/plain"(), Sp6),
+            "group of 6×6 symplectic matrices",
+        )
+        @test contains(sprint(show, MIME"text/plain"(), x), "∈ Sp{6,Int8}")
         @test sprint(print, x) isa String
 
         @test length(word(x)) == 1
 
         for g in gens(Sp6)
-            @test MatrixGroups.issymplectic(MatrixGroups.matrix_repr(g))
+            @test MatrixGroups.issymplectic(MatrixGroups.matrix(g))
         end
+    end
+
+    @testset "General matrix group" begin
+        Sp6 = MatrixGroups.SymplecticGroup{6}(Int8)
+        G = Groups.MatrixGroup{6}(Matrix{Int16}.(gens(Sp6)))
+
+        Logging.with_logger(Logging.NullLogger()) do
+            @testset "GroupsCore conformance" begin
+                test_Group_interface(G)
+                g = G(rand(1:length(alphabet(G)), 10))
+                h = G(rand(1:length(alphabet(G)), 10))
+
+                test_GroupElement_interface(g, h)
+            end
+        end
+
+        x = gens(G, 1)
+        x *= inv(x) * gens(G, 2)
+
+        @test length(word(x)) == 3
+        @test size(x) == (6, 6)
+        @test eltype(x) == Int16
+
+        @test contains(sprint(show, G), "H ⩽ GL{6,Int16}")
+        @test contains(
+            sprint(show, MIME"text/plain"(), G),
+            "subgroup of 6×6 invertible matrices",
+        )
+        @test contains(sprint(show, MIME"text/plain"(), x), "∈ H ⩽ GL{6,Int16}")
+        @test sprint(print, x) isa String
+
+        @test length(word(x)) == 1
     end
 end

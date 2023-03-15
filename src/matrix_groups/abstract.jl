@@ -1,40 +1,89 @@
-abstract type MatrixGroup{N,T} <: Groups.AbstractFPGroup end
-const MatrixGroupElement{N,T} = Groups.AbstractFPGroupElement{<:MatrixGroup{N,T}}
+abstract type AbstractMatrixGroup{N,T} <: Groups.AbstractFPGroup end
+const MatrixGroupElement{N,T} =
+    Groups.AbstractFPGroupElement{<:AbstractMatrixGroup{N,T}}
 
-Base.isone(g::MatrixGroupElement{N,T}) where {N,T} =
-    isone(word(g)) || matrix_repr(g) == LinearAlgebra.I
-
-function Base.:(==)(m1::M1, m2::M2) where {M1<:MatrixGroupElement,M2<:MatrixGroupElement}
-    parent(m1) === parent(m2) || return false
-    word(m1) == word(m2) && return true
-    return matrix_repr(m1) == matrix_repr(m2)
+function Base.isone(g::MatrixGroupElement{N,T}) where {N,T}
+    return isone(word(g)) || isone(matrix(g))
 end
 
-Base.size(m::MatrixGroupElement{N}) where {N} = (N, N)
-Base.eltype(m::MatrixGroupElement{N,T}) where {N,T} = T
+function Base.:(==)(
+    m1::M1,
+    m2::M2,
+) where {M1<:MatrixGroupElement,M2<:MatrixGroupElement}
+    parent(m1) === parent(m2) || return false
+    word(m1) == word(m2) && return true
+    return matrix(m1) == matrix(m2)
+end
+
+Base.size(::MatrixGroupElement{N}) where {N} = (N, N)
+Base.size(::MatrixGroupElement{N}, d) where {N} = ifelse(d::Integer <= 2, N, 1)
+Base.eltype(::MatrixGroupElement{N,T}) where {N,T} = T
 
 # three structural assumptions about matrix groups
-Groups.word(sl::MatrixGroupElement) = sl.word
-Base.parent(sl::MatrixGroupElement) = sl.parent
-Groups.alphabet(M::MatrixGroup) = M.alphabet
-Groups.rewriting(M::MatrixGroup) = alphabet(M)
+Groups.word(m::MatrixGroupElement) = m.word
+Base.parent(m::MatrixGroupElement) = m.parent
+Groups.alphabet(M::AbstractMatrixGroup) = M.alphabet
+Groups.rewriting(M::AbstractMatrixGroup) = alphabet(M)
 
-Base.hash(sl::MatrixGroupElement, h::UInt) =
-    hash(matrix_repr(sl), hash(parent(sl), h))
+Base.hash(m::MatrixGroupElement, h::UInt) = hash(matrix(m), hash(parent(m), h))
 
-function matrix_repr(m::MatrixGroupElement{N,T}) where {N,T}
+function matrix(m::MatrixGroupElement{N,T}) where {N,T}
     if isone(word(m))
         return StaticArrays.SMatrix{N,N,T}(LinearAlgebra.I)
     end
     A = alphabet(parent(m))
-    return prod(matrix_repr(A[l]) for l in word(m))
+    return prod(matrix(A[l]) for l in word(m))
 end
+
+function Base.convert(
+    ::Type{M},
+    m::MatrixGroupElement,
+) where {M<:AbstractMatrix}
+    return convert(M, matrix(m))
+end
+(M::Type{<:AbstractMatrix})(m::MatrixGroupElement) = convert(M, m)
 
 function Base.rand(
     rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:MatrixGroup},
+    rs::Random.SamplerTrivial{<:AbstractMatrixGroup},
 )
     Mgroup = rs[]
     S = gens(Mgroup)
-    return prod(g -> rand(Bool) ? g : inv(g), rand(S, rand(1:30)))
+    return prod(
+        g -> rand(rng, Bool) ? g : inv(g),
+        rand(rng, S, rand(rng, 1:30)),
+    )
+end
+
+function Base.show(io::IO, M::AbstractMatrixGroup)
+    g = gens(M, 1)
+    N = size(g, 1)
+    return print(io, "H ⩽ GL{$N,$(eltype(g))}")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", M::AbstractMatrixGroup)
+    N = size(gens(M, 1), 1)
+    ng = GroupsCore.ngens(M)
+    return print(
+        io,
+        "subgroup of $N×$N invertible matrices with $(ng) generators",
+    )
+end
+
+function Base.show(
+    io::IO,
+    mat::Groups.AbstractFPGroupElement{<:AbstractMatrixGroup},
+)
+    return KnuthBendix.print_repr(io, word(mat), alphabet(mat))
+end
+
+function Base.show(
+    io::IO,
+    ::MIME"text/plain",
+    mat::Groups.AbstractFPGroupElement{<:AbstractMatrixGroup{N}},
+) where {N}
+    Groups.normalform!(mat)
+    KnuthBendix.print_repr(io, word(mat), alphabet(mat))
+    println(io, " ∈ ", parent(mat))
+    return Base.print_array(io, matrix(mat))
 end

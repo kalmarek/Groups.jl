@@ -47,7 +47,15 @@ function Te_diagonal(λ::Groups.ΡΛ, ϱ::Groups.ΡΛ, i::Integer)
     return g
 end
 
-function Te_lantern(A::Alphabet, b₀::T, a₁::T, a₂::T, a₃::T, a₄::T, a₅::T) where {T}
+function Te_lantern(
+    A::Alphabet,
+    b₀::T,
+    a₁::T,
+    a₂::T,
+    a₃::T,
+    a₄::T,
+    a₅::T,
+) where {T}
     a₀ = (a₁ * a₂ * a₃)^4 * inv(b₀, A)
     X = a₄ * a₅ * a₃ * a₄ # from Primer
     b₁ = inv(X, A) * a₀ * X # from Primer
@@ -85,7 +93,8 @@ function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
     if mod(j - (i + 1), genus) == 0
         return Te_diagonal(λ, ϱ, i)
     else
-        return inv(Te_lantern(
+        return inv(
+            Te_lantern(
                 A,
                 # Our notation:               # Primer notation:
                 inv(Ta(λ, i + 1), A),         # b₀
@@ -94,7 +103,9 @@ function Te(λ::ΡΛ, ϱ::ΡΛ, i, j)
                 inv(Te_diagonal(λ, ϱ, i), A), # a₃
                 inv(Tα(λ, i + 1), A),         # a₄
                 inv(Te(λ, ϱ, i + 1, j), A),   # a₅
-            ), A)
+            ),
+            A,
+        )
     end
 end
 
@@ -105,7 +116,6 @@ Return the element of `G` which corresponds to shifting generators of the free g
 In the corresponding mapping class group this element acts by rotation of the surface anti-clockwise.
 """
 function rotation_element(G::AutomorphismGroup{<:FreeGroup})
-
     A = alphabet(G)
     @assert iseven(ngens(object(G)))
     genus = ngens(object(G)) ÷ 2
@@ -140,7 +150,10 @@ function rotation_element(λ::ΡΛ, ϱ::ΡΛ)
             Ta(λ, i) *
             inv(Te_diagonal(λ, ϱ, i), A)
 
-        Ta(λ, i) * inv(Ta(λ, j) * Tα(λ, j), A)^6 * (Ta(λ, j) * Tα(λ, j) * z)^4 * c
+        return Ta(λ, i) *
+               inv(Ta(λ, j) * Tα(λ, j), A)^6 *
+               (Ta(λ, j) * Tα(λ, j) * z)^4 *
+               c
     end
 
     τ = (Ta(λ, 1) * Tα(λ, 1))^6 * prod(halftwists)
@@ -148,7 +161,6 @@ function rotation_element(λ::ΡΛ, ϱ::ΡΛ)
 end
 
 function mcg_twists(G::AutomorphismGroup{<:FreeGroup})
-
     @assert iseven(ngens(object(G)))
     genus = ngens(object(G)) ÷ 2
 
@@ -178,7 +190,9 @@ struct SymplecticMappingClass{T,F} <: GSymbol
     f::F
 end
 
-Base.:(==)(a::SymplecticMappingClass, b::SymplecticMappingClass) = a.autFn_word == b.autFn_word
+function Base.:(==)(a::SymplecticMappingClass, b::SymplecticMappingClass)
+    return a.autFn_word == b.autFn_word
+end
 
 Base.hash(a::SymplecticMappingClass, h::UInt) = hash(a.autFn_word, h)
 
@@ -187,8 +201,8 @@ function SymplecticMappingClass(
     id::Symbol,
     i::Integer,
     j::Integer;
-    minus=false,
-    inverse=false
+    minus = false,
+    inverse = false,
 )
     @assert i > 0 && j > 0
     id === :A && @assert i ≠ j
@@ -246,7 +260,7 @@ function Base.show(io::IO, smc::SymplecticMappingClass)
     else
         print(io, smc.id, subscriptify(smc.i), ".", subscriptify(smc.j))
     end
-    smc.inv && print(io, "^-1")
+    return smc.inv && print(io, "^-1")
 end
 
 function Base.inv(m::SymplecticMappingClass)
@@ -259,7 +273,7 @@ end
 function evaluate!(
     t::NTuple{N,T},
     smc::SymplecticMappingClass,
-    tmp=nothing,
+    tmp = nothing,
 ) where {N,T}
     t = smc.f(t)
     for i in 1:N

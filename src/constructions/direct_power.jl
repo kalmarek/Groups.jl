@@ -12,25 +12,29 @@ struct DirectPowerElement{GEl,N,Gr<:GroupsCore.Group} <: GroupsCore.GroupElement
     parent::DirectPower{Gr,N,GEl}
 end
 
-DirectPowerElement(
+function DirectPowerElement(
     elts::AbstractVector{<:GroupsCore.GroupElement},
     G::DirectPower,
-) = DirectPowerElement(ntuple(i -> elts[i], _nfold(G)), G)
+)
+    return DirectPowerElement(ntuple(i -> elts[i], _nfold(G)), G)
+end
 
 _nfold(::DirectPower{Gr,N}) where {Gr,N} = N
 
-Base.one(G::DirectPower) =
-    DirectPowerElement(ntuple(_ -> one(G.group), _nfold(G)), G)
+function Base.one(G::DirectPower)
+    return DirectPowerElement(ntuple(_ -> one(G.group), _nfold(G)), G)
+end
 
-Base.eltype(::Type{<:DirectPower{Gr,N,GEl}}) where {Gr,N,GEl} =
-    DirectPowerElement{GEl,N,Gr}
+function Base.eltype(::Type{<:DirectPower{Gr,N,GEl}}) where {Gr,N,GEl}
+    return DirectPowerElement{GEl,N,Gr}
+end
 
 function Base.iterate(G::DirectPower)
     itr = Iterators.ProductIterator(ntuple(i -> G.group, _nfold(G)))
     res = iterate(itr)
     @assert res !== nothing
     elt = DirectPowerElement(first(res), G)
-    return elt, (iterator=itr, state=last(res))
+    return elt, (iterator = itr, state = last(res))
 end
 
 function Base.iterate(G::DirectPower, state)
@@ -38,7 +42,7 @@ function Base.iterate(G::DirectPower, state)
     res = iterate(itr, st)
     res === nothing && return nothing
     elt = DirectPowerElement(first(res), G)
-    return elt, (iterator=itr, state=last(res))
+    return elt, (iterator = itr, state = last(res))
 end
 
 function Base.IteratorSize(::Type{<:DirectPower{Gr,N}}) where {Gr,N}
@@ -49,8 +53,9 @@ end
 
 Base.size(G::DirectPower) = ntuple(_ -> length(G.group), _nfold(G))
 
-GroupsCore.order(::Type{I}, G::DirectPower) where {I<:Integer} =
-    convert(I, order(I, G.group)^_nfold(G))
+function GroupsCore.order(::Type{I}, G::DirectPower) where {I<:Integer}
+    return convert(I, order(I, G.group)^_nfold(G))
+end
 
 GroupsCore.ngens(G::DirectPower) = _nfold(G) * ngens(G.group)
 
@@ -83,13 +88,18 @@ end
 
 GroupsCore.parent(g::DirectPowerElement) = g.parent
 
-Base.:(==)(g::DirectPowerElement, h::DirectPowerElement) =
-    (parent(g) === parent(h) && g.elts == h.elts)
+function Base.:(==)(g::DirectPowerElement, h::DirectPowerElement)
+    return (parent(g) === parent(h) && g.elts == h.elts)
+end
 
 Base.hash(g::DirectPowerElement, h::UInt) = hash(g.elts, hash(parent(g), h))
 
-Base.deepcopy_internal(g::DirectPowerElement, stackdict::IdDict) =
-    DirectPowerElement(Base.deepcopy_internal(g.elts, stackdict), parent(g))
+function Base.deepcopy_internal(g::DirectPowerElement, stackdict::IdDict)
+    return DirectPowerElement(
+        Base.deepcopy_internal(g.elts, stackdict),
+        parent(g),
+    )
+end
 
 Base.inv(g::DirectPowerElement) = DirectPowerElement(inv.(g.elts), parent(g))
 
@@ -98,15 +108,25 @@ function Base.:(*)(g::DirectPowerElement, h::DirectPowerElement)
     return DirectPowerElement(g.elts .* h.elts, parent(g))
 end
 
-GroupsCore.order(::Type{I}, g::DirectPowerElement) where {I<:Integer} =
-    convert(I, reduce(lcm, (order(I, h) for h in g.elts), init=one(I)))
+function GroupsCore.order(::Type{I}, g::DirectPowerElement) where {I<:Integer}
+    return convert(I, reduce(lcm, (order(I, h) for h in g.elts); init = one(I)))
+end
 
 Base.isone(g::DirectPowerElement) = all(isone, g.elts)
 
 function Base.show(io::IO, G::DirectPower)
     n = _nfold(G)
     nn = n == 1 ? "1-st" : n == 2 ? "2-nd" : n == 3 ? "3-rd" : "$n-th"
-    print(io, "Direct $(nn) power of $(G.group)")
+    return print(io, "Direct $(nn) power of $(G.group)")
 end
-Base.show(io::IO, g::DirectPowerElement) =
-    print(io, "( ", join(g.elts, ", "), " )")
+function Base.show(io::IO, g::DirectPowerElement)
+    return print(io, "( ", join(g.elts, ", "), " )")
+end
+
+# convienience:
+Base.@propagate_inbounds function Base.getindex(
+    g::DirectPowerElement,
+    i::Integer,
+)
+    return g.elts[i]
+end

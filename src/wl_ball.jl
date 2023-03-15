@@ -8,22 +8,40 @@ radius and multiplication operation to be used.
 """
 function wlmetric_ball(
     S::AbstractVector{T},
-    center::T=one(first(S));
-    radius=2,
-    op=*,
-    threading=true
+    center::T = one(first(S));
+    radius = 2,
+    op = *,
+    threading = true,
 ) where {T}
-    threading && return wlmetric_ball_thr(S, center, radius=radius, op=op)
-    return wlmetric_ball_serial(S, center, radius=radius, op=op)
+    threading && return wlmetric_ball_thr(S, center; radius = radius, op = op)
+    return wlmetric_ball_serial(S, center; radius = radius, op = op)
 end
 
-function wlmetric_ball_serial(S::AbstractVector{T}, center::T=one(first(S)); radius=2, op=*) where {T}
+function wlmetric_ball_serial(
+    S::AbstractVector{T},
+    center::T = one(first(S));
+    radius = 2,
+    op = *,
+) where {T}
     @assert radius >= 1
-    old = union!([center], [center * s for s in S])
-    return _wlmetric_ball(S, old, radius, op, collect, unique!)
+    old = union!(OrderedSet([center]), [center * s for s in S])
+    sizes = [1, length(old)]
+    for _ in 2:radius
+        new = collect(
+            op(o, s) for o in @view(old.dict.keys[sizes[end-1]:end]) for s in S
+        )
+        union!(old, new)
+        push!(sizes, length(old))
+    end
+    return old.dict.keys, sizes[2:end]
 end
 
-function wlmetric_ball_thr(S::AbstractVector{T}, center::T=one(first(S)); radius=2, op=*) where {T}
+function wlmetric_ball_thr(
+    S::AbstractVector{T},
+    center::T = one(first(S));
+    radius = 2,
+    op = *,
+) where {T}
     @assert radius >= 1
     old = union!([center], [center * s for s in S])
     return _wlmetric_ball(S, old, radius, op, Folds.collect, Folds.unique)
@@ -31,11 +49,13 @@ end
 
 function _wlmetric_ball(S, old, radius, op, collect, unique)
     sizes = [1, length(old)]
-    for r in 2:radius
-        old = let old = old, S = S,
+    for _ in 2:radius
+        old = let old = old, S = S
             new = collect(
-                (g = op(o, s); hash(g); g)
-                for o in @view(old[sizes[end-1]:end]) for s in S
+                (g = op(o, s);
+                normalform!(g);
+                hash(g);
+                g) for o in @view(old[sizes[end-1]:end]) for s in S
             )
 
             append!(old, new)
@@ -45,4 +65,3 @@ function _wlmetric_ball(S, old, radius, op, collect, unique)
     end
     return old, sizes[2:end]
 end
-

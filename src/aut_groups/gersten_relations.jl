@@ -1,4 +1,4 @@
-function gersten_alphabet(n::Integer; commutative::Bool=true)
+function gersten_alphabet(n::Integer; commutative::Bool = true)
     indexing = [(i, j) for i in 1:n for j in 1:n if i ≠ j]
     S = [ϱ(i, j) for (i, j) in indexing]
 
@@ -40,12 +40,17 @@ function _hexagonal_rule(
     return W(T[A[x], A[inv(y)], A[z]]) => W(T[A[z], A[w^-1], A[x]])
 end
 
-gersten_relations(n::Integer; commutative) =
-    gersten_relations(Word{UInt8}, n, commutative=commutative)
+function gersten_relations(n::Integer; commutative)
+    return gersten_relations(Word{UInt8}, n; commutative = commutative)
+end
 
-function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:AbstractWord}
+function gersten_relations(
+    ::Type{W},
+    n::Integer;
+    commutative,
+) where {W<:AbstractWord}
     @assert n > 1 "Gersten relations are defined only for n>1, got n=$n"
-    A = gersten_alphabet(n, commutative=commutative)
+    A = gersten_alphabet(n; commutative = commutative)
     @assert length(A) <= typemax(eltype(W)) "Type $W can not represent words over alphabet with $(length(A)) letters."
 
     rels = Pair{W,W}[]
@@ -74,7 +79,10 @@ function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:Abstrac
 
     for (i, j, k) in Iterators.product(1:n, 1:n, 1:n)
         if (i ≠ j && k ≠ i && k ≠ j)
-            push!(rels, _pentagonal_rule(W, A, ϱ(i, j)^-1, ϱ(j, k)^-1, ϱ(i, k)^-1))
+            push!(
+                rels,
+                _pentagonal_rule(W, A, ϱ(i, j)^-1, ϱ(j, k)^-1, ϱ(i, k)^-1),
+            )
             push!(rels, _pentagonal_rule(W, A, ϱ(i, j)^-1, ϱ(j, k), ϱ(i, k)))
 
             commutative && continue
@@ -83,7 +91,10 @@ function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:Abstrac
             push!(rels, _pentagonal_rule(W, A, ϱ(i, j), λ(j, k)^-1, ϱ(i, k)))
 
             # the same as above, but with ϱ ↔ λ:
-            push!(rels, _pentagonal_rule(W, A, λ(i, j)^-1, λ(j, k)^-1, λ(i, k)^-1))
+            push!(
+                rels,
+                _pentagonal_rule(W, A, λ(i, j)^-1, λ(j, k)^-1, λ(i, k)^-1),
+            )
             push!(rels, _pentagonal_rule(W, A, λ(i, j)^-1, λ(j, k), λ(i, k)))
 
             push!(rels, _pentagonal_rule(W, A, λ(i, j), ϱ(j, k), λ(i, k)^-1))
@@ -94,7 +105,10 @@ function gersten_relations(::Type{W}, n::Integer; commutative) where {W<:Abstrac
     if !commutative
         for (i, j) in Iterators.product(1:n, 1:n)
             if i ≠ j
-                push!(rels, _hexagonal_rule(W, A, ϱ(i, j), ϱ(j, i), λ(i, j), λ(j, i)))
+                push!(
+                    rels,
+                    _hexagonal_rule(W, A, ϱ(i, j), ϱ(j, i), λ(i, j), λ(j, i)),
+                )
                 w = W([A[ϱ(i, j)], A[ϱ(j, i)^-1], A[λ(i, j)]])
                 push!(rels, w^2 => inv(w, A)^2)
             end

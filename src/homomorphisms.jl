@@ -67,11 +67,13 @@ struct Homomorphism{Gr1,Gr2,I,W}
         f,
         source::AbstractFPGroup,
         target::AbstractFPGroup;
-        check=true
+        check = true,
     )
         A = alphabet(source)
-        dct = Dict(i => convert(word_type(target), f(i, source, target))
-                   for i in 1:length(A))
+        dct = Dict(
+            i => convert(word_type(target), f(i, source, target)) for
+            i in 1:length(A)
+        )
         I = eltype(word_type(source))
         W = word_type(target)
         hom = new{typeof(source),typeof(target),I,W}(dct, source, target)
@@ -79,7 +81,6 @@ struct Homomorphism{Gr1,Gr2,I,W}
         if check
             @assert hom(one(source)) == one(target)
             for x in gens(source)
-
                 @assert hom(x^-1) == hom(x)^-1
 
                 for y in gens(source)
@@ -111,4 +112,6 @@ function (h::Homomorphism)(g::AbstractFPGroupElement)
     return h.target(w)
 end
 
-Base.show(io::IO, h::Homomorphism) = print(io, "Homomorphism\n from : $(h.source)\n to   : $(h.target)")
+function Base.show(io::IO, h::Homomorphism)
+    return print(io, "Homomorphism\n from : $(h.source)\n to   : $(h.target)")
+end

@@ -1,4 +1,5 @@
-import PermutationGroups: AbstractPermutationGroup, AbstractPerm, degree, SymmetricGroup
+import PermutationGroups:
+    AbstractPermutationGroup, AbstractPerm, degree, SymmetricGroup
 
 """
     WreathProduct(G::Group, P::AbstractPermutationGroup) <: Group
@@ -38,21 +39,22 @@ struct WreathProductElement{
         p::AbstractPerm,
         W::WreathProduct,
     )
-        new{typeof(n),typeof(p),typeof(W)}(n, p, W)
+        return new{typeof(n),typeof(p),typeof(W)}(n, p, W)
     end
 end
 
 Base.one(W::WreathProduct) = WreathProductElement(one(W.N), one(W.P), W)
 
-Base.eltype(::Type{<:WreathProduct{DP,PGr}}) where {DP,PGr} =
-    WreathProductElement{eltype(DP),eltype(PGr),WreathProduct{DP,PGr}}
+function Base.eltype(::Type{<:WreathProduct{DP,PGr}}) where {DP,PGr}
+    return WreathProductElement{eltype(DP),eltype(PGr),WreathProduct{DP,PGr}}
+end
 
 function Base.iterate(G::WreathProduct)
     itr = Iterators.product(G.N, G.P)
     res = iterate(itr)
     @assert res !== nothing
     elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator=itr, state=last(res))
+    return elt, (iterator = itr, state = last(res))
 end
 
 function Base.iterate(G::WreathProduct, state)
@@ -60,7 +62,7 @@ function Base.iterate(G::WreathProduct, state)
     res = iterate(itr, st)
     res === nothing && return nothing
     elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator=itr, state=last(res))
+    return elt, (iterator = itr, state = last(res))
 end
 
 function Base.IteratorSize(::Type{<:WreathProduct{DP,PGr}}) where {DP,PGr}
@@ -78,8 +80,9 @@ end
 
 Base.size(G::WreathProduct) = (length(G.N), length(G.P))
 
-GroupsCore.order(::Type{I}, G::WreathProduct) where {I<:Integer} =
-    convert(I, order(I, G.N) * order(I, G.P))
+function GroupsCore.order(::Type{I}, G::WreathProduct) where {I<:Integer}
+    return convert(I, order(I, G.N) * order(I, G.P))
+end
 
 function GroupsCore.gens(G::WreathProduct)
     N_gens = [WreathProductElement(n, one(G.P), G) for n in gens(G.N)]
@@ -93,18 +96,19 @@ function Base.rand(
     rng::Random.AbstractRNG,
     rs::Random.SamplerTrivial{<:WreathProduct},
 )
-
     G = rs[]
     return WreathProductElement(rand(rng, G.N), rand(rng, G.P), G)
 end
 
 GroupsCore.parent(g::WreathProductElement) = g.parent
 
-Base.:(==)(g::WreathProductElement, h::WreathProductElement) =
-    parent(g) === parent(h) && g.n == h.n && g.p == h.p
+function Base.:(==)(g::WreathProductElement, h::WreathProductElement)
+    return parent(g) === parent(h) && g.n == h.n && g.p == h.p
+end
 
-Base.hash(g::WreathProductElement, h::UInt) =
-    hash(g.n, hash(g.p, hash(g.parent, h)))
+function Base.hash(g::WreathProductElement, h::UInt)
+    return hash(g.n, hash(g.p, hash(g.parent, h)))
+end
 
 function Base.deepcopy_internal(g::WreathProductElement, stackdict::IdDict)
     return WreathProductElement(
@@ -114,8 +118,9 @@ function Base.deepcopy_internal(g::WreathProductElement, stackdict::IdDict)
     )
 end
 
-_act(p::AbstractPerm, n::DirectPowerElement) =
-    DirectPowerElement(n.elts^p, parent(n))
+function _act(p::AbstractPerm, n::DirectPowerElement)
+    return DirectPowerElement(n.elts^p, parent(n))
+end
 
 function Base.inv(g::WreathProductElement)
     pinv = inv(g.p)
@@ -129,8 +134,9 @@ end
 
 Base.isone(g::WreathProductElement) = isone(g.n) && isone(g.p)
 
-Base.show(io::IO, G::WreathProduct) =
-    print(io, "Wreath product of $(G.N.group) by $(G.P)")
+function Base.show(io::IO, G::WreathProduct)
+    return print(io, "Wreath product of $(G.N.group) by $(G.P)")
+end
 Base.show(io::IO, g::WreathProductElement) = print(io, "( $(g.n)≀$(g.p) )")
 
 Base.copy(g::WreathProductElement) = WreathProductElement(g.n, g.p, parent(g))

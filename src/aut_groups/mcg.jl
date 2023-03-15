@@ -17,7 +17,7 @@ function Base.show(io::IO, S::SurfaceGroup)
     end
 end
 
-function SurfaceGroup(genus::Integer, boundaries::Integer, W=Word{Int16})
+function SurfaceGroup(genus::Integer, boundaries::Integer, W = Word{Int16})
     @assert genus > 1
 
     # The (confluent) rewriting systems comes from
@@ -31,7 +31,15 @@ function SurfaceGroup(genus::Integer, boundaries::Integer, W=Word{Int16})
     ltrs = String[]
     for i in 1:genus
         subscript = join('₀' + d for d in reverse(digits(i)))
-        append!(ltrs, ["A" * subscript, "a" * subscript, "B" * subscript, "b" * subscript])
+        append!(
+            ltrs,
+            [
+                "A" * subscript,
+                "a" * subscript,
+                "B" * subscript,
+                "b" * subscript,
+            ],
+        )
     end
     Al = Alphabet(reverse!(ltrs))
 
@@ -51,9 +59,13 @@ function SurfaceGroup(genus::Integer, boundaries::Integer, W=Word{Int16})
         comms = W(word)
         word_rels = [comms => one(comms)]
 
-        rws = let R = KnuthBendix.RewritingSystem(word_rels, KnuthBendix.Recursive(Al))
-            KnuthBendix.IndexAutomaton(KnuthBendix.knuthbendix(R))
-        end
+        rws =
+            let R = KnuthBendix.RewritingSystem(
+                    word_rels,
+                    KnuthBendix.Recursive(Al),
+                )
+                KnuthBendix.IndexAutomaton(KnuthBendix.knuthbendix(R))
+            end
     elseif boundaries == 1
         word_rels = Pair{W,W}[]
         rws = let R = RewritingSystem(word_rels, KnuthBendix.LenLex(Al))
@@ -66,7 +78,13 @@ function SurfaceGroup(genus::Integer, boundaries::Integer, W=Word{Int16})
     F = FreeGroup(Al)
     rels = [F(lhs) => F(rhs) for (lhs, rhs) in word_rels]
 
-    return SurfaceGroup(genus, boundaries, [Al[i] for i in 2:2:length(Al)], rels, rws)
+    return SurfaceGroup(
+        genus,
+        boundaries,
+        [Al[i] for i in 2:2:length(Al)],
+        rels,
+        rws,
+    )
 end
 
 rewriting(S::SurfaceGroup) = S.rw
@@ -75,17 +93,26 @@ relations(S::SurfaceGroup) = S.relations
 function symplectic_twists(π₁Σ::SurfaceGroup)
     g = genus(π₁Σ)
 
-    saut = SpecialAutomorphismGroup(FreeGroup(2g), max_rules=1000)
+    saut = SpecialAutomorphismGroup(FreeGroup(2g); max_rules = 1000)
 
-    Aij = [SymplecticMappingClass(saut, :A, i, j) for i in 1:g for j in 1:g if i ≠ j]
+    Aij = [
+        SymplecticMappingClass(saut, :A, i, j) for i in 1:g for
+        j in 1:g if i ≠ j
+    ]
 
-    Bij = [SymplecticMappingClass(saut, :B, i, j) for i in 1:g for j in 1:g if i ≠ j]
+    Bij = [
+        SymplecticMappingClass(saut, :B, i, j) for i in 1:g for
+        j in 1:g if i ≠ j
+    ]
 
-    mBij = [SymplecticMappingClass(saut, :B, i, j, minus=true) for i in 1:g for j in 1:g if i ≠ j]
+    mBij = [
+        SymplecticMappingClass(saut, :B, i, j; minus = true) for i in 1:g
+        for j in 1:g if i ≠ j
+    ]
 
     Bii = [SymplecticMappingClass(saut, :B, i, i) for i in 1:g]
 
-    mBii = [SymplecticMappingClass(saut, :B, i, i, minus=true) for i in 1:g]
+    mBii = [SymplecticMappingClass(saut, :B, i, i; minus = true) for i in 1:g]
 
     return [Aij; Bij; mBij; Bii; mBii]
 end

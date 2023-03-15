@@ -14,7 +14,14 @@ import KnuthBendix: alphabet, ordering
 
 export MatrixGroups
 
-export Alphabet, AutomorphismGroup, FreeGroup, FreeGroup, FPGroup, FPGroupElement, SpecialAutomorphismGroup, Homomorphism
+export Alphabet,
+    AutomorphismGroup,
+    FreeGroup,
+    FreeGroup,
+    FPGroup,
+    FPGroupElement,
+    SpecialAutomorphismGroup,
+    Homomorphism
 
 export alphabet, evaluate, word, gens
 
