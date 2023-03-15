@@ -20,7 +20,7 @@ Base.hash(e::ElementaryMatrix, h::UInt) =
 Base.inv(e::ElementaryMatrix{N}) where {N} =
     ElementaryMatrix{N}(e.i, e.j, -e.val)
 
-function matrix_repr(e::ElementaryMatrix{N,T}) where {N,T}
+function matrix(e::ElementaryMatrix{N,T}) where {N,T}
     m = StaticArrays.MMatrix{N,N,T}(LinearAlgebra.I)
     m[e.i, e.j] = e.val
     x = StaticArrays.SMatrix{N,N}(m)

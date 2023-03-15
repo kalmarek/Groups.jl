@@ -53,7 +53,7 @@ function Groups._abelianize(
     ab = Groups.Homomorphism(Groups._abelianize, source, SlN, check=false)
 
     matrix_spn_map = let S = gens(target)
-        Dict(MatrixGroups.matrix_repr(g) => word(g) for g in union(S, inv.(S)))
+        Dict(MatrixGroups.matrix(g) => word(g) for g in union(S, inv.(S)))
     end
 
     # renumeration:
@@ -63,7 +63,7 @@ function Groups._abelianize(
     p = [reverse(2:2:N); reverse(1:2:N)]
 
     g = source([i])
-    Mg = MatrixGroups.matrix_repr(ab(g))[p, p]
+    Mg = MatrixGroups.matrix(ab(g))[p, p]
 
     return matrix_spn_map[Mg]
 end

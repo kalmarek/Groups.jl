@@ -57,7 +57,7 @@ LinearAlgebra.transpose(s::ElementarySymplectic{N}) where {N} =
 Base.inv(s::ElementarySymplectic{N}) where {N} =
     ElementarySymplectic{N}(s.symbol, s.i, s.j, -s.val)
 
-function matrix_repr(s::ElementarySymplectic{N,T}) where {N,T}
+function matrix(s::ElementarySymplectic{N,T}) where {N,T}
     @assert iseven(N)
     n = div(N, 2)
     m = StaticArrays.MMatrix{N,N,T}(LinearAlgebra.I)
