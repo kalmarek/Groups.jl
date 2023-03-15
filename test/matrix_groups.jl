@@ -86,4 +86,36 @@ using Groups.MatrixGroups
             @test MatrixGroups.issymplectic(MatrixGroups.matrix(g))
         end
     end
+
+    @testset "General matrix group" begin
+        Sp6 = MatrixGroups.SymplecticGroup{6}(Int8)
+        G = Groups.MatrixGroup{6}(Matrix{Int16}.(gens(Sp6)))
+
+        Logging.with_logger(Logging.NullLogger()) do
+            @testset "GroupsCore conformance" begin
+                test_Group_interface(G)
+                g = G(rand(1:length(alphabet(G)), 10))
+                h = G(rand(1:length(alphabet(G)), 10))
+
+                test_GroupElement_interface(g, h)
+            end
+        end
+
+        x = gens(G, 1)
+        x *= inv(x) * gens(G, 2)
+
+        @test length(word(x)) == 3
+        @test size(x) == (6, 6)
+        @test eltype(x) == Int16
+
+        @test contains(sprint(show, G), "H ⩽ GL{6,Int16}")
+        @test contains(
+            sprint(show, MIME"text/plain"(), G),
+            "subgroup of 6×6 invertible matrices",
+        )
+        @test contains(sprint(show, MIME"text/plain"(), x), "∈ H ⩽ GL{6,Int16}")
+        @test sprint(print, x) isa String
+
+        @test length(word(x)) == 1
+    end
 end
