@@ -4,7 +4,7 @@ function KnuthBendix.Alphabet(S::AbstractVector{<:GSymbol})
     return Alphabet(S, inversions)
 end
 
-struct AutomorphismGroup{G<:Group,T,RW,S} <: AbstractFPGroup
+mutable struct AutomorphismGroup{G<:Group,T,RW,S} <: AbstractFPGroup
     group::G
     gens::Vector{T}
     rw::RW

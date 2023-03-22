@@ -5,14 +5,18 @@ using Groups
 
 function wl_ball(F; radius::Integer)
     g, state = iterate(F)
-    while length(word(g)) <= radius
+    sizes = Int[]
+    while length(sizes) ≤ radius
         res = iterate(F, state)
         isnothing(res) && break
         g, state = res
+        if length(word(g)) > length(sizes)
+            push!(sizes, length(state.seen) - 1)
+        end
     end
     elts = collect(state.seen)
-    elts = resize!(elts, length(elts)-1)
-    return elts
+    resize!(elts, sizes[end] - 1)
+    return elts, sizes[2:end]
 end
 
 @testset "Benchmarks" begin
@@ -25,21 +29,16 @@ end
         let G = FN
             S = unique([gens(G); inv.(gens(G))])
 
-            sizes1 = last(Groups.wlmetric_ball(S, radius=R, threading=false))
-            sizes2 = last(Groups.wlmetric_ball(S, radius=R, threading=true))
-
-            l = length(wl_ball(G, radius=R))
+            sizes1 = last(Groups.wlmetric_ball(S; radius = R))
+            sizes2 = last(wl_ball(G; radius = R))
 
             @test sizes1 == sizes2
-            @test last(sizes1) == l
 
-            @info "Ball of radius $R in $(parent(first(S)))" sizes=sizes1
+            @info "Ball of radius $R in $(parent(first(S)))" sizes = sizes1
             @info "serial"
-            @time Groups.wlmetric_ball(S, radius=R, threading=false)
-            @info "threaded"
-            @time Groups.wlmetric_ball(S, radius=R, threading=true)
+            @time Groups.wlmetric_ball(S, radius = R)
             @info "iteration"
-            @time wl_ball(G, radius=R)
+            @time wl_ball(G, radius = R)
         end
     end
 
@@ -51,21 +50,16 @@ end
         let G = SAutFN
             S = unique([gens(G); inv.(gens(G))])
 
-            sizes1 = last(Groups.wlmetric_ball(S, radius=R, threading=false))
-            sizes2 = last(Groups.wlmetric_ball(S, radius=R, threading=true))
-
-            l = length(wl_ball(G, radius=R))
+            sizes1 = last(Groups.wlmetric_ball(S; radius = R))
+            sizes2 = last(wl_ball(G; radius = R))
 
             @test sizes1 == sizes2
-            @test last(sizes1) == l
 
-            @info "Ball of radius $R in $(parent(first(S)))" sizes=sizes1
+            @info "Ball of radius $R in $(parent(first(S)))" sizes = sizes1
             @info "serial"
-            @time Groups.wlmetric_ball(S, radius=R, threading=false)
-            @info "threaded"
-            @time Groups.wlmetric_ball(S, radius=R, threading=true)
+            @time Groups.wlmetric_ball(S, radius = R)
             @info "iteration"
-            @time wl_ball(G, radius=R)
+            @time wl_ball(G, radius = R)
         end
     end
 end

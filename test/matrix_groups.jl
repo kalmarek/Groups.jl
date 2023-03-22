@@ -22,8 +22,6 @@ using Groups.MatrixGroups
         S = unique([S; inv.(S)])
         _, sizes = Groups.wlmetric_ball(S; radius = 4)
         @test sizes == [7, 33, 141, 561]
-        _, sizes = Groups.wlmetric_ball_serial(S; radius = 4)
-        @test sizes == [7, 33, 141, 561]
 
         Logging.with_logger(Logging.NullLogger()) do
             @testset "GroupsCore conformance" begin
@@ -35,9 +33,9 @@ using Groups.MatrixGroups
             end
         end
 
-        x = w * inv(w) * r
+        x = w * inv(SL3Z(word(w)[end:end])) * r
 
-        @test length(word(x)) == 5
+        @test length(word(x)) == length(word(r))
         @test size(x) == (3, 3)
         @test eltype(x) == Int8
 
@@ -65,10 +63,10 @@ using Groups.MatrixGroups
             end
         end
 
-        x = gens(Sp6, 1)
-        x *= inv(x) * gens(Sp6, 2)
+        x = gens(Sp6, 1) * gens(Sp6, 2)^2
+        x *= inv(gens(Sp6, 2)^2) * gens(Sp6, 3)
 
-        @test length(word(x)) == 3
+        @test length(word(x)) == 2
         @test size(x) == (6, 6)
         @test eltype(x) == Int8
 
@@ -80,7 +78,7 @@ using Groups.MatrixGroups
         @test contains(sprint(show, MIME"text/plain"(), x), "∈ Sp{6,Int8}")
         @test sprint(print, x) isa String
 
-        @test length(word(x)) == 1
+        @test length(word(x)) == 2
 
         for g in gens(Sp6)
             @test MatrixGroups.issymplectic(MatrixGroups.matrix(g))
@@ -101,10 +99,10 @@ using Groups.MatrixGroups
             end
         end
 
-        x = gens(G, 1)
-        x *= inv(x) * gens(G, 2)
+        x = gens(G, 1) * gens(G, 2)^3
+        x *= gens(G, 2)^-3
 
-        @test length(word(x)) == 3
+        @test length(word(x)) == 1
         @test size(x) == (6, 6)
         @test eltype(x) == Int16
 

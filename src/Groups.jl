@@ -1,12 +1,9 @@
 module Groups
 
-import Folds
 import Logging
 
 using GroupsCore
-import GroupsCore.Random
-
-import OrderedCollections: OrderedSet
+import Random
 
 import KnuthBendix
 import KnuthBendix: AbstractWord, Alphabet, Word

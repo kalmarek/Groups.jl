@@ -1,6 +1,6 @@
 ## Hashing
 
-equality_data(g::AbstractFPGroupElement) = (normalform!(g); word(g))
+equality_data(g::AbstractFPGroupElement) = word(g)
 
 bitget(h::UInt, n::Int) = Bool((h & (1 << n)) >> n)
 bitclear(h::UInt, n::Int) = h & ~(1 << n)
