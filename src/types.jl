@@ -144,7 +144,18 @@ end
 
 function Base.:(*)(g::GEl, h::GEl) where {GEl<:AbstractFPGroupElement}
     @boundscheck @assert parent(g) === parent(h)
-    return GEl(word(g) * word(h), parent(g))
+    A = alphabet(parent(g))
+    k = 0
+    while k + 1 ≤ min(length(word(g)), length(word(h)))
+        if inv(word(g)[end-k], A) == word(h)[k+1]
+            k += 1
+        else
+            break
+        end
+    end
+    w = @view(word(g)[1:end-k]) * @view(word(h)[k+1:end])
+    res = GEl(w, parent(g))
+    return res
 end
 
 function GroupsCore.isfiniteorder(g::AbstractFPGroupElement)
