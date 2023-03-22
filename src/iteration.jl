@@ -1,3 +1,5 @@
+import OrderedCollections: OrderedSet
+
 mutable struct FPGroupIter{S,T,GEl}
     seen::S
     seen_iter_state::T
