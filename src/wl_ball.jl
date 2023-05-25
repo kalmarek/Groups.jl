@@ -26,8 +26,7 @@ function wlmetric_ball(
                 new = collect(
                     op(o, s) for o in @view(ball[sizes[end-1]:end]) for s in S
                 )
-                append!(ball, new)
-                unique!(ball)
+                ball = union!(ball, new)
                 push!(sizes, length(ball))
             end
         end
