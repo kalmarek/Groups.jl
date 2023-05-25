@@ -64,4 +64,24 @@
             test_GroupElement_interface(rand(H, 2)...)
         end
     end
+
+    @testset "hash/normalform #28" begin
+        function cyclic_group(n::Integer)
+            A = Alphabet([:a, :A], [2, 1])
+            F = FreeGroup(A)
+            a, = Groups.gens(F)
+            e = one(F)
+            Cₙ = FPGroup(F, [a^n => e])
+
+            return Cₙ
+        end
+
+        n = 15
+        G = cyclic_group(n)
+        ball, sizes = Groups.wlmetric_ball(gens(G); radius = n)
+        @test first(sizes) == 2
+        @test last(sizes) == n
+
+        @test Set(ball) == Set([first(gens(G))^i for i in 0:n-1])
+    end
 end

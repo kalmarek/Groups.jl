@@ -88,6 +88,9 @@ end
 
 abstract type AbstractFPGroupElement{Gr} <: GroupElement end
 
+Base.copy(g::AbstractFPGroupElement) = one(g) * g
+word(f::AbstractFPGroupElement) = f.word
+
 mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <:
                AbstractFPGroupElement{Gr}
     word::W
@@ -111,7 +114,9 @@ function Base.show(io::IO, ::Type{<:FPGroupElement{Gr}}) where {Gr}
     return print(io, FPGroupElement, "{$Gr, …}")
 end
 
-word(f::AbstractFPGroupElement) = f.word
+function Base.copy(f::FPGroupElement)
+    return FPGroupElement(copy(word(f)), parent(f), f.savedhash)
+end
 
 #convenience
 KnuthBendix.alphabet(g::AbstractFPGroupElement) = alphabet(parent(g))
@@ -134,7 +139,13 @@ function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
-    return FPGroupElement(copy(word(g)), parent(g), g.savedhash)
+    haskey(stackdict, objectid(g)) && return stackdict[objectid(g)]
+    cw = if haskey(stackdict, objectid(word(g)))
+        stackdict[objectid(word(g))]
+    else
+        copy(word(g))
+    end
+    return FPGroupElement(cw, parent(g), g.savedhash)
 end
 
 function Base.inv(g::GEl) where {GEl<:AbstractFPGroupElement}
