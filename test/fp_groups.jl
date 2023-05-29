@@ -14,7 +14,8 @@
     G = FPGroup(F, [a * b => b * a, a * c => c * a, b * c => c * b])
 
     @test G isa FPGroup
-    @test sprint(show, G) == "⟨ a  b  c | \n\t  a*b => b*a  a*c => c*a  b*c => c*b ⟩"
+    @test sprint(show, G) ==
+          "⟨ a  b  c | \n\t  a*b => b*a  a*c => c*a  b*c => c*b ⟩"
     @test rand(G) isa FPGroupElement
 
     f = a * c * b
@@ -40,7 +41,7 @@
     end
 
     # quotient of G
-    H = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
+    H = FPGroup(G, [aG^2 => cG, bG * cG => aG]; max_rules = 200)
 
     h = H(word(g))
 
@@ -48,15 +49,21 @@
     @test_throws AssertionError h == g
     @test_throws MethodError h * g
 
-    H′ = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
+    H′ = FPGroup(G, [aG^2 => cG, bG * cG => aG]; max_rules = 200)
     @test_throws AssertionError one(H) == one(H′)
 
     Groups.normalform!(h)
     @test h == H([5])
 
-    @test_logs (:warn, "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong") isfiniteorder(h)
+    @test_logs (
+        :warn,
+        "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong",
+    ) isfiniteorder(h)
 
-    @test_logs (:warn, "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong") isfinite(H)
+    @test_logs (
+        :warn,
+        "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong",
+    ) isfinite(H)
 
     Logging.with_logger(Logging.NullLogger()) do
         @testset "GroupsCore conformance: H" begin
