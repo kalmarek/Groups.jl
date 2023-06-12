@@ -14,12 +14,7 @@ end
 λ(i, j) = Transvection(:λ, i, j)
 
 function Base.show(io::IO, t::Transvection)
-    id = if t.id === :ϱ
-        'ϱ'
-    else # if t.id === :λ
-        'λ'
-    end
-    print(io, id, subscriptify(t.i), '.', subscriptify(t.j))
+    print(io, t.id, subscriptify(t.i), '.', subscriptify(t.j))
     return t.inv && print(io, "^-1")
 end
 

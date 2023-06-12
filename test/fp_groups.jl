@@ -14,7 +14,8 @@
     G = FPGroup(F, [a * b => b * a, a * c => c * a, b * c => c * b])
 
     @test G isa FPGroup
-    @test sprint(show, G) == "⟨ a  b  c | \n\t  a*b => b*a  a*c => c*a  b*c => c*b ⟩"
+    @test sprint(show, G) ==
+          "⟨ a  b  c | \n\t  a*b => b*a  a*c => c*a  b*c => c*b ⟩"
     @test rand(G) isa FPGroupElement
 
     f = a * c * b
@@ -40,7 +41,7 @@
     end
 
     # quotient of G
-    H = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
+    H = FPGroup(G, [aG^2 => cG, bG * cG => aG]; max_rules = 200)
 
     h = H(word(g))
 
@@ -48,20 +49,46 @@
     @test_throws AssertionError h == g
     @test_throws MethodError h * g
 
-    H′ = FPGroup(G, [aG^2 => cG, bG * cG => aG], max_rules=200)
+    H′ = FPGroup(G, [aG^2 => cG, bG * cG => aG]; max_rules = 200)
     @test_throws AssertionError one(H) == one(H′)
 
     Groups.normalform!(h)
     @test h == H([5])
 
-    @test_logs (:warn, "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong") isfiniteorder(h)
+    @test_logs (
+        :warn,
+        "using generic isfiniteorder(::AbstractFPGroupElement): the returned `false` might be wrong",
+    ) isfiniteorder(h)
 
-    @test_logs (:warn, "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong") isfinite(H)
+    @test_logs (
+        :warn,
+        "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong",
+    ) isfinite(H)
 
     Logging.with_logger(Logging.NullLogger()) do
         @testset "GroupsCore conformance: H" begin
             test_Group_interface(H)
             test_GroupElement_interface(rand(H, 2)...)
         end
+    end
+
+    @testset "hash/normalform #28" begin
+        function cyclic_group(n::Integer)
+            A = Alphabet([:a, :A], [2, 1])
+            F = FreeGroup(A)
+            a, = Groups.gens(F)
+            e = one(F)
+            Cₙ = FPGroup(F, [a^n => e])
+
+            return Cₙ
+        end
+
+        n = 15
+        G = cyclic_group(n)
+        ball, sizes = Groups.wlmetric_ball(gens(G); radius = n)
+        @test first(sizes) == 2
+        @test last(sizes) == n
+
+        @test Set(ball) == Set([first(gens(G))^i for i in 0:n-1])
     end
 end

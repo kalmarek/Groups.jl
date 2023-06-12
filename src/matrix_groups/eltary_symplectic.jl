@@ -23,7 +23,7 @@ end
 
 function Base.show(io::IO, s::ElementarySymplectic)
     i, j = Groups.subscriptify(s.i), Groups.subscriptify(s.j)
-    print(io, s.symbol, i, j)
+    print(io, s.symbol, i, '.', j)
     return !isone(s.val) && print(io, "^$(s.val)")
 end
 
