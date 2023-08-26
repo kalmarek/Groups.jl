@@ -1,5 +1,7 @@
 import PermutationGroups:
-    AbstractPermutationGroup, AbstractPerm, degree, SymmetricGroup
+    AbstractPermutationGroup,
+    AbstractPermutation,
+    degree
 
 """
     WreathProduct(G::Group, P::AbstractPermutationGroup) <: Group
@@ -27,7 +29,7 @@ end
 
 struct WreathProductElement{
     DPEl<:DirectPowerElement,
-    PEl<:AbstractPerm,
+    PEl<:AbstractPermutation,
     Wr<:WreathProduct,
 } <: GroupsCore.GroupElement
     n::DPEl
@@ -36,7 +38,7 @@ struct WreathProductElement{
 
     function WreathProductElement(
         n::DirectPowerElement,
-        p::AbstractPerm,
+        p::AbstractPermutation,
         W::WreathProduct,
     )
         return new{typeof(n),typeof(p),typeof(W)}(n, p, W)
@@ -53,16 +55,19 @@ function Base.iterate(G::WreathProduct)
     itr = Iterators.product(G.N, G.P)
     res = iterate(itr)
     @assert res !== nothing
-    elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator = itr, state = last(res))
+    ab, st = res
+    (a, b) = ab
+    elt = WreathProductElement(a, b, G)
+    return elt, (itr, st)
 end
 
 function Base.iterate(G::WreathProduct, state)
-    itr, st = state.iterator, state.state
+    itr, st = state
     res = iterate(itr, st)
     res === nothing && return nothing
-    elt = WreathProductElement(first(res)..., G)
-    return elt, (iterator = itr, state = last(res))
+    (a::eltype(G.N), b::eltype(G.P)), st = res
+    elt = WreathProductElement(a, b, G)
+    return elt, (itr, st)
 end
 
 function Base.IteratorSize(::Type{<:WreathProduct{DP,PGr}}) where {DP,PGr}
@@ -118,8 +123,11 @@ function Base.deepcopy_internal(g::WreathProductElement, stackdict::IdDict)
     )
 end
 
-function _act(p::AbstractPerm, n::DirectPowerElement)
-    return DirectPowerElement(n.elts^p, parent(n))
+function _act(p::AbstractPermutation, n::DirectPowerElement)
+    return DirectPowerElement(
+        ntuple(i -> n.elts[i^p], length(n.elts)),
+        parent(n),
+    )
 end
 
 function Base.inv(g::WreathProductElement)

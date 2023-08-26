@@ -1,9 +1,10 @@
 @testset "GroupConstructions" begin
 
+    symmetric_group(n) = PermGroup(perm"(1,2)", Perm([2:n; 1]))
+
     @testset "DirectProduct" begin
         GH =
-            let G = PermutationGroups.SymmetricGroup(3),
-                H = PermutationGroups.SymmetricGroup(4)
+            let G = symmetric_group(3), H = symmetric_group(4)
 
                 Groups.Constructions.DirectProduct(G, H)
             end
@@ -17,7 +18,7 @@
 
     @testset "DirectPower" begin
         GGG = Groups.Constructions.DirectPower{3}(
-            PermutationGroups.SymmetricGroup(3),
+            symmetric_group(3),
         )
         test_Group_interface(GGG)
         test_GroupElement_interface(rand(GGG, 2)...)
@@ -28,8 +29,7 @@
     end
     @testset "WreathProduct" begin
         W =
-            let G = PermutationGroups.SymmetricGroup(2),
-                P = PermutationGroups.SymmetricGroup(4)
+            let G = symmetric_group(2), P = symmetric_group(4)
 
                 Groups.Constructions.WreathProduct(G, P)
             end

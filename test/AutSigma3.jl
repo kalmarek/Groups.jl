@@ -5,7 +5,7 @@
 
     @test contains(sprint(print, π₁Σ), "surface")
 
-    Groups.PermRightAut(p::Perm) = Groups.PermRightAut(p.d)
+    Groups.PermRightAut(p::Perm) = Groups.PermRightAut([i^p for i in 1:2genus])
     # Groups.PermLeftAut(p::Perm) = Groups.PermLeftAut(p.d)
     autπ₁Σ = let autπ₁Σ = AutomorphismGroup(π₁Σ)
         pauts = let p = perm"(1,3,5)(2,4,6)"
@@ -50,8 +50,9 @@
     @test π₁Σ.(word.(z)) == Groups.domain(first(S))
     d = Groups.domain(first(S))
     p = perm"(1,3,5)(2,4,6)"
-    @test Groups.evaluate!(deepcopy(d), τ) == d^inv(p)
-    @test Groups.evaluate!(deepcopy(d), τ^2) == d^p
+    @test Groups.evaluate!(deepcopy(d), τ) ==
+          ntuple(i -> d[i^inv(p)], length(d))
+    @test Groups.evaluate!(deepcopy(d), τ^2) == ntuple(i -> d[i^p], length(d))
 
     E, sizes = Groups.wlmetric_ball(S, radius=3)
     @test sizes == [49, 1813, 62971]
