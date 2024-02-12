@@ -119,8 +119,25 @@ function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
     @boundscheck @assert parent(g) === parent(h)
     normalform!(g)
     normalform!(h)
+    # I. compare hashes of the normalform
+    # II. compare some data associated to FPGroupElement,
+    # e.g. word, image of the domain etc.
     hash(g) != hash(h) && return false
-    return equality_data(g) == equality_data(h)
+    equality_data(g) == equality_data(h) && return true # compares
+
+    # if this failed it is still possible that the words together can be
+    # rewritten even further, so we
+    # 1. rewrite word(g⁻¹·h) w.r.t. rewriting(parent(g))
+    # 2. check if the result is empty
+    G = parent(g)
+
+    g⁻¹h = append!(inv(word(g), alphabet(G)), word(h))
+    # similar + empty preserve the storage size
+    # saves some re-allocations if res does not represent id
+    res = similar(word(g))
+    resize!(res, 0)
+    res = KnuthBendix.rewrite!(res, g⁻¹h, rewriting(G))
+    return isone(res)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
