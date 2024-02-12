@@ -138,43 +138,47 @@ end
 
 # forward evaluate by substitution
 
-struct LettersMap{T,A}
-    indices_map::Dict{Int,T}
+struct LettersMap{W<:AbstractWord,A}
+    indices_map::Dict{Int,W}
     A::A
 end
 
 function LettersMap(a::FPGroupElement{<:AutomorphismGroup})
     dom = domain(a)
-    @assert all(isone ∘ length ∘ word, dom)
-    A = alphabet(first(dom))
-    first_letters = first.(word.(dom))
-    img = evaluate!(dom, a)
+    if all(isone ∘ length ∘ word, dom)
+        A = alphabet(first(dom))
+        first_letters = first.(word.(dom))
+        img = evaluate!(dom, a)
 
-    # (dom[i] → img[i] is a map from domain to images)
-    # we need a map from alphabet indices → (gens, gens⁻¹) → images
-    # here we do it for elements of the domain
-    # (trusting it's a set of generators that define a)
-    @assert length(dom) == length(img)
+        # (dom[i] → img[i] is a map from domain to images)
+        # we need a map from alphabet indices → (gens, gens⁻¹) → images
+        # here we do it for elements of the domain
+        # (trusting it's a set of generators that define a)
+        @assert length(dom) == length(img)
 
-    indices_map =
-        Dict(A[A[fl]] => word(im) for (fl, im) in zip(first_letters, img))
-    # inverses of generators are dealt lazily in getindex
+        indices_map =
+            Dict(Int(fl) => word(im) for (fl, im) in zip(first_letters, img))
+        # inverses of generators are dealt lazily in getindex
+    else
+        throw("LettersMap is not implemented for non-generators in domain")
+    end
 
     return LettersMap(indices_map, A)
 end
 
-function Base.getindex(lm::LettersMap, i::Integer)
+function Base.getindex(lm::LettersMap{W}, i::Integer) where {W}
     # here i is an index of an alphabet
     @boundscheck 1 ≤ i ≤ length(lm.A)
 
     if !haskey(lm.indices_map, i)
-        img = if haskey(lm.indices_map, inv(i, lm.A))
-            inv(lm.indices_map[inv(i, lm.A)], lm.A)
+        I = inv(i, lm.A)
+        if haskey(lm.indices_map, I)
+            img = inv(lm.indices_map[I], lm.A)
+            lm.indices_map[i] = img
         else
-            @warn "LetterMap: neither $i nor its inverse has assigned value"
-            one(valtype(lm.indices_map))
+            lm.indices_map[i] = W([i])
+            lm.indices_map[I] = W([I])
         end
-        lm.indices_map[i] = img
     end
     return lm.indices_map[i]
 end
@@ -185,9 +189,10 @@ function (a::FPGroupElement{<:AutomorphismGroup})(g::FPGroupElement)
     return parent(g)(img_w)
 end
 
-evaluate(w::AbstractWord, lm::LettersMap) = evaluate!(one(w), w, lm)
+evaluate(w::AbstractWord, lm::LettersMap) = evaluate!(similar(w), w, lm)
 
 function evaluate!(res::AbstractWord, w::AbstractWord, lm::LettersMap)
+    resize!(res, 0)
     for i in w
         append!(res, lm[i])
     end
