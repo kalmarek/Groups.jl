@@ -177,9 +177,16 @@ struct FreeGroup{T,O} <: AbstractFPGroup
     end
 end
 
-FreeGroup(gens, A::Alphabet) = FreeGroup(gens, KnuthBendix.LenLex(A))
+function FreeGroup(n::Integer)
+    symbols =
+        collect(Iterators.flatten((Symbol(:f, i), Symbol(:F, i)) for i in 1:n))
+    inverses = collect(Iterators.flatten((2i, 2i - 1) for i in 1:n))
+    return FreeGroup(Alphabet(symbols, inverses))
+end
 
-function FreeGroup(A::Alphabet)
+FreeGroup(A::Alphabet) = FreeGroup(KnuthBendix.LenLex(A))
+
+function __group_gens(A::Alphabet)
     @boundscheck @assert all(KnuthBendix.hasinverse(l, A) for l in A)
     gens = Vector{eltype(A)}()
     invs = Vector{eltype(A)}()
@@ -188,20 +195,12 @@ function FreeGroup(A::Alphabet)
         push!(gens, l)
         push!(invs, inv(l, A))
     end
-
-    return FreeGroup(gens, A)
+    return gens
 end
 
-function FreeGroup(n::Integer)
-    symbols = Symbol[]
-    inverses = Int[]
-    sizehint!(symbols, 2n)
-    sizehint!(inverses, 2n)
-    for i in 1:n
-        push!(symbols, Symbol(:f, i), Symbol(:F, i))
-        push!(inverses, 2i, 2i - 1)
-    end
-    return FreeGroup(symbols[1:2:2n], Alphabet(symbols, inverses))
+function FreeGroup(O::KnuthBendix.WordOrdering)
+    grp_gens = __group_gens(alphabet(O))
+    return FreeGroup(grp_gens, O)
 end
 
 function Base.show(io::IO, F::FreeGroup)

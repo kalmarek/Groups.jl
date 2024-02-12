@@ -38,7 +38,7 @@
         [2, 1, 4, 3, 6, 5, 8, 7, 10, 9]
     )
 
-    F4 = FreeGroup([:a, :b, :c, :d], A4)
+    F4 = FreeGroup(A4)
     a, b, c, d = gens(F4)
     D = ntuple(i -> gens(F4, i), 4)
 
