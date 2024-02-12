@@ -67,17 +67,6 @@ function GroupsCore.gens(G::AbstractFPGroup)
     return [gens(G, i) for i in 1:GroupsCore.ngens(G)]
 end
 
-# TODO: ProductReplacementAlgorithm
-function Base.rand(
-    rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:AbstractFPGroup},
-)
-    l = rand(10:100)
-    G = rs[]
-    nletters = length(alphabet(G))
-    return FPGroupElement(word_type(G)(rand(1:nletters, l)), G)
-end
-
 function Base.isfinite(::AbstractFPGroup)
     return (
         @warn "using generic isfinite(::AbstractFPGroup): the returned `false` might be wrong"; false

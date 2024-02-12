@@ -27,6 +27,7 @@ include(joinpath("constructions", "constructions.jl"))
 import .Constructions
 
 include("types.jl")
+include("rand.jl")
 include("hashing.jl")
 include("normalform.jl")
 include("autgroups.jl")
