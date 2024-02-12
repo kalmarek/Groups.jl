@@ -36,8 +36,8 @@ function Base.:(==)(
         hash(g) != hash(h) && return false
     end
 
-    length(word(g)) > 8 && normalform!(g)
-    length(word(h)) > 8 && normalform!(h)
+    normalform!(g)
+    normalform!(h)
 
     word(g) == word(h) && return true
 
