@@ -99,10 +99,6 @@ mutable struct FPGroupElement{Gr<:AbstractFPGroup,W<:AbstractWord} <:
     end
 end
 
-function Base.show(io::IO, ::Type{<:FPGroupElement{Gr}}) where {Gr}
-    return print(io, FPGroupElement, "{$Gr, …}")
-end
-
 function Base.copy(f::FPGroupElement)
     return FPGroupElement(copy(word(f)), parent(f), f.savedhash)
 end
