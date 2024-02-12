@@ -124,13 +124,11 @@ function Base.:(==)(g::AbstractFPGroupElement, h::AbstractFPGroupElement)
 end
 
 function Base.deepcopy_internal(g::FPGroupElement, stackdict::IdDict)
-    haskey(stackdict, objectid(g)) && return stackdict[objectid(g)]
-    cw = if haskey(stackdict, objectid(word(g)))
-        stackdict[objectid(word(g))]
-    else
-        copy(word(g))
-    end
-    return FPGroupElement(cw, parent(g), g.savedhash)
+    haskey(stackdict, g) && return stackdict[g]
+    cw = Base.deepcopy_internal(word(g), stackdict)
+    h = FPGroupElement(cw, parent(g), g.savedhash)
+    stackdict[g] = h
+    return h
 end
 
 function Base.inv(g::GEl) where {GEl<:AbstractFPGroupElement}
