@@ -1,7 +1,4 @@
-import PermutationGroups:
-    AbstractPermutationGroup,
-    AbstractPermutation,
-    degree
+import PermutationGroups as PG
 
 """
     WreathProduct(G::Group, P::AbstractPermutationGroup) <: Group
@@ -16,20 +13,20 @@ product is defined as
 where `m^σ` denotes the action (from the right) of the permutation `σ` on
 `d`-tuples of elements from `G`.
 """
-struct WreathProduct{DP<:DirectPower,PGr<:AbstractPermutationGroup} <:
+struct WreathProduct{DP<:DirectPower,PGr<:PG.AbstractPermutationGroup} <:
        GroupsCore.Group
     N::DP
     P::PGr
 
-    function WreathProduct(G::Group, P::AbstractPermutationGroup)
-        N = DirectPower{degree(P)}(G)
+    function WreathProduct(G::Group, P::PG.AbstractPermutationGroup)
+        N = DirectPower{PG.AP.degree(P)}(G)
         return new{typeof(N),typeof(P)}(N, P)
     end
 end
 
 struct WreathProductElement{
     DPEl<:DirectPowerElement,
-    PEl<:AbstractPermutation,
+    PEl<:PG.AP.AbstractPermutation,
     Wr<:WreathProduct,
 } <: GroupsCore.GroupElement
     n::DPEl
@@ -38,7 +35,7 @@ struct WreathProductElement{
 
     function WreathProductElement(
         n::DirectPowerElement,
-        p::AbstractPermutation,
+        p::PG.AP.AbstractPermutation,
         W::WreathProduct,
     )
         return new{typeof(n),typeof(p),typeof(W)}(n, p, W)
@@ -97,14 +94,6 @@ end
 
 Base.isfinite(G::WreathProduct) = isfinite(G.N) && isfinite(G.P)
 
-function Base.rand(
-    rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:WreathProduct},
-)
-    G = rs[]
-    return WreathProductElement(rand(rng, G.N), rand(rng, G.P), G)
-end
-
 GroupsCore.parent(g::WreathProductElement) = g.parent
 
 function Base.:(==)(g::WreathProductElement, h::WreathProductElement)
@@ -115,15 +104,7 @@ function Base.hash(g::WreathProductElement, h::UInt)
     return hash(g.n, hash(g.p, hash(g.parent, h)))
 end
 
-function Base.deepcopy_internal(g::WreathProductElement, stackdict::IdDict)
-    return WreathProductElement(
-        Base.deepcopy_internal(g.n, stackdict),
-        Base.deepcopy_internal(g.p, stackdict),
-        parent(g),
-    )
-end
-
-function _act(p::AbstractPermutation, n::DirectPowerElement)
+function _act(p::PG.AP.AbstractPermutation, n::DirectPowerElement)
     return DirectPowerElement(
         ntuple(i -> n.elts[i^p], length(n.elts)),
         parent(n),
@@ -140,11 +121,36 @@ function Base.:(*)(g::WreathProductElement, h::WreathProductElement)
     return WreathProductElement(g.n * _act(g.p, h.n), g.p * h.p, parent(g))
 end
 
+# to make sure that parents are never copied i.e.
+# g and deepcopy(g) share their parent
+Base.deepcopy_internal(G::WreathProduct, ::IdDict) = G
+
+################## Implementing Group Interface Done!
+
+# Overloading rand: the PRA of GroupsCore is known for not performing
+# well on direct sums
+function Random.Sampler(
+    RNG::Type{<:Random.AbstractRNG},
+    G::WreathProduct,
+    repetition::Random.Repetition = Val(Inf),
+)
+    return Random.SamplerTrivial(G)
+end
+
+function Base.rand(
+    rng::Random.AbstractRNG,
+    rs::Random.SamplerTrivial{<:WreathProduct},
+)
+    G = rs[]
+    return WreathProductElement(rand(rng, G.N), rand(rng, G.P), G)
+end
+
 Base.isone(g::WreathProductElement) = isone(g.n) && isone(g.p)
 
 function Base.show(io::IO, G::WreathProduct)
-    return print(io, "Wreath product of $(G.N.group) by $(G.P)")
+    return print(io, "Wreath product of ", G.N.group, " by ", G.P)
 end
-Base.show(io::IO, g::WreathProductElement) = print(io, "( $(g.n)≀$(g.p) )")
 
-Base.copy(g::WreathProductElement) = WreathProductElement(g.n, g.p, parent(g))
+function Base.show(io::IO, g::WreathProductElement)
+    return print(io, "( ", g.n, "≀", g.p, " )")
+end

@@ -2,8 +2,10 @@
     normalform!(g::FPGroupElement)
 Compute the normal form of `g`, possibly modifying `g` in-place.
 """
-@inline function normalform!(g::AbstractFPGroupElement)
-    isnormalform(g) && return g
+@inline function normalform!(g::AbstractFPGroupElement; force = false)
+    if !force
+        isnormalform(g) && return g
+    end
 
     let w = one(word(g))
         w = normalform!(w, g)
@@ -36,9 +38,9 @@ end
 
 """
     normalform!(res::AbstractWord, g::FPGroupElement)
-Append the normal form of `g` to word `res`, modifying `res` in place.
+Write the normal form of `g` to word `res`, modifying `res` in place.
 
-Defaults to the rewriting in the free group.
+The particular implementation of the normal form depends on `parent(g)`.
 """
 @inline function normalform!(res::AbstractWord, g::AbstractFPGroupElement)
     isone(res) && isnormalform(g) && return append!(res, word(g))

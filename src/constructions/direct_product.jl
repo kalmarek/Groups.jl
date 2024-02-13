@@ -72,14 +72,6 @@ end
 
 Base.isfinite(G::DirectProduct) = isfinite(G.first) && isfinite(G.last)
 
-function Base.rand(
-    rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:DirectProduct},
-)
-    G = rs[]
-    return DirectProductElement((rand(rng, G.first), rand(rng, G.last)), G)
-end
-
 GroupsCore.parent(g::DirectProductElement) = g.parent
 
 function Base.:(==)(g::DirectProductElement, h::DirectProductElement)
@@ -87,13 +79,6 @@ function Base.:(==)(g::DirectProductElement, h::DirectProductElement)
 end
 
 Base.hash(g::DirectProductElement, h::UInt) = hash(g.elts, hash(parent(g), h))
-
-function Base.deepcopy_internal(g::DirectProductElement, stackdict::IdDict)
-    return DirectProductElement(
-        Base.deepcopy_internal(g.elts, stackdict),
-        parent(g),
-    )
-end
 
 function Base.inv(g::DirectProductElement)
     return DirectProductElement(inv.(g.elts), parent(g))
@@ -104,6 +89,30 @@ function Base.:(*)(g::DirectProductElement, h::DirectProductElement)
     return DirectProductElement(g.elts .* h.elts, parent(g))
 end
 
+# to make sure that parents are never copied i.e.
+# g and deepcopy(g) share their parent
+Base.deepcopy_internal(G::DirectProduct, ::IdDict) = G
+
+################## Implementing Group Interface Done!
+
+# Overloading rand: the PRA of GroupsCore is known for not performing
+# well on direct sums
+function Random.Sampler(
+    RNG::Type{<:Random.AbstractRNG},
+    G::DirectProduct,
+    repetition::Random.Repetition = Val(Inf),
+)
+    return Random.SamplerTrivial(G)
+end
+
+function Base.rand(
+    rng::Random.AbstractRNG,
+    rs::Random.SamplerTrivial{<:DirectProduct},
+)
+    G = rs[]
+    return DirectProductElement((rand(rng, G.first), rand(rng, G.last)), G)
+end
+
 function GroupsCore.order(::Type{I}, g::DirectProductElement) where {I<:Integer}
     return convert(I, lcm(order(I, first(g.elts)), order(I, last(g.elts))))
 end
@@ -111,10 +120,13 @@ end
 Base.isone(g::DirectProductElement) = all(isone, g.elts)
 
 function Base.show(io::IO, G::DirectProduct)
-    return print(io, "Direct product of $(G.first) and $(G.last)")
+    return print(io, "Direct product of ", G.first, " and ", G.last)
 end
+
 function Base.show(io::IO, g::DirectProductElement)
-    return print(io, "( $(join(g.elts, ",")) )")
+    print(io, "( ")
+    join(io, g.elts, ", ")
+    return print(io, " )")
 end
 
 # convienience:

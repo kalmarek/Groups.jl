@@ -1,7 +1,7 @@
 @testset "FreeGroup" begin
 
     A3 = Alphabet([:a, :b, :c, :A, :B, :C], [4,5,6,1,2,3])
-    F3 = FreeGroup([:a, :b, :c], A3)
+    F3 = FreeGroup(A3)
     @test F3 isa FreeGroup
 
     @test gens(F3) isa Vector

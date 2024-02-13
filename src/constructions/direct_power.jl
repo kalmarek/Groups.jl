@@ -59,15 +59,6 @@ end
 
 GroupsCore.ngens(G::DirectPower) = _nfold(G) * ngens(G.group)
 
-function GroupsCore.gens(G::DirectPower, i::Integer)
-    k = ngens(G.group)
-    ci = CartesianIndices((k, _nfold(G)))
-    @boundscheck checkbounds(ci, i)
-    r, c = Tuple(ci[i])
-    tup = ntuple(j -> j == c ? gens(G.group, r) : one(G.group), _nfold(G))
-    return DirectPowerElement(tup, G)
-end
-
 function GroupsCore.gens(G::DirectPower)
     N = _nfold(G)
     S = gens(G.group)
@@ -78,14 +69,6 @@ end
 
 Base.isfinite(G::DirectPower) = isfinite(G.group)
 
-function Base.rand(
-    rng::Random.AbstractRNG,
-    rs::Random.SamplerTrivial{<:DirectPower},
-)
-    G = rs[]
-    return DirectPowerElement(rand(rng, G.group, _nfold(G)), G)
-end
-
 GroupsCore.parent(g::DirectPowerElement) = g.parent
 
 function Base.:(==)(g::DirectPowerElement, h::DirectPowerElement)
@@ -94,18 +77,44 @@ end
 
 Base.hash(g::DirectPowerElement, h::UInt) = hash(g.elts, hash(parent(g), h))
 
-function Base.deepcopy_internal(g::DirectPowerElement, stackdict::IdDict)
-    return DirectPowerElement(
-        Base.deepcopy_internal(g.elts, stackdict),
-        parent(g),
-    )
-end
-
 Base.inv(g::DirectPowerElement) = DirectPowerElement(inv.(g.elts), parent(g))
 
 function Base.:(*)(g::DirectPowerElement, h::DirectPowerElement)
     @assert parent(g) === parent(h)
     return DirectPowerElement(g.elts .* h.elts, parent(g))
+end
+
+# to make sure that parents are never copied i.e.
+# g and deepcopy(g) share their parent
+Base.deepcopy_internal(G::DirectPower, ::IdDict) = G
+
+################## Implementing Group Interface Done!
+
+function GroupsCore.gens(G::DirectPower, i::Integer)
+    k = ngens(G.group)
+    ci = CartesianIndices((k, _nfold(G)))
+    @boundscheck checkbounds(ci, i)
+    r, c = Tuple(ci[i])
+    tup = ntuple(j -> j == c ? gens(G.group, r) : one(G.group), _nfold(G))
+    return DirectPowerElement(tup, G)
+end
+
+# Overloading rand: the PRA of GroupsCore is known for not performing
+# well on direct sums
+function Random.Sampler(
+    RNG::Type{<:Random.AbstractRNG},
+    G::DirectPower,
+    repetition::Random.Repetition = Val(Inf),
+)
+    return Random.SamplerTrivial(G)
+end
+
+function Base.rand(
+    rng::Random.AbstractRNG,
+    rs::Random.SamplerTrivial{<:DirectPower},
+)
+    G = rs[]
+    return DirectPowerElement(rand(rng, G.group, _nfold(G)), G)
 end
 
 function GroupsCore.order(::Type{I}, g::DirectPowerElement) where {I<:Integer}
@@ -117,10 +126,13 @@ Base.isone(g::DirectPowerElement) = all(isone, g.elts)
 function Base.show(io::IO, G::DirectPower)
     n = _nfold(G)
     nn = n == 1 ? "1-st" : n == 2 ? "2-nd" : n == 3 ? "3-rd" : "$n-th"
-    return print(io, "Direct $(nn) power of $(G.group)")
+    return print(io, "Direct $(nn) power of ", G.group)
 end
+
 function Base.show(io::IO, g::DirectPowerElement)
-    return print(io, "( ", join(g.elts, ", "), " )")
+    print(io, "( ")
+    join(io, g.elts, ", ")
+    return print(" )")
 end
 
 # convienience:

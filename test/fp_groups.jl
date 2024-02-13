@@ -4,7 +4,7 @@
     @test FreeGroup(A) isa FreeGroup
     @test sprint(show, FreeGroup(A)) == "free group on 3 generators"
 
-    F = FreeGroup([:a, :b, :c], A)
+    F = FreeGroup([:a, :b, :c], Groups.KnuthBendix.LenLex(A))
     @test sprint(show, F) == "free group on 3 generators"
 
     a, b, c = gens(F)

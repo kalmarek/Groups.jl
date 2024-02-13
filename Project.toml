@@ -1,7 +1,7 @@
 name = "Groups"
 uuid = "5d8bd718-bd84-11e8-3b40-ad14f4a32557"
 authors = ["Marek Kaluba <kalmar@amu.edu.pl>"]
-version = "0.7.8"
+version = "0.8"
 
 [deps]
 GroupsCore = "d5909c97-4eac-4ecc-a3dc-fdd0858a4120"
@@ -14,10 +14,10 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-GroupsCore = "0.4"
+GroupsCore = "0.5"
 KnuthBendix = "0.4"
 OrderedCollections = "1"
-PermutationGroups = "0.4"
+PermutationGroups = "0.6"
 StaticArrays = "1"
 julia = "1.6"
 
